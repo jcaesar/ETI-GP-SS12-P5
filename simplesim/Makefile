@@ -5,5 +5,5 @@ all: simplesim
 simplesim: simplesim.o shmlib/shm_consumer.o
 
 clean:
-	rm -f *.o shmlib/* simplesim
+	rm -f *.o shmlib/*.o simplesim
 
