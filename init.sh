@@ -7,7 +7,7 @@ BUILDLOG=./build.log
 VALGRIND_INSTALL=./valgrind-install
 VALGRIND_SRC=./valgrind-source
 
-echo -e "\nBuild started at $(date)" >> $BUILDLOG
+echo -e "Build started at $(date)" > $BUILDLOG
 echo "Logging to $BUILDLOG"
 
 START_DIR=$(pwd)
@@ -104,12 +104,12 @@ fi
 cd $START_DIR
 cd simplesim
 echo "making simplesim..."  | tee -a $BUILDLOG
-make clean all &>>$BUILDLOG
+make &>>$BUILDLOG
 cd ../example
 echo "making example..."  | tee -a $BUILDLOG
-make clean all &>>$BUILDLOG
+make &>>$BUILDLOG
 cd $START_DIR
-PATH_ADDITION=$VALGRIND_INSTALL/bin/:$(cd $VALGRIND_SOURCE; pwd)/mctracer
+PATH_ADDITION=$VALGRIND_INSTALL/bin/:$(cd $VALGRIND_SRC; pwd)/mctracer
 if [[ ! $PATH == *"$PATH_ADDITION"* ]]; then
 	echo "To use valgrind, do $ export PATH=\$PATH:$PATH_ADDITION"  | tee -a $BUILDLOG
 else
