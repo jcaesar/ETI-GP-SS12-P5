@@ -29,15 +29,15 @@ else
 	if [[ -e valgrind-3.7.0.tar.bz2 ]]; then
 		echo "valgrind source package found." | tee -a $BUILDLOG
 	else
-		echo "Downloading valgrind source..." | tee -a $BUILDLOG
+		echo "downloading valgrind source..." | tee -a $BUILDLOG
 		wget http://www.valgrind.org/downloads/valgrind-3.7.0.tar.bz2 &>> $BUILDLOG
 		if [[ ! -e valgrind-3.7.0.tar.bz2 ]]; then
 			echo "Error at downloading" | tee -a $BUILDLOG
 			exit
 		fi
 	fi
-	echo "Unpacking valgrind..." | tee -a $BUILDLOG
-	tar xjvf valgrind-3.7.0.tar.bz2 &>> $BUILDLOG
+	echo "unpacking valgrind..." | tee -a $BUILDLOG
+	tar xjvkf valgrind-3.7.0.tar.bz2 &>> $BUILDLOG
 	if [[ ! -d valgrind-3.7.0 ]]; then
 		echo "Error at unpacking" | tee -a $BUILDLOG
 		exit
