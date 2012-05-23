@@ -1,0 +1,9 @@
+build.log
+example/jc
+example/mm
+example/redblack
+simplesim/shmlib/*.o
+simplesim/simplesim
+simplesim/*.o
+valgrind-install/
+valgrind-source/
