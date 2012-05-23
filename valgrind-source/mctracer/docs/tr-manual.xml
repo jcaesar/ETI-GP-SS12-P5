@@ -1,0 +1,13 @@
+<?xml version="1.0"?> <!-- -*- sgml -*- -->
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<chapter id="tr-manual" xreflabel="McTracer">
+
+<title>McTracer: data access tracer</title>
+
+<para>To use this tool, you must specify
+<option>--tool=mctracer</option> on the Valgrind
+command line.</para>
+
+</chapter>
