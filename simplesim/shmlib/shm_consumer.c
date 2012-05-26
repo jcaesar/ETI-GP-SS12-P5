@@ -125,6 +125,7 @@ shm_buf* attach(int pid)
     producer_pid = pid;
 
     b->h = (shm_header*) addr;
+	b->h->consumer_pid = getpid();
     shm_printf("Event consumer: attaching to '%s'.\n", b->file);
     if (b->h->producer_initialized == 0) {
 	volatile char* w = &(b->h->producer_initialized);

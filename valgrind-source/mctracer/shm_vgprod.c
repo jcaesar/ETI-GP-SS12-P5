@@ -17,6 +17,8 @@
 
 #include "shm_vgprod.h"
 
+#include <sys/wait.h>
+
 /* to be exported by aspacemgr... */
 extern SysRes VG_(am_shared_mmap_file_float_valgrind)
 ( SizeT length, UInt prot, Int fd, Off64T offset );
@@ -87,7 +89,7 @@ char* shm_init(void)
 
     if (shmaddr) return shmaddr;
 
-    if (sizeof(shm_header) != 256)
+    if (sizeof(shm_header) != 260)
       VG_(tool_panic)("SHM header size wrong.");
 
     VG_(sprintf)(shmfile,"/tmp/%s.%d", SHM_NAME, VG_(getpid)());
@@ -301,7 +303,17 @@ rb_chunk* next_chunk(rb_state* st)
       if(0) VG_(printf)("Waiting for chunk at 0x%x (state at 0x%x).\n",
 			(int)(c->buffer - seg), (int)(c->state - seg));
       double t = wtime();
-      while(*(c->state) != RBSTATE_EMPTY) {}
+	  int i = 0;
+      while(1) {
+		if(*(c->state) == RBSTATE_EMPTY) break;
+		if(i < 10000/*arbitrary*/); //sched_yield(); requires -lc which does weird things // VG_(vg_yield)(); <- I'd like to use that, but including pub_core_scheduler.h does weird things.
+		else {
+			i = 0;
+			if(VG_(waitpid)(-1, NULL, WNOHANG|WEXITED) > 0) // child exited
+				VG_(tool_panic)("unexpected child exit");
+		}
+		++i;
+	  }
       wait_time += wtime() - t;
   }
 

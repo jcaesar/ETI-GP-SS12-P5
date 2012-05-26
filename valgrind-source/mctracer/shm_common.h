@@ -7,6 +7,8 @@
 #ifndef SHMPRIV_H
 #define SHMPRIV_H
 
+#include <sys/types.h>
+
 /* 7 chars */
 #define SHM_MAGIC "EVBRG-1"
 #define SHM_NAME  "event_bridge"
@@ -19,6 +21,7 @@ typedef struct {
   char producer_initialized;
   char reserved1;
   char consumer_attached;
+  pid_t  consumer_pid;
 
   struct {
     int offset;

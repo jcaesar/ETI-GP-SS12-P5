@@ -19,6 +19,7 @@ typedef struct {
   char producer_initialized;
   char reserved1;
   char consumer_attached;
+  int  consumer_pid;
 
   struct {
     int offset;
