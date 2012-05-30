@@ -37,10 +37,8 @@
 #include "pub_tool_machine.h"     // VG_(fnptr_to_fnentry)
 #include "pub_tool_threadstate.h"
 
-#include "shm_vgprod.h"
-#include "tr_shmevents.h"
-
 #include "mctracer.h"
+#include "simplesim.h"
 
 static Bool mt_tracing_state = False;
 
@@ -55,32 +53,21 @@ static Bool mt_tracing_state = False;
  */
 static Char* clo_fnstart = "main";
 
-/* The name of the event consumer binary */
-static Char* clo_consumer = "./tr-consumer";
-
-/* Should we start the event consumer? */
-static Bool  clo_run_consumer = True;
-
 static Bool mt_process_cmd_line_option(Char* arg)
 {
    if      VG_STR_CLO(arg, "--fnstart", clo_fnstart) {}
-   else if VG_STR_CLO(arg, "--consumer", clo_consumer) {}
-   else if VG_BOOL_CLO(arg, "--run-consumer", clo_run_consumer) {}
    else
       return False;
    
    tl_assert(clo_fnstart);
-   tl_assert(clo_consumer);
    return True;
 }
 
 static void mt_print_usage(void)
 {  
    VG_(printf)(
-"    --fnstart=<name>        start tracing when entering this function [%s]\n"
-"    --consumer=<name>       event consumer binary to start [%s]\n"
-"    --run-consumer=yes|no   run consumer (use no for debugging) [yes]\n",
-clo_fnstart, clo_consumer
+"    --fnstart=<name>        start tracing when entering this function [%s]\n",
+clo_fnstart
    );
 }
 
@@ -159,56 +146,14 @@ typedef
 static Event events[N_EVENTS];
 static Int   events_used = 0;
 
-static ThreadId last_trace_tid = -1;
-static ThreadId last_seen_tid = -1;
-
-/* Event bridge writing state */
-static rb_state bridge_state;
-
 static void print_trace_tid(void)
 {
-    if (last_trace_tid != last_seen_tid) {
-	last_trace_tid = last_seen_tid;
-
-	ev_run_tid* e;
-	e = (ev_run_tid*) write_event(&bridge_state, TR_RUN_TID,
-				      sizeof(ev_run_tid));
-	e->tid = last_trace_tid;
-    }
 }
 
 static VG_REGPARM(2) void trace_instr(Addr addr, SizeT size)
 {
 //    VG_(printf)("I %08lx,%lu\n", addr, size);
 }
-
-static VG_REGPARM(2) void trace_load(Addr addr, SizeT size)
-{
-    if (mt_tracing_state) {
-	print_trace_tid();
-	
-	ev_data_read* e;
-	e = (ev_data_read*) write_event(&bridge_state, TR_DATA_READ,
-					sizeof(ev_data_read));
-	e->addr = addr;
-	e->len  = size;
-    }
-}
-
-static VG_REGPARM(2) void trace_store(Addr addr, SizeT size)
-{
-    if (mt_tracing_state) {
-	print_trace_tid();
-
-	ev_data_write* e;
-	e = (ev_data_write*) write_event(&bridge_state, TR_DATA_WRITE,
-					 sizeof(ev_data_write));
-	e->addr = addr;
-	e->len  = size;
-    }
-}
-
-
 
 static void flushEvents(IRSB* sb)
 {
@@ -226,13 +171,16 @@ static void flushEvents(IRSB* sb)
       // Decide on helper fn to call and args to pass it.
       switch (ev->ekind) {
          case Event_Ir: helperName = "trace_instr";
-                        helperAddr =  trace_instr;  break;
+                        helperAddr =  trace_instr; 
+						break;
 
          case Event_Dr: helperName = "trace_load";
-                        helperAddr =  trace_load;   break;
+                        helperAddr =  ssim_load;
+                        break;
 
          case Event_Dw: helperName = "trace_store";
-                        helperAddr =  trace_store;  break;
+                        helperAddr =  ssim_store;
+                        break;
 
          default:
             tl_assert(0);
@@ -311,11 +259,10 @@ void addEvent_Dw ( IRSB* sb, IRAtom* daddr, Int dsize )
 static
 Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 {
+
    if (!VG_IS_TOOL_USERREQ('M','T',args[0]))
        return False;
-
-   last_seen_tid = tid;
-
+ 
    switch(args[0]) {
    case VG_USERREQ__PRINT:
        if (mt_tracing_state) {
@@ -353,12 +300,6 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
    return True;
 }
 
-static void mt_start_client_code_callback ( ThreadId tid, ULong blocks_done )
-{
-   last_seen_tid = tid;
-}
-
-
 /*------------------------------------------------------------*/
 /*--- Basic tool functions                                 ---*/
 /*------------------------------------------------------------*/
@@ -367,13 +308,7 @@ static void mt_post_clo_init(void)
 {
    mt_tracing_state = (clo_fnstart[0] == 0);
 
-   shm_init();
-   shm_rb* rb = shm_alloc_rb("tr_main", 4, 8192);
-   if (!rb)
-     VG_(tool_panic)("Cannot create event bridge ring buffer.");
-   shm_init_sending(&bridge_state, rb);
-   shm_initialized();
-   shm_startconsumer(clo_consumer, clo_run_consumer);
+   ssim_init();
 }
 
 static
@@ -536,8 +471,7 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 
 static void mt_fini(Int exitcode)
 {
-    shm_close(&bridge_state);
-    shm_finish();
+	ssim_print_stats();
 }
 
 static void mt_pre_clo_init(void)
@@ -557,7 +491,6 @@ static void mt_pre_clo_init(void)
                                    mt_print_usage,
                                    mt_print_debug_usage);
    VG_(needs_client_requests)     (mt_handle_client_request);
-   VG_(track_start_client_code)   (mt_start_client_code_callback);
 }
 
 VG_DETERMINE_INTERFACE_VERSION(mt_pre_clo_init)

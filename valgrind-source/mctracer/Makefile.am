@@ -2,12 +2,6 @@ include $(top_srcdir)/Makefile.tool.am
 
 EXTRA_DIST = docs/tr-manual.xml
 
-bin_PROGRAMS = tr-consumer
-
-tr_consumer_SOURCES = tr_consumer.c shm_consumer.c
-tr_consumer_CFLAGS  = $(AM_CFLAGS_PRI)
-tr_consumer_LDFLAGS = $(AM_CFLAGS_PRI)
-
 #----------------------------------------------------------------------------
 # mctracer-<platform>
 #----------------------------------------------------------------------------
@@ -17,7 +11,7 @@ if VGCONF_HAVE_PLATFORM_SEC
 noinst_PROGRAMS += mctracer-@VGCONF_ARCH_SEC@-@VGCONF_OS@
 endif
 
-MCTRACER_SOURCES_COMMON = tr_main.c shm_vgprod.c
+MCTRACER_SOURCES_COMMON = tr_main.c simplesim.c
 
 mctracer_@VGCONF_ARCH_PRI@_@VGCONF_OS@_SOURCES      = \
 	$(MCTRACER_SOURCES_COMMON)
