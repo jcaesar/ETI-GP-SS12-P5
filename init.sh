@@ -87,18 +87,7 @@ fi
 cd $START_DIR
 
 
-cd simplesim
-echo -n "making simplesim... "  | tee -a $BUILDLOG
-make &>>$BUILDLOG
-if [[ $? -eq 0 ]]; then
-	echo "success";
-else
-	echo "failed, cleaning up..."
-	make clean all &>> $BUILDLOG
-fi
-
-
-cd ../example
+cd example
 echo -n "making example... "  | tee -a $BUILDLOG
 make &>>$BUILDLOG
 if [[ $? -eq 0 ]]; then
@@ -112,7 +101,7 @@ cd $START_DIR
 
 PATH_ADDITION=$VALGRIND_INSTALL/bin
 if [[ ! $PATH == *"$PATH_ADDITION"* ]]; then
-	echo "To use valgrind, do $ export PATH=\$PATH:$PATH_ADDITION"  | tee -a $BUILDLOG
+	echo "To use valgrind, do $ export PATH=$PATH_ADDITION:\$PATH"  | tee -a $BUILDLOG
 else
 	echo "path is correct."
 fi
