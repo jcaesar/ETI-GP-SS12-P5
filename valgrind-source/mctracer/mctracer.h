@@ -70,47 +70,59 @@ enum
 	VG_USERREQ__PRINT = VG_USERREQ_TOOL_BASE('M','T'),
 	VG_USERREQ__PRINTA,
 	VG_USERREQ__PRINTU,
-	VG_USERREQ__TRACING
+	VG_USERREQ__TRACING,
+	VG_USERREQ__TRACE_MATRIX,
+	VG_USERREQ__UNTRACE_MATRIX,
+	VG_USERREQ__FLUSHCACHE
 } Vg_McTracerClientRequest;
 
 /* Print a string into the trace, prefixed by "P  " */
-#define MCTRACER_PRINT(str)              				\
+#define MCTRACER_PRINT(str)                                             \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
-                            VG_USERREQ__PRINT,                          \
-                            str, 0, 0, 0, 0);                           \
+                               VG_USERREQ__PRINT,                       \
+                               str, 0, 0, 0, 0);                        \
    }
 
 /* Print a string and a hex address into the trace, prefixed by "PA " */
-#define MCTRACER_PRINTA(addr)             				\
+#define MCTRACER_PRINTA(addr)                                           \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
-                            VG_USERREQ__PRINTA,                         \
-			       addr, 0, 0, 0, 0);                        \
+                               VG_USERREQ__PRINTA,                      \
+                               addr, 0, 0, 0, 0);                       \
    }
 
 /* Print a string and an unsigned into the trace, prefixed by "PU " */
-#define MCTRACER_PRINTU(uval)             				\
+#define MCTRACER_PRINTU(uval)                                           \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
-                            VG_USERREQ__PRINTU,                         \
-			       uval, 0, 0, 0, 0);			\
+                               VG_USERREQ__PRINTU,                      \
+                               uval, 0, 0, 0, 0);                       \
    }
 
 /* Switch tracing on */
-#define MCTRACER_TRACING_ON                 				\
+#define SSIM_TRACE_MATRIX(addr,xsize,ysize,elementsize,desc)            \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
-                            VG_USERREQ__TRACING,                        \
-                            1, 0, 0, 0, 0);                             \
+                               VG_USERREQ__TRACE_MATRIX,                \
+                               addr, xsize, ysize, elementsize, desc);  \
    }
 
 /* Switch tracing off */
-#define MCTRACER_TRACING_OFF                 				\
+#define SSIM_DELETE_MATRIX(addr)                                        \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
-                            VG_USERREQ__TRACING,                        \
-                            0, 0, 0, 0, 0);                             \
+                               VG_USERREQ__UNTRACE_MATRIX,              \
+                               addr, 0, 0, 0, 0);                       \
    }
+
+/*  */
+#define SSIM_FLUSH_CACHE                                                \
+   {unsigned int _qzz_res;                                              \
+    VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
+                               VG_USERREQ__FLUSHCACHE,                  \
+                               0, 0, 0, 0, 0);                          \
+   }
+
 
 #endif /* __MCTRACER_H */

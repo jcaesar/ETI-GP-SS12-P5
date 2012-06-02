@@ -40,8 +40,6 @@
 #include "mctracer.h"
 #include "simplesim.h"
 
-static Bool mt_tracing_state = False;
-
 /*------------------------------------------------------------*/
 /*--- Command line options                                 ---*/
 /*------------------------------------------------------------*/
@@ -84,8 +82,7 @@ static void mt_print_debug_usage(void)
 
 static void start_tracing(void)
 {
-	// start tracing at function specified with --fnstart (defaults to "main")
-	mt_tracing_state = True;
+	//TODO: Remove this function
 }
 
 
@@ -272,34 +269,39 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 	switch(args[0])
 	{
 	case VG_USERREQ__PRINT:
-		if (mt_tracing_state)
-		{
-			print_trace_tid();
-			VG_(printf)("P %s\n", (Char*)args[1]);
-		}
+		print_trace_tid();
+		VG_(printf)("P %s\n", (Char*)args[1]);
 		*ret = 0;                 /* meaningless */
 		break;
 
 	case VG_USERREQ__PRINTA:
-		if (mt_tracing_state)
-		{
-			print_trace_tid();
-			VG_(printf)("A %08lx\n", (Addr)args[1]);
-		}
+		print_trace_tid();
+		VG_(printf)("A %08lx\n", (Addr)args[1]);
 		*ret = 0;                 /* meaningless */
 		break;
 
 	case VG_USERREQ__PRINTU:
-		if (mt_tracing_state)
-		{
-			print_trace_tid();
-			VG_(printf)("U %lu\n", (UWord)args[1]);
-		}
+		print_trace_tid();
+		VG_(printf)("U %lu\n", (UWord)args[1]);
 		*ret = 0;                 /* meaningless */
 		break;
 
 	case VG_USERREQ__TRACING:
-		mt_tracing_state = (Bool) args[1];
+		VG_(tool_panic)("Client program used removed MCTRACER_TRACING_ON/OFF");
+
+	case VG_USERREQ__TRACE_MATRIX:
+		if(!ssim_matrix_allocated((Addr)args[1], args[2], args[3], args[4], (char*)args[5]))
+			VG_(tool_panic)("Internal error: Could not trace matrix");
+		*ret = 0;                 /* meaningless */
+		break;
+	case VG_USERREQ__UNTRACE_MATRIX:
+		if(!ssim_matrix_freed((Addr)args[1]))
+			VG_(tool_panic)("Invalid freeing notification");
+		*ret = 0;                 /* meaningless */
+		break;
+
+	case VG_USERREQ__FLUSHCACHE:
+		ssim_flush_cache();
 		*ret = 0;                 /* meaningless */
 		break;
 
@@ -316,8 +318,6 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 
 static void mt_post_clo_init(void)
 {
-	mt_tracing_state = (clo_fnstart[0] == 0);
-
 	ssim_init();
 }
 

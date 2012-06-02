@@ -9,7 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <string.h> // memcpy
+#include "pub_tool_libcprint.h" // printf
+#include "pub_tool_libcassert.h" // tool_panic
 
 /* ----------------------------------------------------------------*/
 
@@ -40,12 +42,18 @@ void ssim_init(void)
 	if(init_done) return;
 	init_done = true;
 
+	ssim_flush_cache();
+}
+
+void ssim_flush_cache(void)
+{
 	int i;
 
 	for(i=0; i<CACHELINES; i++)
 	{
 		cache[i].tag = 0;
 	}
+
 }
 
 // a reference into a set of the cache, return 1 on hit
@@ -111,9 +119,28 @@ static int cache_ref(Addr a, int size)
 
 /* global counters for cache simulation */
 int loads = 0, stores = 0, lmisses = 0, smisses = 0;
+typedef struct _traced_matrix { 
+	Addr start; // TODO: We will want to save size and a pointer to the infostring in this, too.
+	Addr end;
+} traced_matrix;
+traced_matrix matrix_info [256]; // This is going to be enough. If you disagree, mess with malloc. :P
+int matrix_count = 0;
+
+// if you want, you can implement something binary-searchish for this. The table is probably going to have 3 elements, though...
+traced_matrix * find_matrix(Addr access); // -Wmissing-prototypes is idiotic
+traced_matrix * find_matrix(Addr access)
+{
+	traced_matrix * it  = matrix_info,
+	              * end = matrix_info + matrix_count;
+	for(; it < end; ++it) 
+		if(it->start <= access && access < it->end)
+		   return it;
+	return 0;
+}
 
 VG_REGPARM(2) void ssim_load(Addr addr, SizeT size)
 {
+	if(!find_matrix(addr)) return;
 	int res;
 	res = cache_ref(addr, size);
 //	VG_(printf)(" > Load at %p, size %2d: %s\n", (void*) addr, size, res ? "Hit ":"Miss");
@@ -123,6 +150,7 @@ VG_REGPARM(2) void ssim_load(Addr addr, SizeT size)
 
 VG_REGPARM(2) void ssim_store(Addr addr, SizeT size)
 {
+	if(!find_matrix(addr)) return;
 	int res;
 	res = cache_ref(addr, size);
 //	VG_(printf)(" > Store at %p, size %2d: %s\n", (void*) addr, size, res ? "Hit ":"Miss");
@@ -130,9 +158,30 @@ VG_REGPARM(2) void ssim_store(Addr addr, SizeT size)
 	if (res == 0) smisses++;
 }
 
+// I don't expect many reallocations, so I'm doing the next two methods as easy as possible
+bool ssim_matrix_allocated(Addr addr, int x, int y, int elsize, char* info)
+{
+	if(matrix_count >= 256) 
+		VG_(tool_panic)("Can't track more than 256 matrices");
+	(matrix_info + matrix_count)->start = addr;
+	(matrix_info + matrix_count)->end = addr + x*y*elsize;
+	++matrix_count;
+	return true;
+}
+bool ssim_matrix_freed(Addr addr)
+{
+	traced_matrix * rm_pend = find_matrix(addr);
+	if(!rm_pend)
+		return false;
+	--matrix_count;
+	memcpy(rm_pend, matrix_info+matrix_count, sizeof(struct _traced_matrix));
+	return true;
+}
+
+
 void ssim_print_stats(void)
 {
-	VG_(printf)("\nSummary:\n");
+	VG_(printf)("\nSummary of marked matrices:\n");
 	VG_(printf)("Cache holding %d bytes (%d lines, ass. %d, sets: %d).\n",
 	            LINESIZE * CACHELINES, CACHELINES, SETSIZE, SETS);
 	VG_(printf)("Misses:  stores %d / %d, loads %d / %d\n",
