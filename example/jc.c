@@ -20,7 +20,8 @@ int flush_cache()
 	static int* mem = 0;
 	int i, sum = 0;
 
-	if (mem == 0) {
+	if (mem == 0)
+	{
 		mem = malloc(num_ints * sizeof(int));
 		if (mem == 0) return 0;
 
@@ -38,8 +39,8 @@ void init(int sz, double a[sz][sz], double value)
 {
 	int i, j;
 
-	for(i=0;i<sz;i++)
-		for(j=0;j<sz;j++)
+	for(i=0; i<sz; i++)
+		for(j=0; j<sz; j++)
 			a[i][j] = value;
 }
 
@@ -48,8 +49,8 @@ double dosum(int sz, double a[sz][sz])
 	double sum = 0.0;
 	int i, j;
 
-	for(i=0;i<sz;i++)
-		for(j=0;j<sz;j++)
+	for(i=0; i<sz; i++)
+		for(j=0; j<sz; j++)
 			sum += a[i][j];
 	return sum;
 }
@@ -58,7 +59,8 @@ void init_leftright_boundary(int sz, double a[sz][sz], double value)
 {
 	int i, j;
 
-	for(i=0;i<sz;i++) {
+	for(i=0; i<sz; i++)
+	{
 		a[i][0] = value;
 		a[i][sz-1] = value;
 	}
@@ -68,7 +70,7 @@ void init_diag(int sz, double a[sz][sz], double value)
 {
 	int i, j;
 
-	for(i=0;i<sz;i++)
+	for(i=0; i<sz; i++)
 		a[i][i] = value;
 }
 
@@ -87,15 +89,15 @@ int jc_ji(int sz, double a[sz][sz], double b[sz][sz])
 {
 	int i,j;
 
-	for(j=1;j<sz-1;j++)
-		for(i=1;i<sz-1;i++)
+	for(j=1; j<sz-1; j++)
+		for(i=1; i<sz-1; i++)
 			b[i][j] = (a[i-1][j] + a[i][j-1] +
-					a[i+1][j] + a[i][j+1])/4.0;
+			           a[i+1][j] + a[i][j+1])/4.0;
 
-	for(j=1;j<sz-1;j++)
-		for(i=1;i<sz-1;i++)
+	for(j=1; j<sz-1; j++)
+		for(i=1; i<sz-1; i++)
 			a[i][j] = (b[i-1][j] + b[i][j-1] +
-					b[i+1][j] + b[i][j+1])/4.0;
+			           b[i+1][j] + b[i][j+1])/4.0;
 
 	return 2;
 }
@@ -104,26 +106,26 @@ int jc_ij(int sz, double a[sz][sz], double b[sz][sz])
 {
 	int i,j;
 
-	for(i=1;i<sz-1;i++)
-		for(j=1;j<sz-1;j++)
+	for(i=1; i<sz-1; i++)
+		for(j=1; j<sz-1; j++)
 			b[i][j] = (a[i-1][j] + a[i][j-1] +
-					a[i+1][j] + a[i][j+1])/4.0;
+			           a[i+1][j] + a[i][j+1])/4.0;
 
-	for(i=1;i<sz-1;i++)
-		for(j=1;j<sz-1;j++)
+	for(i=1; i<sz-1; i++)
+		for(j=1; j<sz-1; j++)
 			a[i][j] = (b[i-1][j] + b[i][j-1] +
-					b[i+1][j] + b[i][j+1])/4.0;
+			           b[i+1][j] + b[i][j+1])/4.0;
 
 	return 2;
 }
 
-	__inline__
+__inline__
 void dorow(int r, int sz, double a[sz][sz], double b[sz][sz])
 {
 	int j;
-	for(j=1;j<sz-1;j++)
+	for(j=1; j<sz-1; j++)
 		b[r][j] = (a[r-1][j] + a[r][j-1] +
-				a[r+1][j] + a[r][j+1])/4.0;
+		           a[r+1][j] + a[r][j+1])/4.0;
 }
 
 int jc_w2ij(int sz, double a[sz][sz], double b[sz][sz])
@@ -131,7 +133,8 @@ int jc_w2ij(int sz, double a[sz][sz], double b[sz][sz])
 	int r;
 
 	dorow(1, sz, a, b);
-	for(r=2;r<sz-1;r++) {
+	for(r=2; r<sz-1; r++)
+	{
 		dorow(r, sz, a, b);
 		dorow(r-1, sz, b, a);
 	}
@@ -144,10 +147,10 @@ int jc_w2ij(int sz, double a[sz][sz], double b[sz][sz])
 /******************** Run the different versions ***************/
 
 typedef int (*jacfunc)(int sz,
-		double a[sz][sz], double b[sz][sz]);
+                       double a[sz][sz], double b[sz][sz]);
 
 void run_jac(jacfunc f, const char* name, int it,
-		int sz, double a[sz][sz], double b[sz][sz])
+             int sz, double a[sz][sz], double b[sz][sz])
 {
 	double start, stop, mflops;
 	int i;
@@ -162,18 +165,21 @@ void run_jac(jacfunc f, const char* name, int it,
 	stop = gettime();
 	mflops = 4.0*(sz-2)*(sz-2)*it / (stop-start) / 1000000.0;
 	fprintf(stderr, "  %s: %f sec. : %f MFlops (Sum %f)\n",
-			name, stop - start, mflops, dosum(sz, a));
+	        name, stop - start, mflops, dosum(sz, a));
 	printf("%f ", mflops);
 }
 
-struct _version {
+struct _version
+{
 	const char* name;
 	jacfunc func;
-} version[] = {
+} version[] =
+{
 	{ "Simple-JI", jc_ji },
 	{ "Simple-IJ", jc_ij },
 	{ "Weave2-IJ", jc_w2ij },
-	{ 0,0 }};
+	{ 0,0 }
+};
 
 
 void run(int sz, int it)
@@ -190,12 +196,12 @@ void run(int sz, int it)
 	init(sz, *b, 0);
 
 	fprintf(stderr, "Matrix side length: %d, size: %f MB (a: %p, b: %p), %d iterations\n",
-			sz, ((double)sizeof(MAT))/1000000.0, a,b, it);
+	        sz, ((double)sizeof(MAT))/1000000.0, a,b, it);
 	printf("%d ", sz);
 
 	for(v=0; version[v].func !=0; v++)
 		run_jac( version[v].func, version[v].name, it,
-				sz, *a, *b);
+		         sz, *a, *b);
 
 	printf("\n");
 
@@ -215,7 +221,8 @@ int main(int argc, char* argv[])
 	if (argc>4) steps = atoi(argv[4]);
 
 	if ((sz2 == 0) || (sz2 < sz1)) sz2 = sz1;
-	if (steps == 0) {
+	if (steps == 0)
+	{
 		steps = sz2-sz1+1;
 		if (sz2-sz1 >= 10) steps = (sz2-sz1)/10+1;
 		if (sz2-sz1 >= 100) steps = (sz2-sz1)/100+1;

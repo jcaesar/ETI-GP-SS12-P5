@@ -55,27 +55,27 @@ static Char* clo_fnstart = "main";
 
 static Bool mt_process_cmd_line_option(Char* arg)
 {
-   if      VG_STR_CLO(arg, "--fnstart", clo_fnstart) {}
-   else
-      return False;
-   
-   tl_assert(clo_fnstart);
-   return True;
+	if      VG_STR_CLO(arg, "--fnstart", clo_fnstart) {}
+	else
+		return False;
+
+	tl_assert(clo_fnstart);
+	return True;
 }
 
 static void mt_print_usage(void)
-{  
-   VG_(printf)(
-"    --fnstart=<name>        start tracing when entering this function [%s]\n",
-clo_fnstart
-   );
+{
+	VG_(printf)(
+	    "    --fnstart=<name>        start tracing when entering this function [%s]\n",
+	    clo_fnstart
+	);
 }
 
 static void mt_print_debug_usage(void)
-{  
-   VG_(printf)(
-"    (none)\n"
-   );
+{
+	VG_(printf)(
+	    "    (none)\n"
+	);
 }
 
 /*------------------------------------------------------------*/
@@ -84,8 +84,8 @@ static void mt_print_debug_usage(void)
 
 static void start_tracing(void)
 {
-   // start tracing at function specified with --fnstart (defaults to "main")
-   mt_tracing_state = True;
+	// start tracing at function specified with --fnstart (defaults to "main")
+	mt_tracing_state = True;
 }
 
 
@@ -96,20 +96,21 @@ static void start_tracing(void)
 #define MAX_DSIZE    512
 
 typedef
-   IRExpr 
-   IRAtom;
-
-typedef 
-   enum { Event_Ir, Event_Dr, Event_Dw }
-   EventKind;
+IRExpr
+IRAtom;
 
 typedef
-   struct {
-      EventKind  ekind;
-      IRAtom*    addr;
-      Int        size;
-   }
-   Event;
+enum { Event_Ir, Event_Dr, Event_Dw }
+EventKind;
+
+typedef
+struct
+{
+	EventKind  ekind;
+	IRAtom*    addr;
+	Int        size;
+}
+Event;
 
 /* Up to this many unnotified events are allowed.  Must be at least two,
    so that reads and writes to the same address can be merged into a modify.
@@ -157,44 +158,49 @@ static VG_REGPARM(2) void trace_instr(Addr addr, SizeT size)
 
 static void flushEvents(IRSB* sb)
 {
-   Int        i;
-   Char*      helperName;
-   void*      helperAddr;
-   IRExpr**   argv;
-   IRDirty*   di;
-   Event*     ev;
+	Int        i;
+	Char*      helperName;
+	void*      helperAddr;
+	IRExpr**   argv;
+	IRDirty*   di;
+	Event*     ev;
 
-   for (i = 0; i < events_used; i++) {
+	for (i = 0; i < events_used; i++)
+	{
 
-      ev = &events[i];
-      
-      // Decide on helper fn to call and args to pass it.
-      switch (ev->ekind) {
-         case Event_Ir: helperName = "trace_instr";
-                        helperAddr =  trace_instr; 
-						break;
+		ev = &events[i];
 
-         case Event_Dr: helperName = "trace_load";
-                        helperAddr =  ssim_load;
-                        break;
+		// Decide on helper fn to call and args to pass it.
+		switch (ev->ekind)
+		{
+		case Event_Ir:
+			helperName = "trace_instr";
+			helperAddr =  trace_instr;
+			break;
 
-         case Event_Dw: helperName = "trace_store";
-                        helperAddr =  ssim_store;
-                        break;
+		case Event_Dr:
+			helperName = "trace_load";
+			helperAddr =  ssim_load;
+			break;
 
-         default:
-            tl_assert(0);
-      }
+		case Event_Dw:
+			helperName = "trace_store";
+			helperAddr =  ssim_store;
+			break;
 
-      // Add the helper.
-      argv = mkIRExprVec_2( ev->addr, mkIRExpr_HWord( ev->size ) );
-      di   = unsafeIRDirty_0_N( /*regparms*/2, 
-                                helperName, VG_(fnptr_to_fnentry)( helperAddr ),
-                                argv );
-      addStmtToIRSB( sb, IRStmt_Dirty(di) );
-   }
+		default:
+			tl_assert(0);
+		}
 
-   events_used = 0;
+		// Add the helper.
+		argv = mkIRExprVec_2( ev->addr, mkIRExpr_HWord( ev->size ) );
+		di   = unsafeIRDirty_0_N( /*regparms*/2,
+		                                      helperName, VG_(fnptr_to_fnentry)( helperAddr ),
+		                                      argv );
+		addStmtToIRSB( sb, IRStmt_Dirty(di) );
+	}
+
+	events_used = 0;
 }
 
 // WARNING:  If you aren't interested in instruction reads, you can omit the
@@ -204,50 +210,50 @@ static void flushEvents(IRSB* sb)
 // events into modify events works correctly.
 static void addEvent_Ir ( IRSB* sb, IRAtom* iaddr, UInt isize )
 {
-   Event* evt;
-   tl_assert( (VG_MIN_INSTR_SZB <= isize && isize <= VG_MAX_INSTR_SZB)
-            || VG_CLREQ_SZB == isize );
-   if (events_used == N_EVENTS)
-      flushEvents(sb);
-   tl_assert(events_used >= 0 && events_used < N_EVENTS);
-   evt = &events[events_used];
-   evt->ekind = Event_Ir;
-   evt->addr  = iaddr;
-   evt->size  = isize;
-   events_used++;
+	Event* evt;
+	tl_assert( (VG_MIN_INSTR_SZB <= isize && isize <= VG_MAX_INSTR_SZB)
+	           || VG_CLREQ_SZB == isize );
+	if (events_used == N_EVENTS)
+		flushEvents(sb);
+	tl_assert(events_used >= 0 && events_used < N_EVENTS);
+	evt = &events[events_used];
+	evt->ekind = Event_Ir;
+	evt->addr  = iaddr;
+	evt->size  = isize;
+	events_used++;
 }
 
 static
 void addEvent_Dr ( IRSB* sb, IRAtom* daddr, Int dsize )
 {
-   Event* evt;
-   tl_assert(isIRAtom(daddr));
-   tl_assert(dsize >= 1 && dsize <= MAX_DSIZE);
-   if (events_used == N_EVENTS)
-      flushEvents(sb);
-   tl_assert(events_used >= 0 && events_used < N_EVENTS);
-   evt = &events[events_used];
-   evt->ekind = Event_Dr;
-   evt->addr  = daddr;
-   evt->size  = dsize;
-   events_used++;
+	Event* evt;
+	tl_assert(isIRAtom(daddr));
+	tl_assert(dsize >= 1 && dsize <= MAX_DSIZE);
+	if (events_used == N_EVENTS)
+		flushEvents(sb);
+	tl_assert(events_used >= 0 && events_used < N_EVENTS);
+	evt = &events[events_used];
+	evt->ekind = Event_Dr;
+	evt->addr  = daddr;
+	evt->size  = dsize;
+	events_used++;
 }
 
 static
 void addEvent_Dw ( IRSB* sb, IRAtom* daddr, Int dsize )
 {
-   Event* evt;
-   tl_assert(isIRAtom(daddr));
-   tl_assert(dsize >= 1 && dsize <= MAX_DSIZE);
+	Event* evt;
+	tl_assert(isIRAtom(daddr));
+	tl_assert(dsize >= 1 && dsize <= MAX_DSIZE);
 
-   if (events_used == N_EVENTS)
-      flushEvents(sb);
-   tl_assert(events_used >= 0 && events_used < N_EVENTS);
-   evt = &events[events_used];
-   evt->ekind = Event_Dw;
-   evt->size  = dsize;
-   evt->addr  = daddr;
-   events_used++;
+	if (events_used == N_EVENTS)
+		flushEvents(sb);
+	tl_assert(events_used >= 0 && events_used < N_EVENTS);
+	evt = &events[events_used];
+	evt->ekind = Event_Dw;
+	evt->size  = dsize;
+	evt->addr  = daddr;
+	events_used++;
 }
 
 
@@ -260,44 +266,48 @@ static
 Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 {
 
-   if (!VG_IS_TOOL_USERREQ('M','T',args[0]))
-       return False;
- 
-   switch(args[0]) {
-   case VG_USERREQ__PRINT:
-       if (mt_tracing_state) {
-	   print_trace_tid();
-	   VG_(printf)("P %s\n", (Char*)args[1]);
-       }
-       *ret = 0;                 /* meaningless */
-       break;
+	if (!VG_IS_TOOL_USERREQ('M','T',args[0]))
+		return False;
 
-   case VG_USERREQ__PRINTA:
-       if (mt_tracing_state) {
-	   print_trace_tid();
-	   VG_(printf)("A %08lx\n", (Addr)args[1]);
-       }
-       *ret = 0;                 /* meaningless */
-       break;
+	switch(args[0])
+	{
+	case VG_USERREQ__PRINT:
+		if (mt_tracing_state)
+		{
+			print_trace_tid();
+			VG_(printf)("P %s\n", (Char*)args[1]);
+		}
+		*ret = 0;                 /* meaningless */
+		break;
 
-   case VG_USERREQ__PRINTU:
-       if (mt_tracing_state) {
-	   print_trace_tid();
-	   VG_(printf)("U %lu\n", (UWord)args[1]);
-       }
-       *ret = 0;                 /* meaningless */
-       break;
+	case VG_USERREQ__PRINTA:
+		if (mt_tracing_state)
+		{
+			print_trace_tid();
+			VG_(printf)("A %08lx\n", (Addr)args[1]);
+		}
+		*ret = 0;                 /* meaningless */
+		break;
 
-   case VG_USERREQ__TRACING:
-       mt_tracing_state = (Bool) args[1];
-       *ret = 0;                 /* meaningless */
-       break;
+	case VG_USERREQ__PRINTU:
+		if (mt_tracing_state)
+		{
+			print_trace_tid();
+			VG_(printf)("U %lu\n", (UWord)args[1]);
+		}
+		*ret = 0;                 /* meaningless */
+		break;
 
-   default:
-      return False;
-   }
+	case VG_USERREQ__TRACING:
+		mt_tracing_state = (Bool) args[1];
+		*ret = 0;                 /* meaningless */
+		break;
 
-   return True;
+	default:
+		return False;
+	}
+
+	return True;
 }
 
 /*------------------------------------------------------------*/
@@ -306,167 +316,176 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 
 static void mt_post_clo_init(void)
 {
-   mt_tracing_state = (clo_fnstart[0] == 0);
+	mt_tracing_state = (clo_fnstart[0] == 0);
 
-   ssim_init();
+	ssim_init();
 }
 
 static
 IRSB* mt_instrument ( VgCallbackClosure* closure,
-                      IRSB* sbIn, 
-                      VexGuestLayout* layout, 
+                      IRSB* sbIn,
+                      VexGuestLayout* layout,
                       VexGuestExtents* vge,
                       IRType gWordTy, IRType hWordTy )
 {
-   IRDirty*   di;
-   Int        i;
-   IRSB*      sbOut;
-   Char       fnname[100];
-   IRTypeEnv* tyenv = sbIn->tyenv;
+	IRDirty*   di;
+	Int        i;
+	IRSB*      sbOut;
+	Char       fnname[100];
+	IRTypeEnv* tyenv = sbIn->tyenv;
 
-   if (gWordTy != hWordTy) {
-      /* We don't currently support this case. */
-      VG_(tool_panic)("host/guest word size mismatch");
-   }
+	if (gWordTy != hWordTy)
+	{
+		/* We don't currently support this case. */
+		VG_(tool_panic)("host/guest word size mismatch");
+	}
 
-   /* Set up SB */
-   sbOut = deepCopyIRSBExceptStmts(sbIn);
+	/* Set up SB */
+	sbOut = deepCopyIRSBExceptStmts(sbIn);
 
-   // Copy verbatim any IR preamble preceding the first IMark
-   i = 0;
-   while (i < sbIn->stmts_used && sbIn->stmts[i]->tag != Ist_IMark) {
-      addStmtToIRSB( sbOut, sbIn->stmts[i] );
-      i++;
-   }
+	// Copy verbatim any IR preamble preceding the first IMark
+	i = 0;
+	while (i < sbIn->stmts_used && sbIn->stmts[i]->tag != Ist_IMark)
+	{
+		addStmtToIRSB( sbOut, sbIn->stmts[i] );
+		i++;
+	}
 
-   events_used = 0;
+	events_used = 0;
 
-   for (/*use current i*/; i < sbIn->stmts_used; i++) {
-      IRStmt* st = sbIn->stmts[i];
-      if (!st || st->tag == Ist_NoOp) continue;
+	for (/*use current i*/; i < sbIn->stmts_used; i++)
+	{
+		IRStmt* st = sbIn->stmts[i];
+		if (!st || st->tag == Ist_NoOp) continue;
 
-      switch (st->tag) {
-         case Ist_NoOp:
-         case Ist_AbiHint:
-         case Ist_Put:
-         case Ist_PutI:
-         case Ist_MBE:
-	     addStmtToIRSB( sbOut, st );
-	     break;
+		switch (st->tag)
+		{
+		case Ist_NoOp:
+		case Ist_AbiHint:
+		case Ist_Put:
+		case Ist_PutI:
+		case Ist_MBE:
+			addStmtToIRSB( sbOut, st );
+			break;
 
-         case Ist_IMark:
+		case Ist_IMark:
 
-	     /* An unconditional branch to a known destination in the
-	      * guest's instructions can be represented, in the IRSB to
-	      * instrument, by the VEX statements that are the
-	      * translation of that known destination. This feature is
-	      * called 'SB chasing' and can be influenced by command
-	      * line option --vex-guest-chase-thresh.
-	      *
-	      * To get an accurate count of the calls to a specific
-	      * function, taking SB chasing into account, we need to
-	      * check for each guest instruction (Ist_IMark) if it is
-	      * the entry point of a function.
-	      */
-	     tl_assert(clo_fnstart);
-	     if (clo_fnstart[0] &&
-		 VG_(get_fnname_if_entry)(st->Ist.IMark.addr, 
-					  fnname, sizeof(fnname))
-		 && 0 == VG_(strcmp)(fnname, clo_fnstart)) {
-		 di = unsafeIRDirty_0_N( 
-		     0, "start_tracing", 
-		     VG_(fnptr_to_fnentry)( &start_tracing ),
-		     mkIRExprVec_0() );
-		 addStmtToIRSB( sbOut, IRStmt_Dirty(di) );
-	     }
+			/* An unconditional branch to a known destination in the
+			 * guest's instructions can be represented, in the IRSB to
+			 * instrument, by the VEX statements that are the
+			 * translation of that known destination. This feature is
+			 * called 'SB chasing' and can be influenced by command
+			 * line option --vex-guest-chase-thresh.
+			 *
+			 * To get an accurate count of the calls to a specific
+			 * function, taking SB chasing into account, we need to
+			 * check for each guest instruction (Ist_IMark) if it is
+			 * the entry point of a function.
+			 */
+			tl_assert(clo_fnstart);
+			if (clo_fnstart[0] &&
+			        VG_(get_fnname_if_entry)(st->Ist.IMark.addr,
+			                                 fnname, sizeof(fnname))
+			        && 0 == VG_(strcmp)(fnname, clo_fnstart))
+			{
+				di = unsafeIRDirty_0_N(
+				         0, "start_tracing",
+				         VG_(fnptr_to_fnentry)( &start_tracing ),
+				         mkIRExprVec_0() );
+				addStmtToIRSB( sbOut, IRStmt_Dirty(di) );
+			}
 
-	     // WARNING: do not remove this function call, even if you
-	     // aren't interested in instruction reads.  See the comment
-	     // above the function itself for more detail.
-	     addEvent_Ir( sbOut, mkIRExpr_HWord( (HWord)st->Ist.IMark.addr ),
-			  st->Ist.IMark.len );
-	     addStmtToIRSB( sbOut, st );
-	     break;
+			// WARNING: do not remove this function call, even if you
+			// aren't interested in instruction reads.  See the comment
+			// above the function itself for more detail.
+			addEvent_Ir( sbOut, mkIRExpr_HWord( (HWord)st->Ist.IMark.addr ),
+			             st->Ist.IMark.len );
+			addStmtToIRSB( sbOut, st );
+			break;
 
-	  case Ist_WrTmp:
-              {
-		  IRExpr* data = st->Ist.WrTmp.data;
-		  if (data->tag == Iex_Load) {
-		      addEvent_Dr( sbOut, data->Iex.Load.addr,
-				   sizeofIRType(data->Iex.Load.ty) );
-		  }
-	      }
-	      addStmtToIRSB( sbOut, st );
-	      break;
+		case Ist_WrTmp:
+		{
+			IRExpr* data = st->Ist.WrTmp.data;
+			if (data->tag == Iex_Load)
+			{
+				addEvent_Dr( sbOut, data->Iex.Load.addr,
+				             sizeofIRType(data->Iex.Load.ty) );
+			}
+		}
+		addStmtToIRSB( sbOut, st );
+		break;
 
-         case Ist_Store:
-	     {
-		 IRExpr* data  = st->Ist.Store.data;
-		 addEvent_Dw( sbOut, st->Ist.Store.addr,
-			      sizeofIRType(typeOfIRExpr(tyenv, data)) );
-	     }
-	     addStmtToIRSB( sbOut, st );
-	     break;
+		case Ist_Store:
+		{
+			IRExpr* data  = st->Ist.Store.data;
+			addEvent_Dw( sbOut, st->Ist.Store.addr,
+			             sizeofIRType(typeOfIRExpr(tyenv, data)) );
+		}
+		addStmtToIRSB( sbOut, st );
+		break;
 
-         case Ist_Dirty:
-	     {
-		 
-		 Int      dsize;
-		 IRDirty* d = st->Ist.Dirty.details;
-		 if (d->mFx != Ifx_None) {
-		     // This dirty helper accesses memory.  Collect the details.
-		     tl_assert(d->mAddr != NULL);
-		     tl_assert(d->mSize != 0);
-		     dsize = d->mSize;
-		     if (d->mFx == Ifx_Read || d->mFx == Ifx_Modify)
-			 addEvent_Dr( sbOut, d->mAddr, dsize );
-		     if (d->mFx == Ifx_Write || d->mFx == Ifx_Modify)
-			 addEvent_Dw( sbOut, d->mAddr, dsize );
-		 } else {
-		     tl_assert(d->mAddr == NULL);
-		     tl_assert(d->mSize == 0);
-		 }
+		case Ist_Dirty:
+		{
 
-		 addStmtToIRSB( sbOut, st );
-		 break;
-	     }
+			Int      dsize;
+			IRDirty* d = st->Ist.Dirty.details;
+			if (d->mFx != Ifx_None)
+			{
+				// This dirty helper accesses memory.  Collect the details.
+				tl_assert(d->mAddr != NULL);
+				tl_assert(d->mSize != 0);
+				dsize = d->mSize;
+				if (d->mFx == Ifx_Read || d->mFx == Ifx_Modify)
+					addEvent_Dr( sbOut, d->mAddr, dsize );
+				if (d->mFx == Ifx_Write || d->mFx == Ifx_Modify)
+					addEvent_Dw( sbOut, d->mAddr, dsize );
+			}
+			else
+			{
+				tl_assert(d->mAddr == NULL);
+				tl_assert(d->mSize == 0);
+			}
 
-         case Ist_CAS:
-	     {
-		 /* We treat it as a read and a write of the location.  I
-		    think that is the same behaviour as it was before IRCAS
-		    was introduced, since prior to that point, the Vex
-		    front ends would translate a lock-prefixed instruction
-		    into a (normal) read followed by a (normal) write. */
+			addStmtToIRSB( sbOut, st );
+			break;
+		}
 
-		 Int    dataSize;
-		 IRCAS* cas = st->Ist.CAS.details;
-		 tl_assert(cas->addr != NULL);
-		 tl_assert(cas->dataLo != NULL);
-		 dataSize = sizeofIRType(typeOfIRExpr(tyenv, cas->dataLo));
-		 if (cas->dataHi != NULL)
-		     dataSize *= 2; /* since it's a doubleword-CAS */
-		 addEvent_Dr( sbOut, cas->addr, dataSize );
-		 addEvent_Dw( sbOut, cas->addr, dataSize );
-		 
-		 addStmtToIRSB( sbOut, st );
-		 break;
-	     }
+		case Ist_CAS:
+		{
+			/* We treat it as a read and a write of the location.  I
+			   think that is the same behaviour as it was before IRCAS
+			   was introduced, since prior to that point, the Vex
+			   front ends would translate a lock-prefixed instruction
+			   into a (normal) read followed by a (normal) write. */
 
-         case Ist_Exit:
-	     flushEvents(sbOut);
-	     addStmtToIRSB( sbOut, st );      // Original statement
-	     break;
+			Int    dataSize;
+			IRCAS* cas = st->Ist.CAS.details;
+			tl_assert(cas->addr != NULL);
+			tl_assert(cas->dataLo != NULL);
+			dataSize = sizeofIRType(typeOfIRExpr(tyenv, cas->dataLo));
+			if (cas->dataHi != NULL)
+				dataSize *= 2; /* since it's a doubleword-CAS */
+			addEvent_Dr( sbOut, cas->addr, dataSize );
+			addEvent_Dw( sbOut, cas->addr, dataSize );
 
-         default:
-	     tl_assert(0);
-      }
-   }
+			addStmtToIRSB( sbOut, st );
+			break;
+		}
 
-   /* At the end of the sbIn.  Flush outstandings. */
-   flushEvents(sbOut);
+		case Ist_Exit:
+			flushEvents(sbOut);
+			addStmtToIRSB( sbOut, st );      // Original statement
+			break;
 
-   return sbOut;
+		default:
+			tl_assert(0);
+		}
+	}
+
+	/* At the end of the sbIn.  Flush outstandings. */
+	flushEvents(sbOut);
+
+	return sbOut;
 }
 
 static void mt_fini(Int exitcode)
@@ -476,21 +495,21 @@ static void mt_fini(Int exitcode)
 
 static void mt_pre_clo_init(void)
 {
-   VG_(details_name)            ("McTracer");
-   VG_(details_version)         (NULL);
-   VG_(details_description)     ("an memory tracer tool");
-   VG_(details_copyright_author)(
-      "Copyright (C) 2002-2011, and GNU GPL'd, by NN & JW.");
-   VG_(details_bug_reports_to)  (VG_BUGS_TO);
-   VG_(details_avg_translation_sizeB) ( 200 );
+	VG_(details_name)            ("McTracer");
+	VG_(details_version)         (NULL);
+	VG_(details_description)     ("an memory tracer tool");
+	VG_(details_copyright_author)(
+	    "Copyright (C) 2002-2011, and GNU GPL'd, by NN & JW.");
+	VG_(details_bug_reports_to)  (VG_BUGS_TO);
+	VG_(details_avg_translation_sizeB) ( 200 );
 
-   VG_(basic_tool_funcs)          (mt_post_clo_init,
-                                   mt_instrument,
-                                   mt_fini);
-   VG_(needs_command_line_options)(mt_process_cmd_line_option,
-                                   mt_print_usage,
-                                   mt_print_debug_usage);
-   VG_(needs_client_requests)     (mt_handle_client_request);
+	VG_(basic_tool_funcs)          (mt_post_clo_init,
+	                                mt_instrument,
+	                                mt_fini);
+	VG_(needs_command_line_options)(mt_process_cmd_line_option,
+	                                mt_print_usage,
+	                                mt_print_debug_usage);
+	VG_(needs_client_requests)     (mt_handle_client_request);
 }
 
 VG_DETERMINE_INTERFACE_VERSION(mt_pre_clo_init)

@@ -26,7 +26,8 @@
 // derived parameter
 #define SETS (CACHELINES / SETSIZE)
 
-typedef struct _cacheline {
+typedef struct _cacheline
+{
 	Addr tag;            // 64 bit architecture
 } Cacheline;
 
@@ -41,7 +42,8 @@ void ssim_init(void)
 
 	int i;
 
-	for(i=0; i<CACHELINES; i++) {
+	for(i=0; i<CACHELINES; i++)
+	{
 		cache[i].tag = 0;
 	}
 }
@@ -56,9 +58,12 @@ static int cache_setref(int set_no, Addr tag)
 	 * If the tag is another than the MRU, move it into the MRU spot
 	 * and shuffle the rest down.
 	 */
-	for (i = 0; i < SETSIZE; i++) {
-		if (tag == set[i].tag) {
-			for (j = i; j > 0; j--) {
+	for (i = 0; i < SETSIZE; i++)
+	{
+		if (tag == set[i].tag)
+		{
+			for (j = i; j > 0; j--)
+			{
 				set[j].tag = set[j - 1].tag;
 			}
 			set[0].tag = tag;
@@ -68,7 +73,8 @@ static int cache_setref(int set_no, Addr tag)
 	}
 
 	/* A miss;  install this tag as MRU, shuffle rest down. */
-	for (j = SETSIZE - 1; j > 0; j--) {
+	for (j = SETSIZE - 1; j > 0; j--)
+	{
 		set[j].tag = set[j - 1].tag;
 	}
 	set[0].tag = tag;
@@ -128,7 +134,7 @@ void ssim_print_stats(void)
 {
 	VG_(printf)("\nSummary:\n");
 	VG_(printf)("Cache holding %d bytes (%d lines, ass. %d, sets: %d).\n",
-			LINESIZE * CACHELINES, CACHELINES, SETSIZE, SETS);
+	            LINESIZE * CACHELINES, CACHELINES, SETSIZE, SETS);
 	VG_(printf)("Misses:  stores %d / %d, loads %d / %d\n",
-			smisses, stores, lmisses, loads);
+	            smisses, stores, lmisses, loads);
 }

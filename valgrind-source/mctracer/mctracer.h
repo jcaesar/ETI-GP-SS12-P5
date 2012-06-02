@@ -65,12 +65,13 @@
  */
 
 typedef
-   enum {
-      VG_USERREQ__PRINT = VG_USERREQ_TOOL_BASE('M','T'),
-      VG_USERREQ__PRINTA,
-      VG_USERREQ__PRINTU,
-      VG_USERREQ__TRACING
-   } Vg_McTracerClientRequest;
+enum
+{
+	VG_USERREQ__PRINT = VG_USERREQ_TOOL_BASE('M','T'),
+	VG_USERREQ__PRINTA,
+	VG_USERREQ__PRINTU,
+	VG_USERREQ__TRACING
+} Vg_McTracerClientRequest;
 
 /* Print a string into the trace, prefixed by "P  " */
 #define MCTRACER_PRINT(str)              				\
