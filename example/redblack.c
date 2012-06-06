@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "mctracer.h"
+
 #define SIZE 1024
 
 int main()
@@ -10,6 +12,7 @@ int main()
 	double sum = 0.0;
 
 	m = (double*) malloc(sizeof(double)*SIZE*SIZE);
+	SSIM_TRACE_MATRIX(m, SIZE, SIZE, sizeof(double), "redblack");
 
 	// init points
 	for(i=0; i<SIZE; i++)
@@ -49,6 +52,8 @@ int main()
 			sum += m[i*SIZE+j];
 
 	printf("Sum: %f\n", sum);
+
+	SSIM_DELETE_MATRIX(m);
 
 	return 1;
 }

@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <sys/time.h>
 
+#include "mctracer.h"
+
 static inline
 double gettime(void)
 {
@@ -213,7 +215,7 @@ void run_mul(mulfunc f, const char* name,
 {
 	double start, stop, mflops;
 
-	flush_cache();
+	SSIM_FLUSH_CACHE;
 	start = gettime();
 	init(sz, c, 0);
 	(*f)(sz, a, b, c);
@@ -262,8 +264,28 @@ void run(int sz)
 	        sz, ((double)sizeof(MAT))/1000000.0, a,b,c);
 	printf("%d ", sz);
 
-	for(v=0; mmversion[v].func !=0; v++)
+	for(v=0; mmversion[v].func !=0; v++) {
+		// generate tracking identifier for each matrix
+		const int len = 256;
+		char name[len];
+		strcpy(name, mmversion[v].name);
+		
+		strcpy(name + strlen(mmversion[v].name), " - a");
+		SSIM_TRACE_MATRIX(a, sz, sz, sizeof(double), name);
+		
+		strcpy(name + strlen(mmversion[v].name), " - b");
+		SSIM_TRACE_MATRIX(b, sz, sz, sizeof(double), name);
+		
+		strcpy(name + strlen(mmversion[v].name), " - c");
+		SSIM_TRACE_MATRIX(c, sz, sz, sizeof(double), name);
+		
+		
 		run_mul( mmversion[v].func, mmversion[v].name, sz, *a, *b, *c);
+		
+		SSIM_DELETE_MATRIX(a);
+		SSIM_DELETE_MATRIX(b);
+		SSIM_DELETE_MATRIX(c);
+	}
 
 	printf("\n");
 
