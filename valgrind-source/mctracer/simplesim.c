@@ -163,7 +163,7 @@ VG_REGPARM(2) void ssim_store(Addr addr, SizeT size)
 	if (res == 0) smisses++;
 }
 
-bool ssim_matrix_tracking_start(Addr addr, int x, int y, int elsize, char* name)
+bool ssim_matrix_tracing_start(Addr addr, int x, int y, int elsize, char* name)
 {
 	if(matrix_count >= MAX_MATRIX_COUNT) {
 		char msg[100];
@@ -182,7 +182,7 @@ bool ssim_matrix_tracking_start(Addr addr, int x, int y, int elsize, char* name)
     return true;
 }
 
-bool ssim_matrix_tracking_stop(Addr addr)
+bool ssim_matrix_tracing_stop(Addr addr)
 {
 	traced_matrix* rm_pend = find_matrix(addr);
 
