@@ -101,11 +101,11 @@ enum
    }
 
 /* Switch tracing on */
-#define SSIM_TRACE_MATRIX(addr,xsize,ysize,elementsize,desc)            \
+#define SSIM_TRACE_MATRIX(addr,xsize,ysize,elementsize,name)            \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
                                VG_USERREQ__TRACE_MATRIX,                \
-                               addr, xsize, ysize, elementsize, desc);  \
+                               addr, xsize, ysize, elementsize, name);  \
    }
 
 /* Switch tracing off */

@@ -119,19 +119,24 @@ static int cache_ref(Addr a, int size)
 
 /* global counters for cache simulation */
 int loads = 0, stores = 0, lmisses = 0, smisses = 0;
-typedef struct _traced_matrix { 
-	Addr start; // TODO: We will want to save size and a pointer to the infostring in this, too.
+
+typedef struct _traced_matrix {
+    Addr start; // TODO: We will want to save size and a pointer to the infostring in this, too.
 	Addr end;
+    char* name;
 } traced_matrix;
-traced_matrix matrix_info [256]; // This is going to be enough. If you disagree, mess with malloc. :P
+
+traced_matrix matrices [MAX_MATRIX_COUNT]; 
+
+// number of matrices in the array "matrices"
 int matrix_count = 0;
 
 // if you want, you can implement something binary-searchish for this. The table is probably going to have 3 elements, though...
 traced_matrix * find_matrix(Addr access); // -Wmissing-prototypes is idiotic
 traced_matrix * find_matrix(Addr access)
 {
-	traced_matrix * it  = matrix_info,
-	              * end = matrix_info + matrix_count;
+	traced_matrix * it  = matrices,
+	              * end = matrices + matrix_count;
 	for(; it < end; ++it) 
 		if(it->start <= access && access < it->end)
 		   return it;
@@ -158,24 +163,40 @@ VG_REGPARM(2) void ssim_store(Addr addr, SizeT size)
 	if (res == 0) smisses++;
 }
 
-// I don't expect many reallocations, so I'm doing the next two methods as easy as possible
-bool ssim_matrix_allocated(Addr addr, int x, int y, int elsize, char* info)
+/**
+ * Keeps track of a new matrix.
+ */
+bool ssim_matrix_allocated(Addr addr, int x, int y, int elsize, char* name)
 {
-	if(matrix_count >= 256) 
-		VG_(tool_panic)("Can't track more than 256 matrices");
-	(matrix_info + matrix_count)->start = addr;
-	(matrix_info + matrix_count)->end = addr + x*y*elsize;
-	++matrix_count;
-	return true;
+	if(matrix_count >= MAX_MATRIX_COUNT) {
+		char msg[100];
+        VG_(sprintf)(msg, "Max. number of matrices exceeded. Can't track more than %d matrices", MAX_MATRIX_COUNT);
+        VG_(tool_panic)(msg);
+
+        return false;
+    }
+
+    (matrices + matrix_count)->start = addr;
+	(matrices + matrix_count)->end = addr + x*y*elsize;
+	(matrices + matrix_count)->name = name;
+
+    ++matrix_count;
+	
+    return true;
 }
+
 bool ssim_matrix_freed(Addr addr)
 {
-	traced_matrix * rm_pend = find_matrix(addr);
+	traced_matrix* rm_pend = find_matrix(addr);
+
 	if(!rm_pend)
 		return false;
+
 	--matrix_count;
-	memcpy(rm_pend, matrix_info+matrix_count, sizeof(struct _traced_matrix));
-	return true;
+	
+    memcpy(rm_pend, matrices+matrix_count, sizeof(struct _traced_matrix));
+	
+    return true;
 }
 
 
