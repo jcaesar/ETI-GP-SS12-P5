@@ -290,12 +290,12 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 		VG_(tool_panic)("Client program used removed MCTRACER_TRACING_ON/OFF");
 
 	case VG_USERREQ__TRACE_MATRIX:
-		if(!ssim_matrix_allocated((Addr)args[1], args[2], args[3], args[4], (char*)args[5]))
+		if(!ssim_matrix_tracking_start((Addr)args[1], args[2], args[3], args[4], (char*)args[5]))
 			VG_(tool_panic)("Internal error: Could not trace matrix");
 		*ret = 0;                 /* meaningless */
 		break;
 	case VG_USERREQ__UNTRACE_MATRIX:
-		if(!ssim_matrix_freed((Addr)args[1]))
+		if(!ssim_matrix_tracking_stop((Addr)args[1]))
 			VG_(tool_panic)("Invalid freeing notification");
 		*ret = 0;                 /* meaningless */
 		break;
