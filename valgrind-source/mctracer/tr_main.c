@@ -497,7 +497,7 @@ static void mt_pre_clo_init(void)
 {
 	VG_(details_name)            ("McTracer");
 	VG_(details_version)         (NULL);
-	VG_(details_description)     ("an memory tracer tool");
+	VG_(details_description)     ("a memory tracer tool");
 	VG_(details_copyright_author)(
 	    "Copyright (C) 2002-2011, and GNU GPL'd, by NN & JW.");
 	VG_(details_bug_reports_to)  (VG_BUGS_TO);
