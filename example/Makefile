@@ -1,7 +1,7 @@
 ifeq ($(wildcard ../valgrind-source/install/include/valgrind/mctracer.h),)
 	INC =
 else 
-	INC = -I../valgrind-source/install/include
+	INC = -I../valgrind-source/install/include/valgrind
 endif
 
 CFLAGS=-g -O2 $(INC)

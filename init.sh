@@ -1,7 +1,6 @@
 #!/bin/bash
 # simple bash script to conduct the initial stuff
 # I guess this is the ~fifth bash script I've written, go ahead and correct me
-
 # if you edit any of this, make sure to clear the files first
 BUILDLOG=./build.log
 VALGRIND_INSTALL=valgrind-source/install
@@ -28,8 +27,8 @@ if [[ "$VALGRIND_SRC" == "$(pwd)" ]]; then
 	exit
 fi
 
-
-if [[ -x $VALGRIND_INSTALL/bin/valgrind && ( -x $VALGRIND_INSTALL/lib/valgrind/mctracer-amd64-linux || -x $VALGRIND_INSTALL/lib/valgrind/mctracer-x86-linux ) ]]; then
+# call it with the rebuild flag to compile valgrind and mctracer as well
+if [[ "$1" != "rebuild" && -x $VALGRIND_INSTALL/bin/valgrind && ( -x $VALGRIND_INSTALL/lib/valgrind/mctracer-amd64-linux || -x $VALGRIND_INSTALL/lib/valgrind/mctracer-x86-linux ) ]]; then
 	echo "valgrind found installed, mctracer present." | tee -a $BUILDLOG
 else
 	VALGRIND_BUILD_UNCHANGED=true
