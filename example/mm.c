@@ -271,20 +271,20 @@ void run(int sz)
 		strcpy(name, mmversion[v].name);
 		
 		strcpy(name + strlen(mmversion[v].name), " - a");
-		SSIM_TRACE_MATRIX(a, sz, sz, sizeof(double), name);
+		SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
 		
 		strcpy(name + strlen(mmversion[v].name), " - b");
-		SSIM_TRACE_MATRIX(b, sz, sz, sizeof(double), name);
+		SSIM_MATRIX_TRACING_START(b, sz, sz, sizeof(double), name);
 		
 		strcpy(name + strlen(mmversion[v].name), " - c");
-		SSIM_TRACE_MATRIX(c, sz, sz, sizeof(double), name);
+		SSIM_MATRIX_TRACING_START(c, sz, sz, sizeof(double), name);
 		
 		
 		run_mul( mmversion[v].func, mmversion[v].name, sz, *a, *b, *c);
 		
-		SSIM_DELETE_MATRIX(a);
-		SSIM_DELETE_MATRIX(b);
-		SSIM_DELETE_MATRIX(c);
+		SSIM_MATRIX_TRACING_STOP(a);
+		SSIM_MATRIX_TRACING_STOP(b);
+		SSIM_MATRIX_TRACING_STOP(c);
 	}
 
 	printf("\n");
