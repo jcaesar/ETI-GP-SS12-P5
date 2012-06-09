@@ -490,7 +490,7 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 
 static void mt_fini(Int exitcode)
 {
-	ssim_print_stats();
+	ssim_save_stats("/tmp/testfile.etis");
 }
 
 static void mt_pre_clo_init(void)

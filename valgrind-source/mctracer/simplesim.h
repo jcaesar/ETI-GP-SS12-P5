@@ -11,4 +11,4 @@ bool ssim_matrix_tracing_start(Addr, int m, int n, int elsize, char*);
 bool ssim_matrix_tracing_stop(Addr);
 VG_REGPARM(2) void ssim_load(Addr addr, SizeT size);
 VG_REGPARM(2) void ssim_store(Addr addr, SizeT size);
-void ssim_print_stats(void);
+void ssim_save_stats(char* fname);

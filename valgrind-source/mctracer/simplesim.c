@@ -7,6 +7,7 @@
 
 #define _GNU_SOURCE
 #include <stdbool.h>
+#include <stdio.h>
 #include "pub_tool_mallocfree.h" // VG_(malloc)
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic)
@@ -386,21 +387,12 @@ bool ssim_matrix_tracing_stop(Addr addr)
     return true;
 }
 
-void ssim_print_stats(void)
+void ssim_save_stats(char* fname)
 {
-    int i;
-    for (i=0; i<traced_matrices_count; ++i) {
-        traced_matrix* tm = traced_matrices + i;
-        VG_(printf)("Name: %s\nStart Address: %d\nElement Size: %d\n", tm->name, tm->start, tm->ele_size);
-        VG_(printf)("Rows: %d\nColumns: %d\n\n", tm->m, tm->n);
-        
-        int j;
-        for (j = 0; j < tm->access_data.access_methods_count; ++j) {
-            matrix_access_method* am = tm->access_data.access_methods+j;
-            VG_(printf)("%d. Access Method (%d,%d)\n", j+1, am->offset_m, am->offset_n);
-            VG_(printf)("Hits: %d\nMisses: %d\n", am->hits, am->misses);
-        }
+    FILE* fh = fopen(fname, "w+");
+    
+    fputc(0xAF, fh);
+    fputc(0xFE, fh);
 
-        VG_(printf)("\n\n");
-    }
+    fclose(fh);
 }
