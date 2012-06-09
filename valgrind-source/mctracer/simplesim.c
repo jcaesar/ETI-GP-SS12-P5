@@ -171,6 +171,8 @@ int traced_matrices_count = 0;
 // number of stopped matrice traces
 int stopped_matrices_count = 0;
 
+traced_matrix* traced_matrices_active_index[MAX_MATRIX_COUNT];
+
 static traced_matrix* find_matrix(Addr access)
 {
 	traced_matrix* it  = traced_matrices;
@@ -197,14 +199,7 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
         // ignore the first access
         if ((*matr).access_data.last_accessed_addr != -1) {
             int tmp;
-           /* 
-            VG_(printf)("################## NEW LOAD #################\n");
-            VG_(printf)("start_addr=%d\n", (*matr).start);
-            VG_(printf)("last_accessed_addr=%d\n", (*matr).access_data.last_accessed_addr);
-            VG_(printf)("addr=%d\n", addr);
-            VG_(printf)("m = %d\n", (*matr).m);
-            VG_(printf)("ele_size=%d\n", (*matr).ele_size); 
-*/
+
             // transform the last_accessed_addr to (m,n) representation 
             tmp  = ((*matr).access_data.last_accessed_addr - (*matr).start) / (*matr).ele_size;
             int last_n = tmp % (*matr).m;
@@ -218,13 +213,9 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
             // calculate the current access method
             int offset_n = n - last_n;
             int offset_m = m - last_m;
-/*
-            VG_(printf)("offset_n=%d\n", offset_n);
-            VG_(printf)("offset_m=%d\n", offset_m);
-*/
+
             int i;
             int amc = (*matr).access_data.access_methods_count;
-            int is_hit = cache_ref(addr, size);
             bool found = false;
             
             // look for the access method and increase the hit/miss count
