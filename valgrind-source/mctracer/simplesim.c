@@ -6,11 +6,14 @@
 #include "simplesim.h"
 
 #define _GNU_SOURCE
-#include <stdlib.h>
 #include <stdbool.h>
-#include <string.h> // memcpy
+#include "pub_tool_mallocfree.h" // VG_(malloc)
 #include "pub_tool_libcprint.h" // printf
 #include "pub_tool_libcassert.h" // tool_panic
+#include "pub_tool_libcbase.h" // VG_(memcpy)
+
+#define MATRIX_LOAD 'L'
+#define MATRIX_STORE 'S'
 
 /* ----------------------------------------------------------------*/
 
@@ -116,6 +119,11 @@ static int cache_ref(Addr a, int size)
 
 /* ----------------------------------------------------------------*/
 
+typedef struct _matrix_hit_and_miss {
+    int hits;
+    int misses;
+} matrix_access_count;
+
 typedef struct _matrix_access_method {
     /* relative row number */
     int offset_m;
@@ -150,6 +158,10 @@ typedef struct _traced_matrix {
     matrix_access_data access_data;
     /* tells you whether the matrix is kept track of */
     bool traced;
+    /* number of hits/misses per element for loads */
+    matrix_access_count* load_count;
+    /* number of hits/misses per element for stores */
+    matrix_access_count* store_count;
 } traced_matrix;
 
 traced_matrix traced_matrices [MAX_MATRIX_COUNT]; 
@@ -180,9 +192,8 @@ static traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
-static void update_matrix_stats(Addr addr, SizeT size) {
-    traced_matrix* matr;
-	if((matr = find_matrix(addr)) != 0) {
+static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr addr, SizeT size) {
+	if(matr) {
         // ignore the first access
         if ((*matr).access_data.last_accessed_addr != -1) {
             int tmp;
@@ -263,14 +274,40 @@ static void update_matrix_stats(Addr addr, SizeT size) {
     } 
 }
 
+static void update_matrix_stats(Addr addr, SizeT size, char type) {
+    traced_matrix* matr = find_matrix(addr);
+    
+    if (matr) {
+        int is_hit = cache_ref(addr, size);
+        // update access method stats
+        update_matrix_access_stats(matr, is_hit, addr, size);
+        
+        // update general access stats
+        int offset = (addr - matr->start) / matr->ele_size;
+        if (is_hit) {
+            if (type == MATRIX_LOAD) {
+                matr->load_count[offset].hits++;
+            } else {
+                matr->store_count[offset].hits++;
+            }
+        } else {
+            if (type == MATRIX_LOAD) {
+                matr->load_count[offset].misses++;
+            } else {
+                matr->store_count[offset].misses++;
+            }
+        }
+    }
+}
+
 VG_REGPARM(2) void ssim_load(Addr addr, SizeT size)
 {
-    update_matrix_stats(addr,size);
+    update_matrix_stats(addr, size, MATRIX_LOAD);
 }
 
 VG_REGPARM(2) void ssim_store(Addr addr, SizeT size)
 {
-    update_matrix_stats(addr,size);
+    update_matrix_stats(addr, size, MATRIX_STORE);
 }
 
 bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name)
@@ -333,7 +370,23 @@ bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name
 
     /* initialize memory access infos */
     matr->access_data.last_accessed_addr = -1;
-    
+    matr->load_count = (matrix_access_count*) VG_(malloc)("matrix load count", m*n*sizeof(matrix_access_count));
+    matr->store_count = (matrix_access_count*) VG_(malloc)("matrix store count", m*n*sizeof(matrix_access_count));
+
+    // initialize every element with 0
+    int i, j, offset;
+    for(i = 0; i < m; ++i) {
+        for(j = 0; j < n; ++j) {
+            offset = i*n + j;
+            
+            matr->load_count[offset].hits = 0;
+            matr->load_count[offset].misses = 0;
+
+            matr->store_count[offset].hits = 0;
+            matr->store_count[offset].misses = 0;
+        }
+    }
+
     // allocate space for sqrt(N) access methods, but at least 8
     //size_t acc_mths = 20;//max(sqrt(max(m,n)), 8);
     //(traced_matrices + traced_matrices_count)->access_data.access_methods = VG_(calloc)("matrix_access_methods", acc_mths, sizeof(struct _matrix_access_method));
@@ -366,9 +419,9 @@ bool ssim_matrix_tracing_stop(Addr addr)
     if (traced_matrices_count > 1 && matr->start != swp_matr->start) {
         traced_matrix* tmp = VG_(malloc)("tmp swap space", sizeof(traced_matrix));
 
-        memcpy(tmp, matr, sizeof(traced_matrix)); 
-        memcpy(matr, swp_matr, sizeof(traced_matrix));
-        memcpy(swp_matr, tmp, sizeof(traced_matrix));
+        VG_(memcpy)(tmp, matr, sizeof(traced_matrix)); 
+        VG_(memcpy)(matr, swp_matr, sizeof(traced_matrix));
+        VG_(memcpy)(swp_matr, tmp, sizeof(traced_matrix));
 
         // free the tmp space
         VG_(free)(tmp);
