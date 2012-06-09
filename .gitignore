@@ -2,6 +2,7 @@
 *
 
 # ... except
+!.mailmap
 !valgrind-source/
 !valgrind-source/*/
 !valgrind-source/mctracer
