@@ -8,9 +8,8 @@
 #define _GNU_SOURCE
 #include <stdbool.h>
 #include "pub_tool_mallocfree.h" // VG_(malloc)
-#include "pub_tool_libcprint.h" // printf
-#include "pub_tool_libcassert.h" // tool_panic
-#include "pub_tool_libcbase.h" // VG_(memcpy)
+#include "pub_tool_libcprint.h" // VG_(printf)
+#include "pub_tool_libcassert.h" // VG_(tool_panic)
 
 #define MATRIX_LOAD 'L'
 #define MATRIX_STORE 'S'
@@ -116,7 +115,6 @@ static int cache_ref(Addr a, int size)
 	return res1 * res2;
 }
 
-
 /* ----------------------------------------------------------------*/
 
 typedef struct _matrix_hit_and_miss {
@@ -156,8 +154,6 @@ typedef struct _traced_matrix {
     int n;
     /* contains data about the memory and cache access (patterns) */
     matrix_access_data access_data;
-    /* tells you whether the matrix is kept track of */
-    bool traced;
     /* number of hits/misses per element for loads */
     matrix_access_count* load_count;
     /* number of hits/misses per element for stores */
@@ -165,29 +161,22 @@ typedef struct _traced_matrix {
 } traced_matrix;
 
 traced_matrix traced_matrices [MAX_MATRIX_COUNT]; 
+traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
 
 // number of traced matrices 
 int traced_matrices_count = 0;
 // number of stopped matrice traces
 int stopped_matrices_count = 0;
 
-traced_matrix* traced_matrices_active_index[MAX_MATRIX_COUNT];
-
 static traced_matrix* find_matrix(Addr access)
 {
-	traced_matrix* it  = traced_matrices;
-	traced_matrix* end = traced_matrices + traced_matrices_count;
+    int i;
+    int tmax = traced_matrices_count - stopped_matrices_count;
 
-	for(; it < end; ++it) {
-        /*
-        // quit on the first occurence of an "untraced" matrix
-		if (!it->traced) {
-            break;
-        }
-        */
-  
-        if(it->traced && it->start <= access && access < it->end) {
-		    return it;
+	for(i=0; i < tmax; ++i) {
+        if (traced_matrices_index[i]->start <= access &&
+            traced_matrices_index[i]->end > access) {
+            return traced_matrices_index[i];
         }
     }
 
@@ -311,43 +300,7 @@ bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name
         return false;
     }
 
-    traced_matrix* matr = NULL;
-
-    /*
-    if (traced_matrices_count == 1 || stopped_matrices_count == 0) {
-        matr = traced_matrices + traced_matrices_count;
-    } else {*/
-        /**
-         * the idea is to store the new element
-         * at the position of the first "untraced" 
-         * element and move the "untraced" element
-         * to the end of the array
-         */
-    /*
-        // move it to the end of the array
-        memcpy(traced_matrices + traced_matrices_count,
-               traced_matrices + traced_matrices_count - stopped_matrices_count,
-               sizeof(traced_matrices));
-       
-        // init the new matrix
-        if (traced_matrices_count < MAX_MATRIX_COUNT) {
-            memcpy(traced_matrices + traced_matrices_count - stopped_matrices_count,
-                   traced_matrices + traced_matrices_count,
-                   sizeof(traced_matrices));
-        } else {
-            traced_matrix* tmp_matr = VG_(malloc)("tmp swap space", sizeof(traced_matrix));
-            memcpy(traced_matrices + traced_matrices_count - stopped_matrices_count,
-                   tmp_matr,
-                   sizeof(traced_matrix));
-
-            matr = traced_matrices + traced_matrices_count - stopped_matrices_count;
-
-            VG_(free)(tmp_matr);
-        }
-    }
-    */
-
-    matr = traced_matrices + traced_matrices_count;
+    traced_matrix* matr = traced_matrices + traced_matrices_count;
 
     /* store general information about the matrix */
     matr->start = addr;
@@ -357,7 +310,6 @@ bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name
     matr->ele_size = ele_size;
     matr->m = m;
     matr->n = n;
-    matr->traced = true;
 
     /* initialize memory access infos */
     matr->access_data.last_accessed_addr = -1;
@@ -377,11 +329,26 @@ bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name
             matr->store_count[offset].misses = 0;
         }
     }
-
-    // allocate space for sqrt(N) access methods, but at least 8
-    //size_t acc_mths = 20;//max(sqrt(max(m,n)), 8);
-    //(traced_matrices + traced_matrices_count)->access_data.access_methods = VG_(calloc)("matrix_access_methods", acc_mths, sizeof(struct _matrix_access_method));
     
+    /* Update the matrix index */
+
+    if (traced_matrices_count == 1 || stopped_matrices_count == 0) {
+        traced_matrices_index[traced_matrices_count] = matr;
+    } else {
+        /**
+         * the idea is to store the new element
+         * at the position of the first "untraced" 
+         * element and move the "untraced" element
+         * to the end of the array
+         */
+
+        // put the first unused matrix to the end of the array
+        traced_matrices_index[traced_matrices_count] = traced_matrices_index[traced_matrices_count - stopped_matrices_count];
+        
+        // store the ptr to the newly traced matrix at the just freed position
+        traced_matrices_index[traced_matrices_count - stopped_matrices_count] = matr;
+    }
+   
     traced_matrices_count++;
 
     return true;
@@ -396,31 +363,26 @@ bool ssim_matrix_tracing_stop(Addr addr)
 		return false;
     }
 
-    // turn off tracing
-    matr->traced = false;
-
-    /* Now the idea is to put "untraced" matrices to 
+    /* We'll store "untraced" matrices at 
      * the end of the array, so that we'll find the
      * actively traced ones faster.
      */
-/*
-    // the matrix to swap with
-    traced_matrix* swp_matr = (traced_matrices + traced_matrices_count - stopped_matrices_count);
+ 
+    // the last actively traced matrix in the array
+    int last_traced_mtr_offset = traced_matrices_count - stopped_matrices_count - 1;
+    traced_matrix* tmp_tm = traced_matrices_index[last_traced_mtr_offset];
 
-    if (traced_matrices_count > 1 && matr->start != swp_matr->start) {
-        traced_matrix* tmp = VG_(malloc)("tmp swap space", sizeof(traced_matrix));
-
-        VG_(memcpy)(tmp, matr, sizeof(traced_matrix)); 
-        VG_(memcpy)(matr, swp_matr, sizeof(traced_matrix));
-        VG_(memcpy)(swp_matr, tmp, sizeof(traced_matrix));
-
-        // free the tmp space
-        VG_(free)(tmp);
-
-        stopped_matrices_count++;    
+    // look for the mtr from 0 to last_traced_mtr_offset-1, so
+    // that we don't swap a matrix with itself
+    int i;
+    for (i=0; i < last_traced_mtr_offset-1; ++i) {
+        if (traced_matrices_index[i]->start == matr->start) {
+            traced_matrices_index[last_traced_mtr_offset] = matr;
+            traced_matrices_index[i] = tmp_tm;
+        }
     }
-*/
 
+    stopped_matrices_count++;
     return true;
 }
 
