@@ -264,24 +264,25 @@ void run(int sz)
 	        sz, ((double)sizeof(MAT))/1000000.0, a,b,c);
 	printf("%d ", sz);
 
-	for(v=0; mmversion[v].func !=0; v++) {
+	for(v=0; mmversion[v].func !=0; v++)
+	{
 		// generate tracking identifier for each matrix
 		const int len = 256;
 		char name[len];
 		strcpy(name, mmversion[v].name);
-		
+
 		strcpy(name + strlen(mmversion[v].name), " - a");
 		SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
-		
+
 		strcpy(name + strlen(mmversion[v].name), " - b");
 		SSIM_MATRIX_TRACING_START(b, sz, sz, sizeof(double), name);
-		
+
 		strcpy(name + strlen(mmversion[v].name), " - c");
 		SSIM_MATRIX_TRACING_START(c, sz, sz, sizeof(double), name);
-		
-		
+
+
 		run_mul( mmversion[v].func, mmversion[v].name, sz, *a, *b, *c);
-		
+
 		SSIM_MATRIX_TRACING_STOP(a);
 		SSIM_MATRIX_TRACING_STOP(b);
 		SSIM_MATRIX_TRACING_STOP(c);

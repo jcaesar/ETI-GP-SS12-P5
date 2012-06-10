@@ -8,53 +8,58 @@
 #define MAX_MATRIX_ACCESS_METHODS 30
 
 struct _element_access_count;
-typedef struct _element_access_count {
-    unsigned int hits;
-    unsigned int misses;
+typedef struct _element_access_count
+{
+	unsigned int hits;
+	unsigned int misses;
 } element_access_count;
 
 struct _matrix_access_method;
-typedef struct _matrix_access_method {
-    /* relative row number */
-    short offset_m;
-    /* relative column number */
-    short offset_n;
-    unsigned int misses;
-    unsigned int hits;
+typedef struct _matrix_access_method
+{
+	/* relative row number */
+	short offset_m;
+	/* relative column number */
+	short offset_n;
+	unsigned int misses;
+	unsigned int hits;
 } matrix_access_method;
 
 struct _matrix_access_data;
-typedef struct _matrix_access_data {
-    /* last address accessed by this matrix */
-    struct _last_access {
-        short n;
-        short m;
-    } last_access;
-    /* list of access methods used to retrieve/write data from/to the matrix */
-    matrix_access_method access_methods[MAX_MATRIX_ACCESS_METHODS];
-    int access_methods_count;
+typedef struct _matrix_access_data
+{
+	/* last address accessed by this matrix */
+	struct _last_access
+	{
+		short n;
+		short m;
+	} last_access;
+	/* list of access methods used to retrieve/write data from/to the matrix */
+	matrix_access_method access_methods[MAX_MATRIX_ACCESS_METHODS];
+	int access_methods_count;
 } matrix_access_data;
 
 struct _traced_matrix;
-typedef struct _traced_matrix {
-    /* start address of the matrix in memory */
-    Addr start; 
-    /* last address of the matrix in memory */
+typedef struct _traced_matrix
+{
+	/* start address of the matrix in memory */
+	Addr start;
+	/* last address of the matrix in memory */
 	Addr end;
-    /* name of the matrix */
-    char* name;
-    /* size of each element of the matrix in bytes */
-    unsigned short ele_size;
-    /* number of rows */
-    unsigned short m;
-    /* number of columns */
-    unsigned short n;
-    /* contains data about the memory and cache access (patterns) */
-    matrix_access_data access_data;
-    /* number of hits/misses per element for loads */
-    element_access_count* load_count;
-    /* number of hits/misses per element for stores */
-    element_access_count* store_count;
+	/* name of the matrix */
+	char* name;
+	/* size of each element of the matrix in bytes */
+	unsigned short ele_size;
+	/* number of rows */
+	unsigned short m;
+	/* number of columns */
+	unsigned short n;
+	/* contains data about the memory and cache access (patterns) */
+	matrix_access_data access_data;
+	/* number of hits/misses per element for loads */
+	element_access_count* load_count;
+	/* number of hits/misses per element for stores */
+	element_access_count* store_count;
 } traced_matrix;
 
 void ssim_init(void);

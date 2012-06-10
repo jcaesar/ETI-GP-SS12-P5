@@ -11,7 +11,10 @@
 #define abs(x)   (((x)<0)?(-(x)):(x))
 
 bool signaled = false;
-void sighandler(int sig) { signaled = true; }
+void sighandler(int sig)
+{
+	signaled = true;
+}
 
 int main()
 {
@@ -31,7 +34,8 @@ int main()
 	int i, j, it;
 
 	m = (double*) malloc(sizeof(double)*SIZE*SIZE);
-	typedef struct _disphlp {
+	typedef struct _disphlp
+	{
 		unsigned short mappc;
 		double mapsum;
 	} disphelp;
@@ -50,7 +54,7 @@ int main()
 
 	// add some random points
 	srand(time(NULL));
-	for(i=0; i < 200; ++i) 
+	for(i=0; i < 200; ++i)
 	{
 		int x = (rand()%SIZE);
 		m[ (rand()%SIZE)*SIZE + x ] = 50000.0 * ((rand()%SIZE)>x?1:-1);
@@ -79,7 +83,8 @@ int main()
 			for(j=0; j<SIZE; ++j)
 			{
 				int dx = j / ((double)SIZE/screen_sx), dy = i / ((double)SIZE/screen_sy);
-				dx = min(screen_sx-1, dx); dy = min(screen_sy-1, dy); // float arithmetics, do you trust it?
+				dx = min(screen_sx-1, dx);
+				dy = min(screen_sy-1, dy); // float arithmetics, do you trust it?
 				disp[dy*screen_sx+dx].mapsum += m[i*SIZE+j];
 				disp[dy*screen_sx+dx].mappc++;
 			}
@@ -94,7 +99,7 @@ int main()
 				chr = 'E';
 				color = 3;
 			}
-			else 
+			else
 			{
 				double val = disp[i].mapsum / cnt / 10.0 * strlen(dispvals);
 				chr = dispvals[min(strlen(dispvals)-1,(int)abs(val))];
