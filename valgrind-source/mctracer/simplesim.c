@@ -203,8 +203,8 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
             unsigned short m = (tmp - n) / (*matr).m;
 
             // calculate the current access method
-            unsigned short offset_n = n - last_n;
-            unsigned short offset_m = m - last_m;
+            short offset_n = n - last_n;
+            short offset_m = m - last_m;
 
             int i;
             int amc = (*matr).access_data.access_methods_count;

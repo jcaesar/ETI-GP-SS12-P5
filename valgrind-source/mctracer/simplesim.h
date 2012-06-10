@@ -16,9 +16,9 @@ typedef struct _element_access_count {
 struct _matrix_access_method;
 typedef struct _matrix_access_method {
     /* relative row number */
-    unsigned short offset_m;
+    short offset_m;
     /* relative column number */
-    unsigned short offset_n;
+    short offset_n;
     unsigned int misses;
     unsigned int hits;
 } matrix_access_method;
