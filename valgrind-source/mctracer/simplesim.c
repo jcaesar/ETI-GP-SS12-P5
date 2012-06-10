@@ -8,6 +8,7 @@
 #define _GNU_SOURCE
 #include <stdbool.h>
 #include <stdint.h>
+#include <limits.h>
 #include "filemanip.h"
 #include "pub_tool_mallocfree.h" // VG_(malloc)
 #include "pub_tool_libcprint.h" // VG_(printf)
@@ -188,23 +189,17 @@ static traced_matrix* find_matrix(Addr access)
 
 static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr addr, SizeT size) {
 	if(matr) {
+        // transform addr to (m,n) representation
+        Addr tmp = (addr - (*matr).start) / (*matr).ele_size;
+        unsigned short n = tmp % (*matr).m;
+        unsigned short m = (tmp - n) / (*matr).m;
+
         // ignore the first access
-        if ((*matr).access_data.last_accessed_addr != -1) {
-            Addr tmp;
-
-            // transform the last_accessed_addr to (m,n) representation 
-            tmp  = ((*matr).access_data.last_accessed_addr - (*matr).start) / (*matr).ele_size;
-            unsigned short last_n = tmp % (*matr).m;
-            unsigned short last_m = (tmp - last_n) / (*matr).m;
-
-            // transform addr to (m,n) representation
-            tmp = (addr - (*matr).start) / (*matr).ele_size;
-            unsigned short n = tmp % (*matr).m;
-            unsigned short m = (tmp - n) / (*matr).m;
-
+        if ((*matr).access_data.last_access.m != SHRT_MIN && (*matr).access_data.last_access.n != SHRT_MIN) {
+            
             // calculate the current access method
-            short offset_n = n - last_n;
-            short offset_m = m - last_m;
+            short offset_n = n - (*matr).access_data.last_access.n;
+            short offset_m = m - (*matr).access_data.last_access.m;
 
             int i;
             int amc = (*matr).access_data.access_methods_count;
@@ -253,7 +248,9 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
         }
 
         // update
-        (*matr).access_data.last_accessed_addr = addr;
+        (*matr).access_data.last_access.n = n;
+        (*matr).access_data.last_access.m = m;
+
     } 
 }
 
@@ -315,7 +312,8 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
     matr->n = n;
 
     /* initialize memory access infos */
-    matr->access_data.last_accessed_addr = -1;
+    matr->access_data.last_access.n = SHRT_MIN;
+    matr->access_data.last_access.m = SHRT_MIN;
     matr->load_count = (element_access_count*) VG_(malloc)("matrix load count", m*n*sizeof(element_access_count));
     matr->store_count = (element_access_count*) VG_(malloc)("matrix store count", m*n*sizeof(element_access_count));
 

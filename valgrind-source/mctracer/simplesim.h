@@ -26,7 +26,10 @@ typedef struct _matrix_access_method {
 struct _matrix_access_data;
 typedef struct _matrix_access_data {
     /* last address accessed by this matrix */
-    Addr last_accessed_addr;
+    struct _last_access {
+        short n;
+        short m;
+    } last_access;
     /* list of access methods used to retrieve/write data from/to the matrix */
     matrix_access_method access_methods[MAX_MATRIX_ACCESS_METHODS];
     int access_methods_count;
