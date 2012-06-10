@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <sys/time.h>
 
-#include "mctracer.h"
+#include <valgrind/mctracer.h>
 
 static inline
 double gettime(void)

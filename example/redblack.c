@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mctracer.h"
+#include <valgrind/mctracer.h>
 
 #define SIZE 1024
 
