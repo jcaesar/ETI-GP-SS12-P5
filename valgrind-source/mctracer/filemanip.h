@@ -12,7 +12,7 @@
 #define HX_TRUNC  0x200
 
 // Liunux calling conventions used here
-uint64_t hxopen(char * filename, uint64_t modif, uint64_t mode)
+static uint64_t hxopen(char * filename, uint64_t modif, uint64_t mode)
 {
 	uint64_t fd;
 	__asm__("mov $5,%%rax" ASL
@@ -30,7 +30,7 @@ uint64_t hxopen(char * filename, uint64_t modif, uint64_t mode)
 
 #define WRITE_ATONCE 512
 char writebuf[WRITE_ATONCE];
-void hxwrite(uint64_t fd, void * buffer, uint64_t length)
+static void hxwrite(uint64_t fd, void * buffer, uint64_t length)
 {
 	uint64_t i;
 	for(i = 0; i < length; i += WRITE_ATONCE)
@@ -54,12 +54,12 @@ void hxwrite(uint64_t fd, void * buffer, uint64_t length)
 #undef writebuf
 #undef WRITE_ATONCE
 
-void hxputc(uint64_t fd, char c)
+static void hxputc(uint64_t fd, char c)
 {
 	hxwrite(fd, &c, 1);
 }	
 
-void hxclose(uint64_t fd)
+static void hxclose(uint64_t fd)
 {
 	__asm__("mov $6,%%rax" ASL
 			"mov %0,%%rbx" ASL
