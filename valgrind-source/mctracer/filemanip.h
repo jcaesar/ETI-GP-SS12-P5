@@ -5,7 +5,7 @@
 #define ASL "\n\t"
 
 #define HX_WRONLY 0x01
-#define HX_CREAT  0x40
+#define HX_CREATE  0x40
 
 // Liunux calling conventions used here
 uint64_t hxopen(char * filename, uint64_t modif, uint64_t mode)
