@@ -7,13 +7,58 @@
 
 #define _GNU_SOURCE
 #include <stdbool.h>
-#include <stdio.h>
+#include <stdint.h>
+#include "filemanip.h"
 #include "pub_tool_mallocfree.h" // VG_(malloc)
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic)
 
+/* ----------------------------------------------------------------*/
+
+/**
+ * utitlity functions, because of the missing libc
+ */
+
+static int ssim_strlen(char* str) {
+    int len;
+
+    for (len = 0; *(str+len) != '\0'; len++);
+
+    return len;
+}
+
+static void swap(matrix_access_method* a, matrix_access_method* b) {
+  matrix_access_method t = *a;
+  *a = *b;
+  *b = t;
+}
+
+static void ssim_qsort(matrix_access_method arr[], int begin, int end) {
+    if (end > begin + 1) {
+        unsigned int piv = arr[begin].hits + arr[begin].misses;
+        int l = begin + 1, r = end;
+
+        while (l < r) {
+            unsigned int ele = arr[l].hits + arr[l].misses;
+      
+            if (ele > piv) {
+                l++;
+            } else {
+                swap(&arr[l], &arr[--r]);
+            }
+        }
+    
+        swap(&arr[--l], &arr[begin]);
+        ssim_qsort(arr, begin, l);
+        ssim_qsort(arr, r, end);
+    }
+}
+
 #define MATRIX_LOAD 'L'
 #define MATRIX_STORE 'S'
+
+#define byte unsigned char
+#define ushort unsigned short
 
 /* ----------------------------------------------------------------*/
 
@@ -118,49 +163,6 @@ static int cache_ref(Addr a, int size)
 
 /* ----------------------------------------------------------------*/
 
-typedef struct _matrix_hit_and_miss {
-    int hits;
-    int misses;
-} matrix_access_count;
-
-typedef struct _matrix_access_method {
-    /* relative row number */
-    int offset_m;
-    /* relative column number */
-    int offset_n;
-    int misses;
-    int hits;
-} matrix_access_method;
-
-typedef struct _matrix_access_data {
-    /* last address accessed by this matrix */
-    Addr last_accessed_addr;
-    /* list of access methods used to retrieve/write data from/to the matrix */
-    matrix_access_method access_methods[MAX_MATRIX_ACCESS_METHODS];
-    int access_methods_count;
-} matrix_access_data;
-
-typedef struct _traced_matrix {
-    /* start address of the matrix in memory */
-    Addr start; 
-    /* last address of the matrix in memory */
-	Addr end;
-    /* name of the matrix */
-    char* name;
-    /* size of each element of the matrix in bytes */
-    int ele_size;
-    /* number of rows */
-    int m;
-    /* number of columns */
-    int n;
-    /* contains data about the memory and cache access (patterns) */
-    matrix_access_data access_data;
-    /* number of hits/misses per element for loads */
-    matrix_access_count* load_count;
-    /* number of hits/misses per element for stores */
-    matrix_access_count* store_count;
-} traced_matrix;
-
 traced_matrix traced_matrices [MAX_MATRIX_COUNT]; 
 traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
 
@@ -188,21 +190,21 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
 	if(matr) {
         // ignore the first access
         if ((*matr).access_data.last_accessed_addr != -1) {
-            int tmp;
+            Addr tmp;
 
             // transform the last_accessed_addr to (m,n) representation 
             tmp  = ((*matr).access_data.last_accessed_addr - (*matr).start) / (*matr).ele_size;
-            int last_n = tmp % (*matr).m;
-            int last_m = (tmp - last_n) / (*matr).m;
+            unsigned short last_n = tmp % (*matr).m;
+            unsigned short last_m = (tmp - last_n) / (*matr).m;
 
             // transform addr to (m,n) representation
             tmp = (addr - (*matr).start) / (*matr).ele_size;
-            int n = tmp % (*matr).m;
-            int m = (tmp - n) / (*matr).m;
+            unsigned short n = tmp % (*matr).m;
+            unsigned short m = (tmp - n) / (*matr).m;
 
             // calculate the current access method
-            int offset_n = n - last_n;
-            int offset_m = m - last_m;
+            unsigned short offset_n = n - last_n;
+            unsigned short offset_m = m - last_m;
 
             int i;
             int amc = (*matr).access_data.access_methods_count;
@@ -291,7 +293,7 @@ VG_REGPARM(2) void ssim_store(Addr addr, SizeT size)
     update_matrix_stats(addr, size, MATRIX_STORE);
 }
 
-bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name)
+bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, unsigned short ele_size, char* name)
 {
 	if(traced_matrices_count >= MAX_MATRIX_COUNT) {
 		char msg[100];
@@ -314,8 +316,8 @@ bool ssim_matrix_tracing_start(Addr addr, int m, int n, int ele_size, char* name
 
     /* initialize memory access infos */
     matr->access_data.last_accessed_addr = -1;
-    matr->load_count = (matrix_access_count*) VG_(malloc)("matrix load count", m*n*sizeof(matrix_access_count));
-    matr->store_count = (matrix_access_count*) VG_(malloc)("matrix store count", m*n*sizeof(matrix_access_count));
+    matr->load_count = (element_access_count*) VG_(malloc)("matrix load count", m*n*sizeof(element_access_count));
+    matr->store_count = (element_access_count*) VG_(malloc)("matrix store count", m*n*sizeof(element_access_count));
 
     // initialize every element with 0
     int i, j, offset;
@@ -366,7 +368,7 @@ bool ssim_matrix_tracing_stop(Addr addr)
 
     /* We'll store "untraced" matrices at 
      * the end of the array, so that we'll find the
-     * actively traced ones faster.
+     _* actively traced ones faster.
      */
  
     // the last actively traced matrix in the array
@@ -389,10 +391,166 @@ bool ssim_matrix_tracing_stop(Addr addr)
 
 void ssim_save_stats(char* fname)
 {
-    FILE* fh = fopen(fname, "w+");
+    uint64_t fd = hxopen(fname, HX_WRONLY|HX_CREAT|HX_TRUNC, 0644);  
     
-    fputc(0xAF, fh);
-    fputc(0xFE, fh);
+    /**
+     * FILE HEADER (4 bytes)
+     */
 
-    fclose(fh);
+    // our magix number OxAFFE 
+    hxputc(fd, 0xAF);
+    hxputc(fd, 0xFE);
+
+    // version number
+    hxputc(fd, 0x01);
+    // total number of matrices
+    hxputc(fd, (byte)traced_matrices_count);
+
+    /**
+     * MATRICES HEADER (N*17 bytes)
+     */
+
+    // MH:MIBADR => initalize with the DH and MH size
+    unsigned int mibaddr = 4 + traced_matrices_count*17;
+    int i;
+    for (i = 0; i < traced_matrices_count; ++i) {
+        // MH:GM (2 bytes)
+        hxwrite(fd, &(traced_matrices[i].m), sizeof(ushort));
+        
+        // MH:GN (2 bytes)
+        hxwrite(fd, &(traced_matrices[i].n), sizeof(ushort));
+        
+        // MH:AZ (1 byte), limited to 8
+        int tmp = traced_matrices[i].access_data.access_methods_count;
+        byte accm_count = tmp < 8 ? (byte)tmp : 8;
+        hxputc(fd, accm_count);
+        
+        // MH:ADR (8 byte)
+        hxwrite(fd, &(traced_matrices[i].start), sizeof(Addr));
+    
+        // MH:MIBADR (4 byte)
+        hxwrite(fd, &mibaddr, sizeof(unsigned int)); 
+        
+        // calculate the address of the next MIB
+        // matrices
+        mibaddr += 2 * traced_matrices[i].m * traced_matrices[i].n;
+        // access methods
+        mibaddr += 12 * accm_count;
+        // name + \0
+        mibaddr += ssim_strlen(traced_matrices[i].name) + 1;
+    }
+
+    /**
+     * MIB - Matrix Informationblock
+     */
+    for (i = 0; i < traced_matrices_count; ++i) {
+        int rows = traced_matrices[i].m;
+        int cols = traced_matrices[i].n;
+
+        byte* loads_array = (byte*) VG_(malloc)("loads byte array", rows * cols);
+        byte* stores_array = (byte*) VG_(malloc)("stores byte array", rows * cols);
+
+        /**
+         * Bytearray (BA)
+         */
+        int l;
+        for(l = 0;  l < rows; ++l) {
+            int k;
+            for (k = 0; k < cols; ++k) {
+                int offset = l*rows + k;
+               
+                // TODO clean up duplicates
+
+                /**
+                 * LOADS
+                 */
+                element_access_count load_count = traced_matrices[i].load_count[offset];
+                
+                if (load_count.misses == 0 && load_count.hits == 0) {
+                    // no access at all
+                    loads_array[offset] = 5;
+                } else {
+                    /**
+                     * A value between 0 and 4:
+                     * 0 := 0 percent hits
+                     * 1 := 25% percent hits
+                     * 2 := 50% percent hits
+                     * 3 := 75% percent hits
+                     * 4 := 100% percent hits
+                     * 5 := no access at all
+                     */
+                    loads_array[offset] = (byte) (4 * ((float)load_count.hits) / (load_count.hits + load_count.misses));
+                }
+
+                /**
+                 * STORES
+                 */
+                element_access_count store_count = traced_matrices[i].store_count[offset];
+                
+                if (store_count.misses == 0 && store_count.hits == 0) {
+                    // no access at all
+                    stores_array[offset] = 5;
+                } else {
+                    /**
+                     * A value between 0 and 4:
+                     * 0 := 0 percent hits
+                     * 1 := 25% percent hits
+                     * 2 := 50% percent hits
+                     * 3 := 75% percent hits
+                     * 4 := 100% percent hits
+                     * 5 := no access at all
+                     */
+                    stores_array[offset] = (byte) (4 * ((float)store_count.hits) / (store_count.hits + store_count.misses));
+                }
+            } 
+        }
+        
+        hxwrite(fd, loads_array, rows*cols);
+        hxwrite(fd, stores_array, rows*cols);
+        
+        // free all that memory
+        VG_(free)(loads_array);
+        VG_(free)(stores_array);
+        VG_(free)(traced_matrices[i].load_count);
+        VG_(free)(traced_matrices[i].store_count);
+
+        /**
+         * Access methods (ZA) (N*12 bytes)
+         */
+
+        int accm_count = traced_matrices[i].access_data.access_methods_count;
+
+        if (accm_count > 8) {
+            // sort the access methods according to their cumulative hits and misses
+            ssim_qsort(traced_matrices[i].access_data.access_methods, 0, traced_matrices[i].access_data.access_methods_count);
+        }
+
+        accm_count = accm_count > 8 ? 8 : accm_count;
+
+        int k;
+        for (k = 0; k < accm_count; ++k) {
+            matrix_access_method accm = traced_matrices[i].access_data.access_methods[k];
+
+            // ZA:OM
+            hxwrite(fd, &(accm.offset_m), sizeof(ushort));
+            
+            // ZA:ON
+            hxwrite(fd, &(accm.offset_n), sizeof(ushort));
+            
+            // ZA:AH
+            hxwrite(fd, &(accm.hits), sizeof(unsigned int));
+
+            // ZA:AM
+            hxwrite(fd, &(accm.misses), sizeof(unsigned int));
+        }
+
+        /**
+         * Name (NA)
+         */
+
+        // matrix name + \0
+        hxwrite(fd, traced_matrices[i].name, ssim_strlen(traced_matrices[i].name)+1);
+    }
+
+    hxclose(fd);
 }

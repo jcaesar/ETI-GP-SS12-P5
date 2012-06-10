@@ -1,3 +1,6 @@
+#ifndef _FILEMANIP_H
+#define _FILEMANIP_H
+
 // Beware of massive trickery: Valgrind doesn't seem to supply VG_(fopen) and alikes, so this is a workaround
 // Replace it with something "normal" asap!
 
@@ -68,3 +71,5 @@ void hxclose(uint64_t fd)
 }
 
 #undef ASL
+
+#endif
