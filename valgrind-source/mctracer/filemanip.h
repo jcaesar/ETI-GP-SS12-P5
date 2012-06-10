@@ -1,3 +1,6 @@
+#ifndef _FILEMANIP_H
+#define _FILEMANIP_H
+
 // Beware of massive trickery: Valgrind doesn't seem to supply VG_(fopen) and alikes, so this is a workaround
 // Replace it with something "normal" asap!
 
@@ -6,6 +9,7 @@
 
 #define HX_WRONLY 0x01
 #define HX_CREAT  0x40
+#define HX_TRUNC  0x200
 
 // Liunux calling conventions used here
 uint64_t hxopen(char * filename, uint64_t modif, uint64_t mode)
@@ -34,7 +38,7 @@ void hxwrite(uint64_t fd, void * buffer, uint64_t length)
 		uint64_t segl = length - i > WRITE_ATONCE ? WRITE_ATONCE : length - i;
 		uint64_t j; 
 		for(j = 0; j < segl; ++j)
-			writebuf[j] = *(((char*)buffer) + j);
+			writebuf[j] = *(((char*)buffer) + i + j);
 		__asm__ __volatile__(
 			"mov $4,%%rax" ASL // write it
 			"mov %0,%%rbx" ASL
@@ -67,3 +71,5 @@ void hxclose(uint64_t fd)
 }
 
 #undef ASL
+
+#endif
