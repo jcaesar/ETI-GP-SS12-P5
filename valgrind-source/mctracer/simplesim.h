@@ -7,6 +7,9 @@
 #define MAX_MATRIX_COUNT 256
 #define MAX_MATRIX_ACCESS_METHODS 30
 
+#define BA_MAX_HIT_VAL 254
+#define BA_NO_ACCESS_VAL 255
+
 struct _element_access_count;
 typedef struct _element_access_count
 {

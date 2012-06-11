@@ -514,19 +514,11 @@ void ssim_save_stats(char* fname)
 				if (load_count.misses == 0 && load_count.hits == 0)
 				{
 					// no access at all
-					loads_array[offset] = 11;
+					loads_array[offset] = BA_NO_ACCESS_VAL;
 				}
 				else
 				{
-					/**
-					 * A value between 0 and 10:
-					 * 0 := 0 percent hits
-					 * 1 := 10 percent hits
-					 * ...
-					 * 10 := 100 percent hits
-					 * 11 := no access at all
-					 */
-					loads_array[offset] = (byte) (10 * ((float)load_count.hits) / (load_count.hits + load_count.misses));
+					loads_array[offset] = (byte) (BA_MAX_HIT_VAL * ((float)load_count.hits) / (load_count.hits + load_count.misses));
 				}
 
 				/**
@@ -537,19 +529,11 @@ void ssim_save_stats(char* fname)
 				if (store_count.misses == 0 && store_count.hits == 0)
 				{
 					// no access at all
-					stores_array[offset] = 11;
+					stores_array[offset] = BA_NO_ACCESS_VAL;
 				}
 				else
 				{
-					/**
-					 * A value between 0 and 10:
-					 * 0 := 0 percent hits
-					 * 1 := 10 percent hits
-					 * ...
-					 * 10 := 100 percent hits
-					 * 11 := no access at all
-					 */
-					stores_array[offset] = (byte) (10 * ((float)store_count.hits) / (store_count.hits + store_count.misses));
+					stores_array[offset] = (byte) (BA_MAX_HIT_VAL * ((float)store_count.hits) / (store_count.hits + store_count.misses));
 				}
 			}
 		}
