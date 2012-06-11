@@ -9,7 +9,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
-#include "filemanip.h"
+#include "pub_tool_libcbase.h" // VG_(strlen)
+#include "pub_tool_libcfile.h" // VG_(open), VG_(write)
+#include "pub_tool_vki.h" // VKI_O_TRUNC ... 
 #include "pub_tool_mallocfree.h" // VG_(malloc)
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic)
@@ -19,16 +21,6 @@
 /**
  * utitlity functions, because of the missing libc
  */
-
-static int ssim_strlen(char* str)
-{
-	int len;
-
-	for (len = 0; *(str+len) != '\0'; len++);
-
-	return len;
-}
-
 static void swap(matrix_access_method* a, matrix_access_method* b)
 {
 	matrix_access_method t = *a;
@@ -432,20 +424,26 @@ bool ssim_matrix_tracing_stop(Addr addr)
 
 void ssim_save_stats(char* fname)
 {
-	uint64_t fd = hxopen(fname, HX_WRONLY|HX_CREAT|HX_TRUNC, 0644);
+	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, 0);
+    Int fd = sr_Res(fd_res);
+
+    // no SESE for julius
+    if (fd == -1) {
+        VG_(tool_panic)("Failed to open file!");
+        return;
+    }
 
 	/**
 	 * FILE HEADER (4 bytes)
 	 */
 
 	// our magix number OxAFFE
-	hxputc(fd, 0xAF);
-	hxputc(fd, 0xFE);
+	VG_(write)(fd, 0xAFFE, 2);
 
 	// version number
-	hxputc(fd, 0x01);
+	VG_(write)(fd, 0x01, 1);
 	// total number of matrices
-	hxputc(fd, (byte)traced_matrices_count);
+	VG_(write)(fd, (byte)traced_matrices_count, sizeof(byte));
 
 	/**
 	 * MATRICES HEADER (N*17 bytes)
@@ -457,21 +455,21 @@ void ssim_save_stats(char* fname)
 	for (i = 0; i < traced_matrices_count; ++i)
 	{
 		// MH:GM (2 bytes)
-		hxwrite(fd, &(traced_matrices[i].m), sizeof(ushort));
+		VG_(write)(fd, &(traced_matrices[i].m), sizeof(ushort));
 
 		// MH:GN (2 bytes)
-		hxwrite(fd, &(traced_matrices[i].n), sizeof(ushort));
+		VG_(write)(fd, &(traced_matrices[i].n), sizeof(ushort));
 
 		// MH:AZ (1 byte), limited to 8
 		int tmp = traced_matrices[i].access_data.access_methods_count;
 		byte accm_count = tmp < 8 ? (byte)tmp : 8;
-		hxputc(fd, accm_count);
+		VG_(write)(fd, accm_count, sizeof(byte));
 
 		// MH:ADR (8 byte)
-		hxwrite(fd, &(traced_matrices[i].start), sizeof(Addr));
+		VG_(write)(fd, &(traced_matrices[i].start), sizeof(Addr));
 
 		// MH:MIBADR (4 byte)
-		hxwrite(fd, &mibaddr, sizeof(unsigned int));
+		VG_(write)(fd, &mibaddr, sizeof(unsigned int));
 
 		// calculate the address of the next MIB
 		// matrices
@@ -479,7 +477,7 @@ void ssim_save_stats(char* fname)
 		// access methods
 		mibaddr += 12 * accm_count;
 		// name + \0
-		mibaddr += ssim_strlen(traced_matrices[i].name) + 1;
+		mibaddr += VG_(strlen)(traced_matrices[i].name) + 1;
 	}
 
 	/**
@@ -538,8 +536,8 @@ void ssim_save_stats(char* fname)
 			}
 		}
 
-		hxwrite(fd, loads_array, rows*cols);
-		hxwrite(fd, stores_array, rows*cols);
+		VG_(write)(fd, loads_array, rows*cols);
+		VG_(write)(fd, stores_array, rows*cols);
 
 		// free all that memory
 		VG_(free)(loads_array);
@@ -567,16 +565,16 @@ void ssim_save_stats(char* fname)
 			matrix_access_method accm = traced_matrices[i].access_data.access_methods[k];
 
 			// ZA:OM
-			hxwrite(fd, &(accm.offset_m), sizeof(ushort));
+			VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
 
 			// ZA:ON
-			hxwrite(fd, &(accm.offset_n), sizeof(ushort));
+			VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
 
 			// ZA:AH
-			hxwrite(fd, &(accm.hits), sizeof(unsigned int));
+			VG_(write)(fd, &(accm.hits), sizeof(unsigned int));
 
 			// ZA:AM
-			hxwrite(fd, &(accm.misses), sizeof(unsigned int));
+			VG_(write)(fd, &(accm.misses), sizeof(unsigned int));
 		}
 
 		/**
@@ -584,8 +582,8 @@ void ssim_save_stats(char* fname)
 		 */
 
 		// matrix name + \0
-		hxwrite(fd, traced_matrices[i].name, ssim_strlen(traced_matrices[i].name)+1);
+		VG_(write)(fd, traced_matrices[i].name, VG_(strlen)(traced_matrices[i].name)+1);
 	}
 
-	hxclose(fd);
+	VG_(close)(fd);
 }
