@@ -424,12 +424,12 @@ bool ssim_matrix_tracing_stop(Addr addr)
 
 void ssim_save_stats(char* fname)
 {
-	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, 0);
+	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, VKI_S_IRUSR|VKI_S_IWUSR|VKI_S_IRGRP|VKI_S_IWGRP);
     Int fd = sr_Res(fd_res);
 
     // no SESE for julius
     if (fd == -1) {
-        VG_(tool_panic)("Failed to open file!");
+        VG_(tool_panic)("Failed to open the file '%s' for writing.", fname);
         return;
     }
 
@@ -437,11 +437,13 @@ void ssim_save_stats(char* fname)
 	 * FILE HEADER (4 bytes)
 	 */
 
-	// our magix number OxAFFE
-	VG_(write)(fd, 0xAFFE, 2);
+    // magic number
+    byte magic_num[2] = {0xAF, 0xFE};
+    // version of the file format
+    byte version = 0x1;
 
-	// version number
-	VG_(write)(fd, 0x01, 1);
+	VG_(write)(fd, magic_num, 2*sizeof(byte));
+	VG_(write)(fd, &version, sizeof(byte));
 	// total number of matrices
 	VG_(write)(fd, (byte)traced_matrices_count, sizeof(byte));
 
