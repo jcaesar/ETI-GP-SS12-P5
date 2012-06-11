@@ -429,7 +429,9 @@ void ssim_save_stats(char* fname)
 
     // no SESE for julius
     if (fd == -1) {
-        VG_(tool_panic)("Failed to open the file '%s' for writing.", fname);
+        char msg[100];
+        VG_(sprintf)(msg, "Failed to open the file '%s' for writing.", fname);
+        VG_(tool_panic)(msg);
         return;
     }
 
