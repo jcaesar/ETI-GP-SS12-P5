@@ -443,11 +443,11 @@ void ssim_save_stats(char* fname)
     byte magic_num[2] = {0xAF, 0xFE};
     // version of the file format
     byte version = 0x1;
+    byte matr_count = (byte) traced_matrices_count;
 
 	VG_(write)(fd, magic_num, 2*sizeof(byte));
 	VG_(write)(fd, &version, sizeof(byte));
-	// total number of matrices
-	VG_(write)(fd, (byte)traced_matrices_count, sizeof(byte));
+	VG_(write)(fd, &matr_count, sizeof(byte));
 
 	/**
 	 * MATRICES HEADER (N*17 bytes)
@@ -467,7 +467,7 @@ void ssim_save_stats(char* fname)
 		// MH:AZ (1 byte), limited to 8
 		int tmp = traced_matrices[i].access_data.access_methods_count;
 		byte accm_count = tmp < 8 ? (byte)tmp : 8;
-		VG_(write)(fd, accm_count, sizeof(byte));
+		VG_(write)(fd, &accm_count, sizeof(byte));
 
 		// MH:ADR (8 byte)
 		VG_(write)(fd, &(traced_matrices[i].start), sizeof(Addr));
