@@ -5,8 +5,7 @@ Quellen zum ETI Grossprojekt
 Generator fuer Speicherzugriffsereignisse: McTracer
 ===================================================
 
-
-mctracer-vg370.patch ist ein Patch fuer die Original-Quellen
+mctracer-vg370.patch war ein Patch fuer die Original-Quellen
 von Valgrind 3.7.0 und enthaelt das sogenannte McTracer-Tool,
 welches Speicherzugriffe an einen eigenen Simulator ueber
 Shared-Memory weiterleiten kann (siehe SimpleSim unten).
@@ -17,124 +16,44 @@ Installation
 Voraussetzung:
 * relativ neue Linux-Distribution
 * "gcc" (C-Compiler), "automake" installiert
-* Valgrind 3.7.0 Quellen (siehe www.valgrind.org), z.B. mit
-    wget http://www.valgrind.org/downloads/valgrind-3.7.0.tar.bz2
+* Git 
+
+Installation:
+git clone https://github.com/bucjac/ETI-GP-SS12-P5.git PROJEKTPFAD
+cd PROJEKTPFAD
+./init.sh
+
+Statt die installationsschritte von init.sh übernehmen zu lassen kann man auch
+manuell vorgehen:
+cd valgrind-source
+./autogen.sh
+./configure --prefix=<Installationspfad für valgrind>
+make
+make install
+cd ..
+cd example
+make
+cd ..
 
 
-Installation unter /home/me/mctracer (wenn man --prefix=... beim
-configure-Aufruf weglaesst, wird es unter /usr/local installiert,
-und kann dort mit "make uninstall" entfernt werden):
-
- tar xvf valgrind-3.7.0.tar.bz2
- patch -p1 < mctracer-vg370.patch
- cd valgrind-3.7.0
- sh ./autogen
- ./configure --prefix=/home/me/mctracer
- make
- make install
-
-Am besten /home/me/mctracer/bin zum PATH hinzufuegen:
-
- export PATH=$PATH:/home/me/mctracer/bin
-
-Als Test ist unter ../valgrind-3.7.0/mctracer ein einfaches Beispiel
-eines Event-Empfaengers dabei, das einfach die Speicherzugriffe auf
-der Standardausgabe ausgibt. Testen kann man das mit:
-
- cd valgrind-3.7.0/mctracer
- valgrind --tool=mctracer -v /bin/ls
-
-Die Option "-v" schaltet interne Debug-Ausgaben an.
-Am Ende sollte eine Ausgabe wie
-
-==16888== 
---16888-- Event producer (rb 'tr_main') statistics:
---16888--   total 0.520s (active 0.520s, waiting 0.000s = 0.00%)
---16888--   produced 1 chunks, 0 events, 4 bytes
---16888--   troughput 0.000 MEv/s, 0.000 MB/s (without waiting 0.0 MEv/s, 0.0 MB/s)
-++16888++ Event consumer: statistics
-++16888++   run 0.519 secs since attaching (0.519 secs waiting = 100.00%)
-++16888++   consumed 1 chunks, 0 events, 4 bytes
-++16888++   troughput 0.000 MEv/s, 0.000 MB/s (without waiting 0.0 MEv/s, 0.2 MB/s)
-
-stehen.
-Der Standardempfaenger fuer Events ist "./tr-consumer", den es in
-../valgrind-3.7.0/mctracer geben sollte, und der automatisch aufgerufen wird.
-
-Wie man sieht, wird kein einziges Event uebertragen. Dies liegt daran, dass McTracer
-Events erst anfaengt, zu erzeugen, wenn die Funktion "main" ausgefuehrt wird. Da wir
-oben "/bin/ls" aufrufen, welches keine Debuginformationen enthaelt, findet McTracer
-auch kein "main". Um Events von Anfang an zu generieren, kann man die Funktion, ab
-der Events erzeugt werden, selbst angeben mit "--fnstart=<func>". Leerlassen bedeutet
-von Anfang an. Also:
-
- valgrind --tool=mctracer -v --fnstart= /bin/ls > log
-
-Da nun SEHR VIEL auf die Standardausgabe geschrieben wird, leitet man das besser
-in eine Datei "log".
-
-Als Statistik sollte folgendes etwa am Ende erscheinen:
-
-==16915== 
---16915-- Event producer (rb 'tr_main') statistics:
---16915--   total 0.531s (active 0.514s, waiting 0.016s = 3.15%)
---16915--   produced 269 chunks, 200111 events, 2202292 bytes
---16915--   troughput 0.376 MEv/s, 4.142 MB/s (without waiting 0.3 MEv/s, 4.2 MB/s)
-++16915++ Event consumer: statistics
-++16915++   run 0.531 secs since attaching (0.487 secs waiting = 91.83%)
-++16915++   consumed 269 chunks, 200111 events, 2202292 bytes
-++16915++   troughput 0.377 MEv/s, 4.149 MB/s (without waiting 4.6 MEv/s, 50.8 MB/s)
-
-D.h. jetzt waren es schon ueber 200.000 Ereignisse, die alle nun in "log" stehen. 
-
-
-
-
-Nutzung von SimpleSim mit Code-Beispiel
----------------------------------------
-
-
-Dann simplesim und Code-Beispiel kompilieren:
-
- (cd simplesim; make)
- (cd example; make)
+Nutzung von McTracer/SimpleSim mit Code-Beispiel
+------------------------------------------------
+McTracer lässt sich nur mit angepasstem Code verwenden, da ohne informationen
+über Größe und Beschaffenheit der Speicherbereiche keine gute Analyse erstellt
+werden kann.
 
 Testen:
 
- valgrind --tool=mctracer --consumer=simplesim/simplesim example/redblack
+ valgrind --tool=mctracer example/redblack
 
-Dies weist McTracer an, als Ereignisempfaenger das Program
-"simplesim/simplesim" zu benutzen. Dies enthaelt einen einfachen Cache-Simulator.
-
-Es sollte etwa folgende Ausgabe kommen:
-
- ==19331== McTracer, an memory tracer tool
- ==19331== Copyright (C) 2002-2011, and GNU GPL'd, by NN & JW.
- ==19331== Using Valgrind-3.8.0.SVN and LibVEX; rerun with -h for copyright info
- ==19331== Command: example/redblack
- ==19331== 
- Sum: 125195.582793
- ==19331== 
-
- Summary:
- Cache holding 524288 bytes (8192 lines, ass. 16, sets: 512).
- Misses:  stores 132191 / 53276343, loads 13239578 / 209961103
-
-Wie oben schon erwaehnt, faengt McTracer erst dann an, Speicherzugriffe
-weiterzuleiten, wenn die Funktion "main()" betreten wird. Damit wird
-mehr oder weniger das dynamische Linken der libc etc. ausgeblendet.
-Weitere Informationen zu SimpleSim in "simplesim/README".
-
-Achtung: Wenn an McTracer kein Prozess zum Verarbeiten der Events haengt
-(etwa wenn ein modifizierter simplesim abstuerzt), kann McTracer nicht
-mit Ctrl+C beendet werden, sondern muss mit "kill -9 <mctracerPID>"
-getoetet werden, etwa bei obiger Ausgabe mit "kill -9 19331" (die Zeilen,
-die mit ==XXXXX== beginnen, geben als XXXXX die ProcessID an).
-
+Dies weist McTracer an, den Hitzeverteilungssimulator redblack zu starten.
+Dabei werden informationen über Zugriffe auf den Speicherbereich gesammelt,
+der die Simulation abbildet. Die Ausgabe wird in redblack.etis gespeichert.
+Ein alternativer Ausgabepfad kann mit --output=<pfad> spezifiziert werden.
 
 
 Viel Spass,
 Josef Weidendorfer
-
+  - Dankesehr!
 
 
