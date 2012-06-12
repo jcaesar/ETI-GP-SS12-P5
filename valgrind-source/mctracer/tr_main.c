@@ -26,7 +26,6 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-
 #include "pub_tool_basics.h"
 #include "pub_tool_tooliface.h"
 #include "pub_tool_libcassert.h"
@@ -36,6 +35,9 @@
 #include "pub_tool_options.h"
 #include "pub_tool_machine.h"     // VG_(fnptr_to_fnentry)
 #include "pub_tool_threadstate.h"
+#include "pub_tool_xarray.h" // required by publ_tool_clientstate.h
+#include "pub_tool_clientstate.h" // VG_(args_the_exename)
+#include "pub_tool_mallocfree.h" // VG_(malloc)
 
 #include "mctracer.h"
 #include "simplesim.h"
@@ -50,7 +52,7 @@
  * If empty (default), starts tracing when entering "main".
  */
 static Char* clo_fnstart = "main";
-static Char* clo_ssim_output = "simplesim.etis";
+static Char* clo_ssim_output = NULL;
 
 static Bool mt_process_cmd_line_option(Char* arg)
 {
@@ -67,9 +69,8 @@ static void mt_print_usage(void)
 {
 	VG_(printf)(
 	    "    --fnstart=<name>        start tracing when entering this function [%s]\n"
-	    "    --output=<filepath>     write cache statistics to this file [%s]\n",
-	    clo_fnstart,
-		clo_ssim_output
+	    "    --output=<filepath>     write cache statistics to this file [<executable name>.etis]\n",
+	    clo_fnstart
 	);
 }
 
@@ -494,7 +495,38 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 
 static void mt_fini(Int exitcode)
 {
-	ssim_save_stats(clo_ssim_output);
+	if(clo_ssim_output)
+		ssim_save_stats(clo_ssim_output);
+	else
+	{
+		/** 
+		 * extract the filename
+		 * from the program path
+		 * 
+		 * */
+		
+		const HChar* exename = VG_(args_the_exename);
+		// find the last occurence of /
+		int i, len = VG_(strlen)(exename);
+		for (i = len-1; i > 0 && *(exename+i) != '/'; --i);
+
+		// allocate 5 more bytes for the .etis extension and 1 for the \0
+		HChar* filename = VG_(malloc)("filename", sizeof(HChar*) * (6 + len-i)); 
+
+		if (i == 0) {
+			VG_(strcpy)(filename, exename);
+			VG_(strcpy)(filename+len, ".etis");
+		} else {
+			VG_(strcpy)(filename, exename+i+1);
+			VG_(strcpy)(filename + (len - i - 1), ".etis");
+		}
+
+		// TODO maybe append date/time or so?
+
+		ssim_save_stats(filename);
+
+		VG_(free)(filename);
+	}
 }
 
 static void mt_pre_clo_init(void)

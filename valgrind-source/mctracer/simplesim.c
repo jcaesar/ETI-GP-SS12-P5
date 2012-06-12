@@ -3,6 +3,11 @@
  * For ETI @ TUM, (C) 2011 Josef Weidendorfer
  */
 
+/**
+ * TODO: replace C datatypes with the corresponding valgrind types
+ *
+ */
+
 #include "simplesim.h"
 
 #define _GNU_SOURCE
@@ -422,7 +427,7 @@ bool ssim_matrix_tracing_stop(Addr addr)
 	return true;
 }
 
-void ssim_save_stats(char* fname)
+void ssim_save_stats(HChar* fname)
 {
 	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, VKI_S_IRUSR|VKI_S_IWUSR|VKI_S_IRGRP|VKI_S_IWGRP);
     Int fd = sr_Res(fd_res);
