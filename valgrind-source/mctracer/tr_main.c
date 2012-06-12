@@ -50,10 +50,12 @@
  * If empty (default), starts tracing when entering "main".
  */
 static Char* clo_fnstart = "main";
+static Char* clo_ssim_output = "simplesim.etis";
 
 static Bool mt_process_cmd_line_option(Char* arg)
 {
 	if      VG_STR_CLO(arg, "--fnstart", clo_fnstart) {}
+	if      VG_STR_CLO(arg, "--output", clo_ssim_output) {}
 	else
 		return False;
 
@@ -64,8 +66,10 @@ static Bool mt_process_cmd_line_option(Char* arg)
 static void mt_print_usage(void)
 {
 	VG_(printf)(
-	    "    --fnstart=<name>        start tracing when entering this function [%s]\n",
-	    clo_fnstart
+	    "    --fnstart=<name>        start tracing when entering this function [%s]\n"
+	    "    --output=<filepath>     write cache statistics to this file [%s]\n",
+	    clo_fnstart,
+		clo_ssim_output
 	);
 }
 
@@ -490,7 +494,7 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 
 static void mt_fini(Int exitcode)
 {
-	ssim_save_stats("/tmp/testfile.etis");
+	ssim_save_stats(clo_ssim_output);
 }
 
 static void mt_pre_clo_init(void)
