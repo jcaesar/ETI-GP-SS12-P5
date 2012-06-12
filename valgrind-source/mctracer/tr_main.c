@@ -26,7 +26,6 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-
 #include "pub_tool_basics.h"
 #include "pub_tool_tooliface.h"
 #include "pub_tool_libcassert.h"
@@ -36,6 +35,9 @@
 #include "pub_tool_options.h"
 #include "pub_tool_machine.h"     // VG_(fnptr_to_fnentry)
 #include "pub_tool_threadstate.h"
+#include "pub_tool_xarray.h" // required by publ_tool_clientstate.h
+#include "pub_tool_clientstate.h" // VG_(args_the_exename)
+#include "pub_tool_mallocfree.h" // VG_(malloc)
 
 #include "mctracer.h"
 #include "simplesim.h"
@@ -490,7 +492,34 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 
 static void mt_fini(Int exitcode)
 {
-	ssim_save_stats("/tmp/testfile.etis");
+    /** 
+     * extract the filename
+     * from the program path
+     * 
+     * */
+    
+    HChar* exename = VG_(args_the_exename);
+    // find the first occurence of /
+    int i, len = VG_(strlen)(exename);
+    for (i = len-1; i > 0 && *(exename+i) != '/'; --i);
+
+    // allocate 5 more bytes for the .etis extension and 1 for the \0
+    HChar* filename = VG_(malloc)("filename", sizeof(HChar*) * (6 + len-i)); 
+
+    if (i == 0) {
+        VG_(strcpy)(filename, exename);
+        VG_(strcpy)(filename+len, ".etis");
+    } else {
+        VG_(strcpy)(filename, exename+i+1);
+        VG_(strcpy)(filename + (len - i - 1), ".etis");
+    }
+
+    // TODO maybe append date/time or so?
+    // TODO allow to specify a folder?
+
+	ssim_save_stats(filename);
+
+    VG_(free)(filename);
 }
 
 static void mt_pre_clo_init(void)
