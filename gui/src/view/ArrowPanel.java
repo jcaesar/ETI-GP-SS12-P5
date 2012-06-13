@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package view;
 
 import java.awt.BasicStroke;
@@ -12,7 +9,7 @@ import java.awt.geom.AffineTransform;
 
 /**
  *
- * @author philip
+ * @author Philip Becker-Ehmck
  */
 public class ArrowPanel extends javax.swing.JPanel {
 
@@ -30,7 +27,7 @@ public class ArrowPanel extends javax.swing.JPanel {
         this.y = y;
         setColor(rate);
     }
-    private final int ARR_SIZE = 8;
+    private final int ARR_SIZE = 7;
 
     private void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
         Graphics2D g = (Graphics2D) g1.create();

@@ -6,8 +6,14 @@ package view;
 
 import controller.Controller;
 import data.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,22 +28,27 @@ public class EtiGP {
 
         final ArrayList<DataInput> matrixList = new ArrayList<DataInput>();
 
-        // Generate 1-5 matrices and fill them with dummy data
-        Random rand = new Random();
-        int max = rand.nextInt(10) + 5;
-
-        for (int i = 0; i < max; i++) {
-            matrixList.add(new DummyInput());
+        /**
+        DataInput matricesList = new StandardInput();
+        DataInput[] tmp;
+        try {
+            tmp = DataReader.readData(new File("F:\\Downloads\\mm.etis"));
+            matrixList.addAll(Arrays.asList(tmp));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(EtiGP.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(EtiGP.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        */
         // Create frame and controller instance
-        MainFrame frame = new MainFrame(matrixList);
+        MainFrame frame = new MainFrame();
         Controller c = new Controller(frame, matrixList);
         
         // Display frame
         frame.setVisible(true);
         
         // Add matrices to the frame
-        c.addMatrices(matrixList);
+        // c.addMatrices(matrixList);
     }
 }

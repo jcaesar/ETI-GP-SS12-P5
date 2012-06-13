@@ -1,17 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package view;
 
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 /**
  *
- * @author philip
+ * @author Philip Becker-Ehmck
  */
 public class ArrowStatisticsPanel extends javax.swing.JPanel {
 
@@ -48,7 +46,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         setPreferredSize(new java.awt.Dimension(80, 120));
         setLayout(new java.awt.GridBagLayout());
 
-        jumpDirections.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jumpDirections.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         jumpDirections.setText(" ( | )");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -60,6 +58,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(jumpDirections, gridBagConstraints);
 
+        successrate.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         successrate.setText("%");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -71,6 +70,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(successrate, gridBagConstraints);
 
+        numberLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         numberLabel.setText("   #: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -80,6 +80,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(numberLabel, gridBagConstraints);
 
+        number.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         number.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -89,6 +90,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(number, gridBagConstraints);
 
+        hitsLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         hitsLabel.setText("   Hits: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -98,6 +100,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(hitsLabel, gridBagConstraints);
 
+        hits.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         hits.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -107,6 +110,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(hits, gridBagConstraints);
 
+        missesLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         missesLabel.setText("   Misses: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -116,6 +120,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(missesLabel, gridBagConstraints);
 
+        misses.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         misses.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -163,15 +168,15 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
     }
     
     public void setNumber(int n) {
-        number.setText(String.valueOf(n));
+        number.setText(NumberFormat.getInstance().format(n));
     }
     
     public void setHits(int hits) {
-        this.hits.setText(String.valueOf(hits));
+        this.hits.setText(NumberFormat.getInstance().format(hits));
     }
     
     public void setMisses(int misses) {
-        this.misses.setText(String.valueOf(misses));
+        this.misses.setText(NumberFormat.getInstance().format(misses));
     }
 
     public void setSuccessrate(double rate) {

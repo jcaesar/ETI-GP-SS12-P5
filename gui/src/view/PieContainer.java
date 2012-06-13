@@ -60,9 +60,14 @@ public class PieContainer extends javax.swing.JPanel {
 
                 int sum = jump.getHits() + jump.getMisses();
 
+                
                 //Zugriffsart mit größter Zugriffszagl hat maximalen Durchmesser
                 //Alle anderen werden entsprechend der Zugriffszahl skaliert
-                int diameter = (sum * MAX_PIE_DIAMETER) / maxAccesses;
+                int diameter =  sum / maxAccesses * MAX_PIE_DIAMETER;
+                
+                if (diameter < 20) {
+                    diameter = 20;
+                }
 
                 //Richtige Position im Gitter setzen
                 c.gridx = j;

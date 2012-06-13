@@ -1,40 +1,25 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package view;
 
+import controller.EtisFileFilter;
 import data.DataInput;
 import data.RelativeJump;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JToggleButton;
 
 /**
  *
- * @author philip
+ * @author Philip Becker-Ehmck
  */
 public class MainFrame extends javax.swing.JFrame {
-
-    ArrayList<DataInput> data;
 
     /**
      * Creates new MainFrame
      */
-    public MainFrame(ArrayList<DataInput> data) {
-        initComponents();
-        this.data = data;
-        // Create instances of lists for dynamic GUI
-        dataStructureList = new ArrayList<JToggleButton>();
-        arrowList = new ArrayList<ArrowStatisticsPanel>();
-    }
-
     public MainFrame() {
         initComponents();
+
         // Create instances of lists for dynamic GUI
         dataStructureList = new ArrayList<JToggleButton>();
         arrowList = new ArrayList<ArrowStatisticsPanel>();
@@ -51,22 +36,30 @@ public class MainFrame extends javax.swing.JFrame {
         java.awt.GridBagConstraints gridBagConstraints;
 
         DataStructuresButtonGroup = new javax.swing.ButtonGroup();
+        fileChooser = new javax.swing.JFileChooser();
+        aboutDialog = new javax.swing.JDialog();
+        jLabel1 = new javax.swing.JLabel();
         Toolbar = new javax.swing.JToolBar();
         LabelToolBar = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         relativeJumpPanel = new view.RelativeJumpPanel();
         piePanel = new javax.swing.JPanel();
         matrixPanel = new javax.swing.JPanel();
-        statisticsPanel = new view.OverallStatisticsPanel();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10), new java.awt.Dimension(0, 10), new java.awt.Dimension(32767, 5));
-        MenuBar = new javax.swing.JMenuBar();
-        FileMenu = new javax.swing.JMenu();
-        OpenFileMenuItem = new javax.swing.JMenuItem();
-        Seperator = new javax.swing.JPopupMenu.Separator();
-        ExitMenuItem = new javax.swing.JMenuItem();
-        HelpMenu = new javax.swing.JMenu();
-        DocMenuItem = new javax.swing.JMenuItem();
-        AboutMenuItem = new javax.swing.JMenuItem();
+        statisticsPanel = new view.StatisticsPanel();
+        menuBar = new javax.swing.JMenuBar();
+        fileMenu = new javax.swing.JMenu();
+        openFileMenuItem = new javax.swing.JMenuItem();
+        seperator = new javax.swing.JPopupMenu.Separator();
+        exitMenuItem = new javax.swing.JMenuItem();
+        helpMenu = new javax.swing.JMenu();
+        docMenuItem = new javax.swing.JMenuItem();
+        aboutMenuItem = new javax.swing.JMenuItem();
+
+        fileChooser.setFileFilter(new EtisFileFilter());
+
+        jLabel1.setText("Product Version: 0.8");
+        aboutDialog.getContentPane().add(jLabel1, java.awt.BorderLayout.PAGE_START);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Cache Analyzer");
@@ -140,19 +133,6 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 6.0;
         getContentPane().add(matrixPanel, gridBagConstraints);
-
-        statisticsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Overall Statistics", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
-        statisticsPanel.setMinimumSize(new java.awt.Dimension(450, 50));
-        statisticsPanel.setName("");
-        statisticsPanel.setPreferredSize(new java.awt.Dimension(450, 50));
-        statisticsPanel.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        getContentPane().add(statisticsPanel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -160,28 +140,38 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         getContentPane().add(filler1, gridBagConstraints);
 
-        FileMenu.setText("File");
+        statisticsPanel.setMinimumSize(new java.awt.Dimension(450, 70));
+        statisticsPanel.setName("");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        getContentPane().add(statisticsPanel, gridBagConstraints);
 
-        OpenFileMenuItem.setText("Open File...");
-        FileMenu.add(OpenFileMenuItem);
-        FileMenu.add(Seperator);
+        fileMenu.setText("File");
 
-        ExitMenuItem.setText("Exit");
-        FileMenu.add(ExitMenuItem);
+        openFileMenuItem.setText("Open File...");
+        fileMenu.add(openFileMenuItem);
+        fileMenu.add(seperator);
 
-        MenuBar.add(FileMenu);
+        exitMenuItem.setText("Exit");
+        fileMenu.add(exitMenuItem);
 
-        HelpMenu.setText("Help");
+        menuBar.add(fileMenu);
 
-        DocMenuItem.setText("Documentation");
-        HelpMenu.add(DocMenuItem);
+        helpMenu.setText("Help");
 
-        AboutMenuItem.setText("About");
-        HelpMenu.add(AboutMenuItem);
+        docMenuItem.setText("Documentation");
+        helpMenu.add(docMenuItem);
 
-        MenuBar.add(HelpMenu);
+        aboutMenuItem.setText("About");
+        helpMenu.add(aboutMenuItem);
 
-        setJMenuBar(MenuBar);
+        menuBar.add(helpMenu);
+
+        setJMenuBar(menuBar);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -223,28 +213,31 @@ public class MainFrame extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                new MainFrame(new ArrayList<DataInput>()).setVisible(true);
+                new MainFrame().setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem AboutMenuItem;
     private javax.swing.ButtonGroup DataStructuresButtonGroup;
-    private javax.swing.JMenuItem DocMenuItem;
-    private javax.swing.JMenuItem ExitMenuItem;
-    private javax.swing.JMenu FileMenu;
-    private javax.swing.JMenu HelpMenu;
     private javax.swing.JLabel LabelToolBar;
-    private javax.swing.JMenuBar MenuBar;
-    private javax.swing.JMenuItem OpenFileMenuItem;
-    private javax.swing.JPopupMenu.Separator Seperator;
     private javax.swing.JToolBar Toolbar;
+    public javax.swing.JDialog aboutDialog;
+    public javax.swing.JMenuItem aboutMenuItem;
+    public javax.swing.JMenuItem docMenuItem;
+    public javax.swing.JMenuItem exitMenuItem;
+    public javax.swing.JFileChooser fileChooser;
+    private javax.swing.JMenu fileMenu;
     private javax.swing.Box.Filler filler1;
+    private javax.swing.JMenu helpMenu;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel matrixPanel;
+    private javax.swing.JMenuBar menuBar;
+    public javax.swing.JMenuItem openFileMenuItem;
     private javax.swing.JPanel piePanel;
     private view.RelativeJumpPanel relativeJumpPanel;
-    private view.OverallStatisticsPanel statisticsPanel;
+    private javax.swing.JPopupMenu.Separator seperator;
+    private view.StatisticsPanel statisticsPanel;
     // End of variables declaration//GEN-END:variables
     // Declaration of variables for a dynamic GUI
     private List<JToggleButton> dataStructureList;
@@ -264,14 +257,26 @@ public class MainFrame extends javax.swing.JFrame {
 
         DataStructuresButtonGroup.add(button);
         // initialize Data
-        button.setText(" " + number + " ");
+        button.setText(String.valueOf(number));
         button.setFocusable(false);
         button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         button.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        if (number == 1) {
+            button.setSelected(true);
+        }
         // add to toolbar
         Toolbar.add(button);
         // add to list (so that I can be removed later)
         dataStructureList.add(button);
+    }
+
+    public void removeToggleButton() {
+        for (JToggleButton btn : dataStructureList) {
+            Toolbar.remove(btn);
+            DataStructuresButtonGroup.remove(btn);
+        }
+        Toolbar.updateUI();
+        dataStructureList = new ArrayList<JToggleButton>();
     }
 
     /**
@@ -281,31 +286,25 @@ public class MainFrame extends javax.swing.JFrame {
      * @param matrix
      * @param number number of the matrix in the intern ArrayList
      */
-    public void addDetailedStatistics(DataInput matrix, int number) {
-        detail = new DetailedOverallStatisticsPanel();
-        // initialize Data
-        detail.setMatrixName("Matrix " + (number+1));
-        detail.setNumber(matrix.getHits() + matrix.getMisses());
-        detail.setHits(matrix.getHits());
-        detail.setMisses(matrix.getMisses());
-        DecimalFormat f = new DecimalFormat("#0.00");
-        detail.setRate(f.format((double) matrix.getHits()
-                / (double) (matrix.getHits() + matrix.getMisses()) * 100));
-        // add to frame
-        statisticsPanel.addStatistics(detail);
-    }
-
+    /*
+     * public void addDetailedStatistics(int hits, int misses, int number) {
+     * detail = new DetailedOverallStatisticsPanel(); // initialize Data
+     * detail.setMatrixName("Matrix " + (number+1)); detail.setNumber(hits +
+     * misses); detail.setHits(hits); detail.setMisses(misses); DecimalFormat f
+     * = new DecimalFormat("#0.00"); detail.setRate(f.format((double) hits /
+     * (double) (hits + misses) * 100)); // add to frame
+     * statisticsPanel.addStatistics(detail); }
+     */
     /**
      *
      * Removes overall statistics for the currently display/specified matrix.
-     * 
+     *
      * @TODO terrible way to do it
      */
-    public void removeDetailedStatistics() {
-        if (detail != null)
-            statisticsPanel.remove(detail);
-    }
-    
+    /*
+     * public void removeDetailedStatistics() { if (detail != null)
+     * statisticsPanel.remove(detail); }
+     */
     /**
      *
      * Adds a short combined statistics that includes all the matrices.
@@ -313,23 +312,21 @@ public class MainFrame extends javax.swing.JFrame {
      * @param hits overall cache hits in all the matrices
      * @param misses overall cache misses in all the matrices
      */
-    public void addOverallStatistics(long hits, long misses) {
-        DetailedOverallStatisticsPanel overall = new DetailedOverallStatisticsPanel();
-        // initialize Data
-        overall.setMatrixName("Overall");
-        overall.setNumber(hits + misses);
-        overall.setHits(hits);
-        overall.setMisses(misses);
-        DecimalFormat f = new DecimalFormat("#0.00");
-        overall.setRate(f.format((double) hits / (double) (hits + misses) * 100));
-        // add to frame
-        statisticsPanel.addStatistics(overall);
-    }
+    /*
+     * public void addOverallStatistics(long hits, long misses) {
+     * DetailedOverallStatisticsPanel overall = new
+     * DetailedOverallStatisticsPanel(); // initialize Data
+     * overall.setMatrixName("Overall"); overall.setNumber(hits + misses);
+     * overall.setHits(hits); overall.setMisses(misses); DecimalFormat f = new
+     * DecimalFormat("#0.00"); overall.setRate(f.format((double) hits / (double)
+     * (hits + misses) * 100)); // add to frame
+     * statisticsPanel.addStatistics(overall); }
+     */
     
     /**
-     * 
-     * @param matrix 
-     * @TODO just quickly added, needs another class for "clean" implementation
+     *
+     * @param matrix @TODO just quickly added, needs another class for "clean"
+     * implementation
      */
     public void addAbsoluteRepresentation(DataInput matrix) {
         MatrixPanel m = new MatrixPanel(matrix);
@@ -339,7 +336,7 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     /**
-     * 
+     *
      */
     public void removeAbsoluteRepresentation() {
         matrixPanel.removeAll();
@@ -373,6 +370,7 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public void removeArrowStatistics() {
         relativeJumpPanel.removeArrowStatistics();
+        relativeJumpPanel.updateUI();
     }
 
     /**
@@ -395,6 +393,14 @@ public class MainFrame extends javax.swing.JFrame {
         piePanel.removeAll();
     }
 
+    public void updateOverallStatistics(long overallHits, long overallMisses) {
+        statisticsPanel.setOverallStatistics(overallHits, overallMisses);
+    }
+
+    public void updateDetailedStatistics(int hits, int misses, int n) {
+        statisticsPanel.setMatrixStatistics(hits, misses, n);
+    }
+
     /**
      *
      * Adds an MatrixListener to all the buttons.
@@ -405,5 +411,27 @@ public class MainFrame extends javax.swing.JFrame {
         for (JToggleButton button : dataStructureList) {
             button.addActionListener(al);
         }
+    }
+
+    /**
+     *
+     * Adds an FileMenuListener to all the buttons.
+     *
+     * @param al
+     */
+    public void addFileMenuListener(ActionListener al) {
+        openFileMenuItem.addActionListener(al);
+        exitMenuItem.addActionListener(al);
+    }
+
+    public void addHelpMenuListener(ActionListener al) {
+        docMenuItem.addActionListener(al);
+        aboutMenuItem.addActionListener(al);
+    }
+
+    public void showAboutDialog() {
+        aboutDialog.setSize(400, 400);
+        aboutDialog.setDefaultCloseOperation(javax.swing.JFrame.HIDE_ON_CLOSE);
+        aboutDialog.setVisible(true);
     }
 }
