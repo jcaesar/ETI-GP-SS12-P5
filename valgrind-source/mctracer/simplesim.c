@@ -337,7 +337,10 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	/* store general information about the matrix */
 	matr->start = addr;
 	matr->end = addr + m*n*ele_size;
-	matr->name = name;
+	
+    matr->name = (char*) VG_(malloc)("name", VG_(strlen)(name)*sizeof(char));
+    VG_(strcpy)(matr->name, name);
+
 	// size of each element of the matrix in bytes
 	matr->ele_size = ele_size;
 	matr->m = m;
@@ -592,6 +595,7 @@ void ssim_save_stats(HChar* fname)
 
 		// matrix name + \0
 		VG_(write)(fd, traced_matrices[i].name, VG_(strlen)(traced_matrices[i].name)+1);
+        VG_(free)(traced_matrices[i].name);
 	}
 
 	VG_(close)(fd);
