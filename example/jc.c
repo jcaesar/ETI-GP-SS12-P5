@@ -14,29 +14,6 @@ double gettime(void)
 	return ((double)now_tv.tv_sec) + ((double)now_tv.tv_usec)/1000000.0;
 }
 
-int flush_cache()
-{
-	/* 16MB should be enough */
-	const int num_ints = 4*1024*1024;
-
-	static int* mem = 0;
-	int i, sum = 0;
-
-	if (mem == 0)
-	{
-		mem = malloc(num_ints * sizeof(int));
-		if (mem == 0) return 0;
-
-		memset(mem, 1, num_ints * sizeof(int));
-	}
-
-	/* return sum of array so the accesses are not optimized away */
-	for (i=0; i < num_ints; i++)
-		sum += mem[i];
-
-	return sum;
-}
-
 void init(int sz, double a[sz][sz], double value)
 {
 	int i, j;
@@ -157,7 +134,7 @@ void run_jac(jacfunc f, const char* name, int it,
 	double start, stop, mflops;
 	int i;
 
-	flush_cache();
+	SSIM_FLUSH_CACHE;
 	init(sz, a, 0);
 	init_leftright_boundary(sz, a, 10.0);
 	start = gettime();
@@ -202,8 +179,23 @@ void run(int sz, int it)
 	printf("%d ", sz);
 
 	for(v=0; version[v].func !=0; v++)
+	{
+		const int len = 256;
+		char name[len];
+		strcpy(name, version[v].name);
+		
+		strcpy(name + strlen(version[v].name), " - a");
+		SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
+		
+		strcpy(name + strlen(version[v].name), " - b");
+		SSIM_MATRIX_TRACING_START(b, sz, sz, sizeof(double), name);
+		
 		run_jac( version[v].func, version[v].name, it,
 		         sz, *a, *b);
+		
+		SSIM_MATRIX_TRACING_STOP(a);
+		SSIM_MATRIX_TRACING_STOP(b);
+	}
 
 	printf("\n");
 

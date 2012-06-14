@@ -12,7 +12,7 @@ int main()
 	double sum = 0.0;
 
 	m = (double*) malloc(sizeof(double)*SIZE*SIZE);
-	SSIM_MATRIX_TRACING_START(m, SIZE, SIZE, sizeof(double), "redblack");
+	SSIM_MATRIX_TRACING_START(m, SIZE, SIZE, sizeof(double), "redblack - m");
 
 	// init points
 	for(i=0; i<SIZE; i++)
