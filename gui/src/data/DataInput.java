@@ -1,4 +1,5 @@
 package data;
+
 import java.util.List;
 
 /**
@@ -6,8 +7,12 @@ import java.util.List;
  * @author Simon Wimmer
  */
 public interface DataInput {
-    byte[][] getAbsoluteMatrix(); // 0<->100% Misses, 1<->100% Hits
+
+    byte[][] getAbsoluteStoreMatrix(); //0<->100% Misses, 1<->100% Hits
+
+    byte[][] getAbsoluteLoadMatrix(); //0<->100% Misses, 1<->100% Hits
+
+    int[] getAbsoluteNumAccesses(); //2-elementiges Array, zuerst Hits, dann Misses
+
     List<RelativeJump> getRelativeJumps();
-    int getHits(); // overall number of hits
-    int getMisses(); // overall number of misses
 }

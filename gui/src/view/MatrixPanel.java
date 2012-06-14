@@ -35,7 +35,7 @@ public class MatrixPanel extends JPanel {
         super();
         init = true;
 
-        byte[][] pixel = matrix.getAbsoluteMatrix();
+        byte[][] pixel = matrix.getAbsoluteLoadMatrix();
         colors = new Color[pixel.length][pixel[0].length];
         for (int i = 0; i < pixel.length; i++) {
             for (int j = 0; j < pixel[0].length; j++) {
@@ -48,8 +48,6 @@ public class MatrixPanel extends JPanel {
                 }
             }
         }
-
-
 
         start = new Point();
         this.addMouseMotionListener(new MouseMotionListener() {

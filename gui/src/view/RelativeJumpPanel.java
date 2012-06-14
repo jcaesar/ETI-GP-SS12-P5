@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package view;
 
 import java.awt.GridBagConstraints;
@@ -10,7 +7,7 @@ import java.util.List;
 
 /**
  *
- * @author philip
+ * @author Philip Becker-Ehmck
  */
 public class RelativeJumpPanel extends javax.swing.JPanel {
 

@@ -30,7 +30,7 @@ public class DummyInput implements DataInput {
                 matrix[i][j] = (byte) rand.nextInt(256);
             }
         }
-        
+
         //Anzahl der Zugriffe pro Zugriffsart
         int[] sizes = new int[8];
         for (int i = 0; i < 8; i++) {
@@ -43,16 +43,11 @@ public class DummyInput implements DataInput {
         int hits;
         for (int i = 0; i < sizes.length; i++) {
             hits = (int) (rand.nextDouble() * sizes[i]);
-            jumps.add(new RelativeJump((int) (rand.nextDouble() * MAX_MOVE)-10,
-                    (int) (rand.nextDouble() * MAX_MOVE)-50, hits, sizes[i] - hits));
+            jumps.add(new RelativeJump((int) (rand.nextDouble() * MAX_MOVE) - 10,
+                    (int) (rand.nextDouble() * MAX_MOVE) - 50, hits, sizes[i] - hits));
             overallHits += hits;
             overallMisses += sizes[i] - hits;
         }
-    }
-
-    @Override
-    public byte[][] getAbsoluteMatrix() {
-        return matrix;
     }
 
     @Override
@@ -61,12 +56,17 @@ public class DummyInput implements DataInput {
     }
 
     @Override
-    public int getHits() {
-        return overallHits;
+    public byte[][] getAbsoluteStoreMatrix() {
+        return matrix;
     }
 
     @Override
-    public int getMisses() {
-       return overallMisses;
+    public byte[][] getAbsoluteLoadMatrix() {
+        return matrix;
+    }
+
+    @Override
+    public int[] getAbsoluteNumAccesses() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
