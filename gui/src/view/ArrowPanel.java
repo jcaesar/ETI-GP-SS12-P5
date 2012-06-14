@@ -1,4 +1,3 @@
-
 package view;
 
 import java.awt.BasicStroke;
@@ -13,12 +12,11 @@ import java.awt.geom.AffineTransform;
  */
 public class ArrowPanel extends javax.swing.JPanel {
 
-    private int MAX_X = 65; 
+    private int MAX_X = 45;
     private int MAX_Y = 45;
-    
-    private int x;
-    private int y;
-    private Color c;
+    private int x_move;
+    private int y_move;
+    private Color color;
 
     /**
      * Creates new form ArrowPanel
@@ -26,8 +24,8 @@ public class ArrowPanel extends javax.swing.JPanel {
     public ArrowPanel(int x, int y, double rate) {
         initComponents();
         // offset in x and y direction
-        this.x = x;
-        this.y = y;
+        this.x_move = x;
+        this.y_move = y;
         setColor(rate);
     }
     private final int ARR_SIZE = 7;
@@ -43,10 +41,10 @@ public class ArrowPanel extends javax.swing.JPanel {
         g.transform(at);
 
         // set Color according to successrate
-        g.setColor(c);
+        g.setColor(color);
         g.setStroke(new BasicStroke(2));
         // Draw horizontal arrow starting in (0, 0)
-        g.drawLine(0, 0, len-4, 0);
+        g.drawLine(-7, 0, len - 7, 0);
         g.fillPolygon(new int[]{len, len - ARR_SIZE, len - ARR_SIZE, len},
                 new int[]{0, -ARR_SIZE, ARR_SIZE, 0}, 4);
     }
@@ -54,33 +52,49 @@ public class ArrowPanel extends javax.swing.JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (x > 0 && y > 0) {
-            drawArrow(g, 20, 15, 85, 15);   // left -> right
-            drawArrow(g, 20, 15, 20, 60);   // top -> bottom
-        } else if (x > 0 && y < 0) {
-            drawArrow(g, 20, 55, 85, 55);   // left -> right
-            drawArrow(g, 20, 55, 20, 10);   // bottom -> top
-        } else if (x < 0 && y > 0) {
-            drawArrow(g, 85, 15, 20, 15);   // right -> left
-            drawArrow(g, 85, 15, 85, 60);   // top -> bottom
-        } else if (x < 0 && y < 0) {
-            drawArrow(g, 85, 55, 20, 55);   // right -> left
-            drawArrow(g, 85, 55, 85, 10);   // bottom -> top
-        } else if (x > 0) {
-            drawArrow(g, 20, 35, 85, 35);   // left -> right
-        } else if (x < 0) {
-            drawArrow(g, 85, 35, 20, 35);   // right -> left
-        } else if (y > 0) {
-            drawArrow(g, 45, 15, 45, 60);   // top -> bottom
-        } else if (y < 0) {
-            drawArrow(g, 45, 60, 45, 15);   // bottom -> top
+
+        // square root function for length + a minimum lenght of 2
+        int length_x = (int) (Math.sqrt(Math.abs(x_move)) + 2);
+        int length_y = (int) (Math.sqrt(Math.abs(y_move)) + 2);
+
+        // check maximum length of an arrow 
+        if (length_x > MAX_X) {
+            length_x = MAX_X;
+        }
+        if (length_y > MAX_Y) {
+            length_y = MAX_Y;
+        }
+
+        // minium length does not apply to zero vectors
+        if (y_move == 0) {
+            length_y = 0;
+        }
+        if (x_move == 0) {
+            length_x = 0;
+        }
+
+        // draw the arrow (if necessary)
+        if (!(x_move == 0 && y_move == 0)) {
+            if (x_move >= 0 && y_move >= 0) {
+                drawArrow(g, (int) (45 - (length_x / 2.0)), (int) (35 - (length_y / 2.0)),
+                        (int) (45 + (length_x / 2.0)), (int) (35 + (length_y / 2.0)));
+            } else if (x_move >= 0 && y_move <= 0) {
+                drawArrow(g, (int) (45 - (length_x / 2.0)), (int) (35 + (length_y / 2.0)),
+                        (int) (45 + (length_x / 2.0)), (int) (35 - (length_y / 2.0)));
+            } else if (x_move <= 0 && y_move >= 0) {
+                drawArrow(g, (int) (45 + (length_x / 2.0)), (int) (35 - (length_y / 2.0)),
+                        (int) (45 - (length_x / 2.0)), (int) (35 + (length_y / 2.0)));
+            } else if (x_move <= 0 && y_move <= 0) {
+                drawArrow(g, (int) (45 + (length_x / 2.0)), (int) (35 + (length_y / 2.0)),
+                        (int) (45 - (length_x / 2.0)), (int) (35 - (length_y / 2.0)));
+            }
         }
     }
 
     private void setColor(double rate) {
-        c = new Color((int) (255*(100-rate))/100, (int) (255*rate)/100,0);
+        color = new Color((int) (255 * (100 - rate)) / 100, (int) (255 * rate) / 100, 0);
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

@@ -140,8 +140,9 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         getContentPane().add(filler1, gridBagConstraints);
 
-        statisticsPanel.setMinimumSize(new java.awt.Dimension(450, 70));
+        statisticsPanel.setMinimumSize(new java.awt.Dimension(450, 80));
         statisticsPanel.setName("");
+        statisticsPanel.setPreferredSize(new java.awt.Dimension(450, 80));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -242,7 +243,6 @@ public class MainFrame extends javax.swing.JFrame {
     // Declaration of variables for a dynamic GUI
     private List<JToggleButton> dataStructureList;
     private List<ArrowStatisticsPanel> arrowList;
-    private DetailedOverallStatisticsPanel detail;
     // End of variables declaration
 
     /**
@@ -278,50 +278,6 @@ public class MainFrame extends javax.swing.JFrame {
         Toolbar.updateUI();
         dataStructureList = new ArrayList<JToggleButton>();
     }
-
-    /**
-     *
-     * Adds overall statistics for the currently display/specified matrix.
-     *
-     * @param matrix
-     * @param number number of the matrix in the intern ArrayList
-     */
-    /*
-     * public void addDetailedStatistics(int hits, int misses, int number) {
-     * detail = new DetailedOverallStatisticsPanel(); // initialize Data
-     * detail.setMatrixName("Matrix " + (number+1)); detail.setNumber(hits +
-     * misses); detail.setHits(hits); detail.setMisses(misses); DecimalFormat f
-     * = new DecimalFormat("#0.00"); detail.setRate(f.format((double) hits /
-     * (double) (hits + misses) * 100)); // add to frame
-     * statisticsPanel.addStatistics(detail); }
-     */
-    /**
-     *
-     * Removes overall statistics for the currently display/specified matrix.
-     *
-     * @TODO terrible way to do it
-     */
-    /*
-     * public void removeDetailedStatistics() { if (detail != null)
-     * statisticsPanel.remove(detail); }
-     */
-    /**
-     *
-     * Adds a short combined statistics that includes all the matrices.
-     *
-     * @param hits overall cache hits in all the matrices
-     * @param misses overall cache misses in all the matrices
-     */
-    /*
-     * public void addOverallStatistics(long hits, long misses) {
-     * DetailedOverallStatisticsPanel overall = new
-     * DetailedOverallStatisticsPanel(); // initialize Data
-     * overall.setMatrixName("Overall"); overall.setNumber(hits + misses);
-     * overall.setHits(hits); overall.setMisses(misses); DecimalFormat f = new
-     * DecimalFormat("#0.00"); overall.setRate(f.format((double) hits / (double)
-     * (hits + misses) * 100)); // add to frame
-     * statisticsPanel.addStatistics(overall); }
-     */
     
     /**
      *

@@ -38,7 +38,7 @@ public class MatrixPanel extends JPanel {
         for (int i = 0; i < pixel.length; i++) {
             for (int j = 0; j < pixel[0].length; j++) {
                 byte color = pixel[i][j];
-                System.out.println(i + "," + j + ":" + (128 + color) * 2);
+                // System.out.println(i + "," + j + ":" + (128 + color) * 2);
 
                 if (color == 127) {
                     colors[i][j] = new Color(255, 255, 0);
@@ -116,11 +116,11 @@ public class MatrixPanel extends JPanel {
 
         AffineTransform tx = new AffineTransform();
         tx.translate(dx, dy);
-        System.out.println("dx: " + dx + ", dy: " + dy + ", scale:" + scale);
+        // System.out.println("dx: " + dx + ", dy: " + dy + ", scale:" + scale);
         tx.scale(scale, scale);
         g2.setTransform(tx);
 
-        System.out.println("x:" + start.getX() + "," + dx + "; y:" + start.getY() + "," + dy);
+        // System.out.println("x:" + start.getX() + "," + dx + "; y:" + start.getY() + "," + dy);
         for (int i = 0; i < colors.length; i++) {
             for (int j = 0; j < colors[0].length; j++) {
                 g2.setColor(colors[i][j]);
@@ -134,8 +134,8 @@ public class MatrixPanel extends JPanel {
     private void moveCamera(MouseEvent e) {
 
         end = e.getPoint();
-        System.out.println("end: " + end.toString());
-        System.out.println("start: " + end.toString());
+        //System.out.println("end: " + end.toString());
+        //System.out.println("start: " + end.toString());
         dx = dx + end.getX() - start.getX();
         //dx = Math.max(0, dx + end.getX() - start.getX());
         //dx = Math.min(dx, this.getWidth() - colors.length*scale);
