@@ -397,7 +397,7 @@ public class MainFrame extends javax.swing.JFrame {
         statisticsPanel.setOverallStatistics(overallHits, overallMisses);
     }
 
-    public void updateDetailedStatistics(int hits, int misses, int n) {
+    public void updateDetailedStatistics(long hits, long misses, int n) {
         statisticsPanel.setMatrixStatistics(hits, misses, n);
     }
 

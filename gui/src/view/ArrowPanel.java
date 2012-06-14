@@ -13,6 +13,9 @@ import java.awt.geom.AffineTransform;
  */
 public class ArrowPanel extends javax.swing.JPanel {
 
+    private int MAX_X = 65; 
+    private int MAX_Y = 45;
+    
     private int x;
     private int y;
     private Color c;
@@ -74,7 +77,7 @@ public class ArrowPanel extends javax.swing.JPanel {
         }
     }
 
-    protected void setColor(double rate) {
+    private void setColor(double rate) {
         c = new Color((int) (255*(100-rate))/100, (int) (255*rate)/100,0);
     }
     

@@ -12,7 +12,7 @@ public interface DataInput {
 
     byte[][] getAbsoluteLoadMatrix(); //0<->100% Misses, 1<->100% Hits
 
-    int[] getAbsoluteNumAccesses(); //2-elementiges Array, zuerst Hits, dann Misses
+    long[] getAbsoluteNumAccesses(); //2-elementiges Array, zuerst Hits, dann Misses
 
     List<RelativeJump> getRelativeJumps();
 }
