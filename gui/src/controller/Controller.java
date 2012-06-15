@@ -118,7 +118,7 @@ public class Controller {
 
         // Go through the list of matrices, add a button for every item 
         for (DataInput matrix : matrixList) {
-            int[] numAcesses = matrix.getAbsoluteNumAccesses();
+            long[] numAcesses = matrix.getAbsoluteNumAccesses();
             overallHits += numAcesses[0];
             overallMisses += numAcesses[1];
             number++;
@@ -147,7 +147,7 @@ public class Controller {
      *
      * Updates the GUI to display all relevant data to the specified matrix n.
      * That includes the absolute matrix representation, the relative jumps
-     * (arrows) and the pie chart diagramm.
+     * (arrows) and the pie chart diagram.
      *
      * @param n , number of the selected matrix
      */
@@ -158,7 +158,7 @@ public class Controller {
         view.removeArrowStatistics();
         view.removePieChart();
         // Add relevant data
-        int[] numAcesses = matrix.getAbsoluteNumAccesses();
+        long[] numAcesses = matrix.getAbsoluteNumAccesses();
         view.updateDetailedStatistics(numAcesses[0], numAcesses[1], n);
         view.addAbsoluteRepresentation(matrix);
         addArrowStatistics(matrix);
