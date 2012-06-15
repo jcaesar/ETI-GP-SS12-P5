@@ -194,9 +194,9 @@ static traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
-static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr addr, SizeT size)
+static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* access_data, int is_hit, Addr addr, SizeT size)
 {
-	if(matr)
+	if(matr && access_data)
 	{
 		// transform addr to (m,n) representation
 		Addr tmp = (addr - (*matr).start) / (*matr).ele_size;
@@ -204,21 +204,21 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
 		unsigned short m = (tmp - n) / (*matr).m;
 
 		// ignore the first access
-		if ((*matr).access_data.last_access.m != SHRT_MIN && (*matr).access_data.last_access.n != SHRT_MIN)
+		if (access_data->last_access.m != SHRT_MIN && access_data->last_access.n != SHRT_MIN)
 		{
 
 			// calculate the current access method
-			short offset_n = n - (*matr).access_data.last_access.n;
-			short offset_m = m - (*matr).access_data.last_access.m;
+			short offset_n = n - access_data->last_access.n;
+			short offset_m = m - access_data->last_access.m;
 
 			int i;
-			int amc = (*matr).access_data.access_methods_count;
+			int amc = access_data->access_methods_count;
 			bool found = false;
 
 			// look for the access method and increase the hit/miss count
 			for (i=0; i < amc; ++i)
 			{
-				matrix_access_method* am = (*matr).access_data.access_methods+i;
+				matrix_access_method* am = access_data->access_methods+i;
 
 				if (am->offset_m == offset_m && am->offset_n == offset_n)
 				{
@@ -241,7 +241,7 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
 			// if no access method was found => add a new one
 			if (!found)
 			{
-				matrix_access_method* am = ((*matr).access_data.access_methods + (*matr).access_data.access_methods_count);
+				matrix_access_method* am = (access_data->access_methods + access_data->access_methods_count);
 				am->offset_m = offset_m;
 				am->offset_n = offset_n;
 
@@ -258,9 +258,9 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
 					am->hits = 0;
 				}
 
-				(*matr).access_data.access_methods_count++;
+				access_data->access_methods_count++;
 
-				if ((*matr).access_data.access_methods_count >= MAX_MATRIX_ACCESS_METHODS)
+				if (access_data->access_methods_count >= MAX_MATRIX_ACCESS_METHODS)
 				{
 					VG_(tool_panic)("Max. number of access methods exceeded.");
 				}
@@ -268,8 +268,8 @@ static void update_matrix_access_stats(traced_matrix* matr, int is_hit, Addr add
 		}
 
 		// update
-		(*matr).access_data.last_access.n = n;
-		(*matr).access_data.last_access.m = m;
+		access_data->last_access.n = n;
+		access_data->last_access.m = m;
 
 	}
 }
@@ -281,33 +281,31 @@ static void update_matrix_stats(Addr addr, SizeT size, char type)
 	if (matr)
 	{
 		int is_hit = cache_ref(addr, size);
-		// update access method stats
-		update_matrix_access_stats(matr, is_hit, addr, size);
-
-		// update general access stats
 		int offset = (addr - matr->start) / matr->ele_size;
-		if (is_hit)
-		{
-			if (type == MATRIX_LOAD)
-			{
-				matr->load_count[offset].hits++;
-			}
-			else
-			{
-				matr->store_count[offset].hits++;
-			}
-		}
-		else
-		{
-			if (type == MATRIX_LOAD)
-			{
-				matr->load_count[offset].misses++;
-			}
-			else
-			{
-				matr->store_count[offset].misses++;
-			}
-		}
+
+        if (type == MATRIX_LOAD) {
+            //update access method stats
+            update_matrix_access_stats(matr, &(matr->load_access_data), is_hit, addr, size);
+
+            // update general access stats
+            if (is_hit) {
+                matr->load_count[offset].hits++;
+                matr->loads.hits++;
+            } else {
+                matr->load_count[offset].misses++;
+                matr->loads.misses++;
+            }
+        } else {
+            update_matrix_access_stats(matr, &(matr->store_access_data), is_hit, addr, size);
+
+            if (is_hit) {
+                matr->store_count[offset].hits++;
+                matr->stores.hits++; 
+            } else {
+                matr->store_count[offset].misses++;
+                matr->stores.misses++;
+            }
+        }
 	}
 }
 
@@ -347,8 +345,10 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	matr->n = n;
 
 	/* initialize memory access infos */
-	matr->access_data.last_access.n = SHRT_MIN;
-	matr->access_data.last_access.m = SHRT_MIN;
+	matr->load_access_data.last_access.n = SHRT_MIN;
+	matr->load_access_data.last_access.m = SHRT_MIN;
+	matr->store_access_data.last_access.n = SHRT_MIN;
+	matr->store_access_data.last_access.m = SHRT_MIN;
 	matr->load_count = (element_access_count*) VG_(malloc)("matrix load count", m*n*sizeof(element_access_count));
 	matr->store_count = (element_access_count*) VG_(malloc)("matrix store count", m*n*sizeof(element_access_count));
 
@@ -367,6 +367,11 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 			matr->store_count[offset].misses = 0;
 		}
 	}
+
+    matr->loads.hits = 0;
+    matr->stores.hits = 0;
+    matr->loads.misses = 0;
+    matr->stores.misses = 0;
 
 	/* Update the matrix index */
 
@@ -430,6 +435,40 @@ bool ssim_matrix_tracing_stop(Addr addr)
 	return true;
 }
 
+static void write_access_methods(Int fd, matrix_access_data* access_data) {
+    /**
+	 * Access methods (ZA) (2*N*12 bytes)
+	 */
+
+	int accm_count = access_data->access_methods_count;
+
+	if (accm_count > 8)
+    {
+		// sort the access methods according to their cumulative hits and misses
+		ssim_qsort(access_data->access_methods, 0, access_data->access_methods_count);
+	}
+
+	accm_count = accm_count > 8 ? 8 : accm_count;
+
+	int k;
+	for (k = 0; k < accm_count; ++k)
+	{
+		matrix_access_method accm = access_data->access_methods[k];
+
+		// ZA:OM
+		VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
+
+		// ZA:ON
+		VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
+
+		// ZA:AH
+		VG_(write)(fd, &(accm.hits), sizeof(unsigned int));
+
+		// ZA:AM
+		VG_(write)(fd, &(accm.misses), sizeof(unsigned int));
+	}
+}
+
 void ssim_save_stats(HChar* fname)
 {
 	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, VKI_S_IRUSR|VKI_S_IWUSR|VKI_S_IRGRP|VKI_S_IWGRP);
@@ -458,11 +497,11 @@ void ssim_save_stats(HChar* fname)
 	VG_(write)(fd, &matr_count, sizeof(byte));
 
 	/**
-	 * MATRICES HEADER (N*17 bytes)
+	 * MATRICES HEADER (N*34 bytes)
 	 */
 
 	// MH:MIBADR => initalize with the DH and MH size
-	unsigned int mibaddr = 4 + traced_matrices_count*17;
+	unsigned int mibaddr = 4 + traced_matrices_count*34;
 	int i;
 	for (i = 0; i < traced_matrices_count; ++i)
 	{
@@ -472,22 +511,39 @@ void ssim_save_stats(HChar* fname)
 		// MH:GN (2 bytes)
 		VG_(write)(fd, &(traced_matrices[i].n), sizeof(ushort));
 
-		// MH:AZ (1 byte), limited to 8
-		int tmp = traced_matrices[i].access_data.access_methods_count;
-		byte accm_count = tmp < 8 ? (byte)tmp : 8;
-		VG_(write)(fd, &accm_count, sizeof(byte));
+		// MH:AZL (1 byte), limited to 8
+		int tmp = traced_matrices[i].load_access_data.access_methods_count;
+		byte accm_loads_count = tmp < 8 ? (byte)tmp : 8;
+		VG_(write)(fd, &accm_loads_count, sizeof(byte));
+
+        // MH:AZS (1 byte), limited to 8
+		tmp = traced_matrices[i].store_access_data.access_methods_count;
+		byte accm_stores_count = tmp < 8 ? (byte)tmp : 8;
+		VG_(write)(fd, &accm_stores_count, sizeof(byte));
 
 		// MH:ADR (8 byte)
 		VG_(write)(fd, &(traced_matrices[i].start), sizeof(Addr));
 
 		// MH:MIBADR (4 byte)
 		VG_(write)(fd, &mibaddr, sizeof(unsigned int));
+    
+        // MH:ALH (4 byte)
+        VG_(write)(fd, &(traced_matrices[i].loads.hits), sizeof(unsigned int));
+        
+        // MH:ALM (4 byte)
+        VG_(write)(fd, &(traced_matrices[i].loads.misses), sizeof(unsigned int));
+        
+        // MH:ASH (4 byte)
+        VG_(write)(fd, &(traced_matrices[i].stores.hits), sizeof(unsigned int));
+        
+        // MH:ASM (4 byte)
+        VG_(write)(fd, &(traced_matrices[i].stores.misses), sizeof(unsigned int));
 
 		// calculate the address of the next MIB
 		// matrices
 		mibaddr += 2 * traced_matrices[i].m * traced_matrices[i].n;
 		// access methods
-		mibaddr += 12 * accm_count;
+		mibaddr += 12 * (accm_loads_count + accm_stores_count);
 		// name + \0
 		mibaddr += VG_(strlen)(traced_matrices[i].name) + 1;
 	}
@@ -557,37 +613,10 @@ void ssim_save_stats(HChar* fname)
 		VG_(free)(traced_matrices[i].load_count);
 		VG_(free)(traced_matrices[i].store_count);
 
-		/**
-		 * Access methods (ZA) (N*12 bytes)
-		 */
-
-		int accm_count = traced_matrices[i].access_data.access_methods_count;
-
-		if (accm_count > 8)
-		{
-			// sort the access methods according to their cumulative hits and misses
-			ssim_qsort(traced_matrices[i].access_data.access_methods, 0, traced_matrices[i].access_data.access_methods_count);
-		}
-
-		accm_count = accm_count > 8 ? 8 : accm_count;
-
-		int k;
-		for (k = 0; k < accm_count; ++k)
-		{
-			matrix_access_method accm = traced_matrices[i].access_data.access_methods[k];
-
-			// ZA:OM
-			VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
-
-			// ZA:ON
-			VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
-
-			// ZA:AH
-			VG_(write)(fd, &(accm.hits), sizeof(unsigned int));
-
-			// ZA:AM
-			VG_(write)(fd, &(accm.misses), sizeof(unsigned int));
-		}
+        // LOADS
+        write_access_methods(fd, &(traced_matrices[i].load_access_data));
+        // STORES
+        write_access_methods(fd, &(traced_matrices[i].store_access_data));
 
 		/**
 		 * Name (NA)

@@ -58,11 +58,16 @@ typedef struct _traced_matrix
 	/* number of columns */
 	unsigned short n;
 	/* contains data about the memory and cache access (patterns) */
-	matrix_access_data access_data;
+	matrix_access_data load_access_data;
+    matrix_access_data store_access_data;
 	/* number of hits/misses per element for loads */
 	element_access_count* load_count;
 	/* number of hits/misses per element for stores */
 	element_access_count* store_count;
+    /* accumulated number of hits/misses for loads over the whole matrix */
+    element_access_count loads;
+    /* accumulated number of hits/misses for stores over the whole matrix*/
+    element_access_count stores;
 } traced_matrix;
 
 void ssim_init(void);
