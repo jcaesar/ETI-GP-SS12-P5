@@ -489,7 +489,7 @@ void ssim_save_stats(HChar* fname)
     // magic number
     byte magic_num[2] = {0xAF, 0xFE};
     // version of the file format
-    byte version = 0x1;
+    byte version = 0x2;
     byte matr_count = (byte) traced_matrices_count;
 
 	VG_(write)(fd, magic_num, 2*sizeof(byte));
