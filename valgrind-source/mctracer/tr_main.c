@@ -47,30 +47,22 @@
 /*------------------------------------------------------------*/
 
 
-/* The name of the function at which tracing should start.
- * Override with command line option --fnstart.
- * If empty (default), starts tracing when entering "main".
- */
-static Char* clo_fnstart = "main";
+/* The path where the statistics will be written. */
 static Char* clo_ssim_output = NULL;
 
 static Bool mt_process_cmd_line_option(Char* arg)
 {
-	if      VG_STR_CLO(arg, "--fnstart", clo_fnstart) {}
 	if      VG_STR_CLO(arg, "--output", clo_ssim_output) {}
 	else
 		return False;
 
-	tl_assert(clo_fnstart);
 	return True;
 }
 
 static void mt_print_usage(void)
 {
 	VG_(printf)(
-	    "    --fnstart=<name>        start tracing when entering this function [%s]\n"
-	    "    --output=<filepath>     write cache statistics to this file [<executable name>.etis]\n",
-	    clo_fnstart
+	    "    --output=<filepath>     write cache statistics to this file [<executable name>.etis]\n"
 	);
 }
 
@@ -80,16 +72,6 @@ static void mt_print_debug_usage(void)
 	    "    (none)\n"
 	);
 }
-
-/*------------------------------------------------------------*/
-/*--- Stuff for --basic-counts                             ---*/
-/*------------------------------------------------------------*/
-
-static void start_tracing(void)
-{
-	//TODO: Remove this function
-}
-
 
 /*------------------------------------------------------------*/
 /*--- Stuff for memory access tracing                      ---*/
@@ -336,7 +318,6 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 	IRDirty*   di;
 	Int        i;
 	IRSB*      sbOut;
-	Char       fnname[100];
 	IRTypeEnv* tyenv = sbIn->tyenv;
 
 	if (gWordTy != hWordTy)
@@ -374,31 +355,6 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
 			break;
 
 		case Ist_IMark:
-
-			/* An unconditional branch to a known destination in the
-			 * guest's instructions can be represented, in the IRSB to
-			 * instrument, by the VEX statements that are the
-			 * translation of that known destination. This feature is
-			 * called 'SB chasing' and can be influenced by command
-			 * line option --vex-guest-chase-thresh.
-			 *
-			 * To get an accurate count of the calls to a specific
-			 * function, taking SB chasing into account, we need to
-			 * check for each guest instruction (Ist_IMark) if it is
-			 * the entry point of a function.
-			 */
-			tl_assert(clo_fnstart);
-			if (clo_fnstart[0] &&
-			        VG_(get_fnname_if_entry)(st->Ist.IMark.addr,
-			                                 fnname, sizeof(fnname))
-			        && 0 == VG_(strcmp)(fnname, clo_fnstart))
-			{
-				di = unsafeIRDirty_0_N(
-				         0, "start_tracing",
-				         VG_(fnptr_to_fnentry)( &start_tracing ),
-				         mkIRExprVec_0() );
-				addStmtToIRSB( sbOut, IRStmt_Dirty(di) );
-			}
 
 			// WARNING: do not remove this function call, even if you
 			// aren't interested in instruction reads.  See the comment
