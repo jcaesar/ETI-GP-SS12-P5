@@ -221,13 +221,34 @@ struct _mmversion
 	{ 0,0 }
 };
 
+/* run a single mm version */
+void run_version(int v, int sz, double a[sz][sz], double b[sz][sz], double c[sz][sz])
+{
+	// generate tracking identifier for each matrix
+	const int len = 256;
+	char name[len];
 
-void run(int sz)
+	strcpy(name + strlen(mmversion[v].name), " - a");
+        SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
+
+	strcpy(name + strlen(mmversion[v].name), " - b");
+	SSIM_MATRIX_TRACING_START(b, sz, sz, sizeof(double), name);
+
+	strcpy(name + strlen(mmversion[v].name), " - c");
+        SSIM_MATRIX_TRACING_START(c, sz, sz, sizeof(double), name);
+
+	run_mul(mmversion[v].func, mmversion[v].name, sz, a, b, c);
+
+        SSIM_MATRIX_TRACING_STOP(a);
+        SSIM_MATRIX_TRACING_STOP(b);
+	SSIM_MATRIX_TRACING_STOP(c);
+}
+
+void run(int v, int sz)
 {
 	typedef double MAT[sz][sz];
 	void *ap, *bp, *cp;
 	MAT *a, *b, *c;
-	int v;
 
 	a = (MAT*) mymalloc(sizeof(MAT), &ap);
 	b = (MAT*) mymalloc(sizeof(MAT), &bp);
@@ -241,29 +262,13 @@ void run(int sz)
 	        sz, ((double)sizeof(MAT))/1000000.0, a,b,c);
 	printf("%d ", sz);
 
-	for(v=0; mmversion[v].func !=0; v++)
-	{
-		// generate tracking identifier for each matrix
-		const int len = 256;
-		char name[len];
-		strcpy(name, mmversion[v].name);
-
-		strcpy(name + strlen(mmversion[v].name), " - a");
-		SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
-
-		strcpy(name + strlen(mmversion[v].name), " - b");
-		SSIM_MATRIX_TRACING_START(b, sz, sz, sizeof(double), name);
-
-		strcpy(name + strlen(mmversion[v].name), " - c");
-		SSIM_MATRIX_TRACING_START(c, sz, sz, sizeof(double), name);
-
-
-		run_mul( mmversion[v].func, mmversion[v].name, sz, *a, *b, *c);
-
-		SSIM_MATRIX_TRACING_STOP(a);
-		SSIM_MATRIX_TRACING_STOP(b);
-		SSIM_MATRIX_TRACING_STOP(c);
-	}
+	// run the specified mm version or else run all versions
+	// if v does not point to one of the implemented versions
+	if (mmversion[v].func != 0)
+		run_version(v, sz, *a, *b, *c);
+	else
+		for(v=0; mmversion[v].func != 0; v++)
+			run_version(v, sz, *a, *b, *c);
 
 	printf("\n");
 
@@ -276,10 +281,19 @@ int main(int argc, char* argv[])
 {
 	int sz, diff;
 	int sz1 = 500, sz2 = 0, steps = 0;
+	char* funcname = 0;
 
-	if (argc>1) sz1 = atoi(argv[1]);
-	if (argc>2) sz2 = atoi(argv[2]);
-	if (argc>3) steps = atoi(argv[3]);
+	if (argc>1) funcname = argv[1];
+	if (argc>2) sz1 = atoi(argv[2]);
+	if (argc>3) sz2 = atoi(argv[3]);
+	if (argc>4) steps = atoi(argv[4]);
+
+	// look for a mm version that matches the argument
+	// (if no matching version is found, v consists of nullpointers)
+	int v;
+	for (v=0; mmversion[v].func != 0; v++)
+		if (funcname != 0 && strcmp(funcname, mmversion[v].name) == 0) break;
+
 
 	if ((sz2 == 0) || (sz2 < sz1)) sz2 = sz1;
 	if (steps == 0)
@@ -289,8 +303,8 @@ int main(int argc, char* argv[])
 		if (sz2-sz1 >= 100) steps = (sz2-sz1)/100+1;
 	}
 
-	if (steps <= 1) run(sz1);
+	if (steps <= 1) run(v, sz1);
 	else
 		for(sz = sz1; sz<=sz2; sz += (sz2-sz1)/(steps-1))
-			run (sz);
+			run (v, sz);
 }
