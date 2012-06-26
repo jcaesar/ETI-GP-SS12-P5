@@ -9,6 +9,15 @@
 
 #define BA_MAX_HIT_VAL 254
 #define BA_NO_ACCESS_VAL 255
+#define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT (1<<12)
+
+#define MATRIX_LOAD 'L'
+#define MATRIX_STORE 'S'
+
+typedef struct _matrix_coordinates {
+	short m;
+	short n;
+} matrix_coordinates;
 
 struct _element_access_count;
 typedef struct _element_access_count
@@ -32,15 +41,16 @@ struct _matrix_access_data;
 typedef struct _matrix_access_data
 {
 	/* last address accessed by this matrix */
-	struct _last_access
-	{
-		short n;
-		short m;
-	} last_access;
+	matrix_coordinates last_access;
 	/* list of access methods used to retrieve/write data from/to the matrix */
 	matrix_access_method access_methods[MAX_MATRIX_ACCESS_METHODS];
 	int access_methods_count;
 } matrix_access_data;
+
+typedef struct _access_event {
+	bool is_hit;
+	matrix_coordinates offset;
+} access_event;
 
 struct _traced_matrix;
 typedef struct _traced_matrix
@@ -68,6 +78,9 @@ typedef struct _traced_matrix
     element_access_count loads;
     /* accumulated number of hits/misses for stores over the whole matrix*/
     element_access_count stores;
+	/* buffer for finding access patterns */
+	access_event * access_buffer; // relative
+	unsigned int access_event_count;
 } traced_matrix;
 
 void ssim_init(void);

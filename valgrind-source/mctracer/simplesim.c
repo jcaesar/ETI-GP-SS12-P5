@@ -60,9 +60,6 @@ static void ssim_qsort(matrix_access_method arr[], int begin, int end)
 	}
 }
 
-#define MATRIX_LOAD 'L'
-#define MATRIX_STORE 'S'
-
 #define byte unsigned char
 #define ushort unsigned short
 
@@ -194,6 +191,23 @@ static traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
+static void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, short offset_m, bool is_hit)
+{
+	if(!matr || !matr->access_buffer)
+		VG_(tool_panic)("internal error: matrix passed for pattern finding without access buffer.");
+	// store new event
+	access_event ev;
+	ev.is_hit = is_hit;
+	ev.offset.n = offset_n;
+	ev.offset.m = offset_m;
+	matr->access_buffer[matr->access_event_count] = ev;
+	if(++matr->access_event_count == MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT)
+	{
+		// TODO: Do something...
+		matr->access_event_count = 0;
+	}
+}
+
 static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* access_data, int is_hit, Addr addr, SizeT size)
 {
 	if(matr && access_data)
@@ -265,6 +279,7 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 					VG_(tool_panic)("Max. number of access methods exceeded.");
 				}
 			}
+			update_matrix_pattern_stats(matr, offset_n, offset_m, is_hit);
 		}
 
 		// update
@@ -373,6 +388,9 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
     matr->loads.misses = 0;
     matr->stores.misses = 0;
 
+	matr->access_buffer = (access_event*) VG_(malloc)("matrix access event buffer", MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT*sizeof(access_event));
+	matr->access_event_count = 0;
+
 	/* Update the matrix index */
 
 	if (traced_matrices_count == 1 || stopped_matrices_count == 0)
@@ -419,6 +437,10 @@ bool ssim_matrix_tracing_stop(Addr addr)
 	int last_traced_mtr_offset = traced_matrices_count - stopped_matrices_count - 1;
 	traced_matrix* tmp_tm = traced_matrices_index[last_traced_mtr_offset];
 
+	// free unused memory
+	VG_(free)(matr->access_buffer);
+	matr->access_buffer = NULL;
+
 	// look for the mtr from 0 to last_traced_mtr_offset-1, so
 	// that we don't swap a matrix with itself
 	int i;
@@ -432,6 +454,7 @@ bool ssim_matrix_tracing_stop(Addr addr)
 	}
 
 	stopped_matrices_count++;
+
 	return true;
 }
 
