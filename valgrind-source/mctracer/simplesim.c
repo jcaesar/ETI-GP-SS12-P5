@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
-#include "pub_tool_libcbase.h" // VG_(strlen), VG_(libcbase)
+#include "pub_tool_libcbase.h" // VG_(strlen), VG_(memset)
 #include "pub_tool_libcfile.h" // VG_(open), VG_(write)
 #include "pub_tool_vki.h" // VKI_O_TRUNC ... 
 #include "pub_tool_mallocfree.h" // VG_(malloc)
@@ -191,6 +191,42 @@ static traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
+static void mark_pattern_findings(traced_matrix * matr, access_pattern * const ap, bool * const patterned_access)
+{
+	// convenience shorthands
+	const unsigned int count = matr->access_event_count;
+	access_event * const accbuf = matr->access_buffer;
+
+	if(ap->length == 0) 
+		return;
+	unsigned int j;
+	for(j = 0; j < count; ++j) // loop over access buffer, loop variable is modified inside of the loop
+	{
+		if(ap->length + j >= count) // can't match pattern if it's longer than the remaining accesses
+			break;
+			
+		unsigned int apstep;
+		for(apstep = 0; apstep < ap->length; ++apstep) // loop over access method steps
+			if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
+			   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
+				break;
+		if(apstep == ap->length) // means that all were equal
+		{
+			unsigned int k;
+			for(k = 0; k < ap->length; ++k)
+			{
+				if(accbuf[j+k].is_hit)
+					++ap->steps[k].hits;
+				else
+					++ap->steps[k].misses;
+				patterned_access[j+k] = true;
+			}
+			j += ap->length - 1; // -1 to counter loop increment
+			++(ap->occurences);
+		}
+	}
+}
+
 static void process_pattern_buffer(traced_matrix * matr)
 {
 	// convenience shorthands
@@ -198,45 +234,68 @@ static void process_pattern_buffer(traced_matrix * matr)
 	access_event * const accbuf = matr->access_buffer;
 
 	// buffer for registering that an access has been included in an existing pattern
-	bool access_processed[MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT];
-	VG_(memset)(access_processed, false, MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
+	bool patterned_access[MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT];
+	VG_(memset)(patterned_access, false, MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
 
 	// go over all the existing access patterns and find matching accesses
 	unsigned int i;
-	for(i = 0; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT; ++i) // loop over access patterns
+	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over access patterns
+		mark_pattern_findings(matr, matr->access_patterns + i, patterned_access);
+	// find new patterns
+	for(i = 0; i < count - MAX_PATTERN_LENGTH*2; ++i)
 	{
-		access_pattern * const ap = matr->access_patterns + i; // convenience variable
-		if(ap->length == 0) 
+		if(patterned_access[i])
+			continue;
+		// single access repetition locating
+		unsigned int length;
+		for(length = 1; length >= MAX_PATTERN_LENGTH; ++length)
+			if(accbuf[i].offset.n == accbuf[i+length].offset.n &&
+			   accbuf[i].offset.m == accbuf[i+length].offset.m)
+				break;
+		if(length > MAX_PATTERN_LENGTH)
 			continue;
 		unsigned int j;
-		for(j = 0; j < count; ++j) // loop over access buffer, loop variable is modified inside of the loop
-		{
-			if(ap->length + j >= count) // can't match pattern if it's longer than the remaining accesses
+		// sequence equality check
+		for(j = 1; j < length; ++j)
+			if(accbuf[i+j].offset.n != accbuf[i+length+j].offset.n ||
+			   accbuf[i+j].offset.m != accbuf[i+length+j].offset.m)
 				break;
-				
-			unsigned int apstep;
-			for(apstep = 0; apstep < ap->length; ++apstep) // loop over access method steps
-				if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
-				   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
-					break;
-			if(apstep == ap->length) // means that all were equal
+		if(j < length)
+			continue;
+		// found a pattern, find a place to store it in.
+		// (Keeping a list of all located patterns around would require a much more sofisticated pattern recognition algorithm
+		//  it would probably be slower, too.)
+		unsigned int matr_accesses = matr->loads.misses + matr->loads.hits + matr->stores.misses + matr->stores.hits;
+		float max_expendability = 0;
+		access_pattern * rap = 0; // replaced access pattern
+		for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j)
+		{
+			access_pattern * const ap = matr->access_patterns + j;
+			if(ap->length == 0)
 			{
-				unsigned int k;
-				for(k = 0; k < ap->length; ++k)
-				{
-					if(accbuf[j+k].is_hit)
-						++ap->steps[k].hits;
-					else
-						++ap->steps[k].misses;
-					access_processed[j+k] = true;
-				}
-				j += ap->length - 1; // -1 to counter loop increment
-				++(ap->occurences);
+				rap = ap;
+				break;
 			}
+			// the relevance of a pattern is computed by the fraction of accesses that match that pattern since that pattern emerged.
+			float expendability = (matr_accesses - ap->accesses_before_lifetime + 1000) / (ap->occurences * ap->length + 1000); // the constant summands prevent instabilities with small numbers
+			if(expendability < max_expendability)
+				rap = ap;
 		}
+		if(rap->steps)
+			VG_(free)(rap->steps);
+		rap->steps = VG_(malloc)("access pattern",length*sizeof(access_pattern));
+		for(j = 0; j < length; ++j)
+		{
+			rap->steps[j].offset_n = accbuf[i+j].offset.n;
+			rap->steps[j].offset_m = accbuf[i+j].offset.m;
+			rap->steps[j].hits = 0;
+			rap->steps[j].misses = 0;
+		}
+		rap->length = length;
+		rap->occurences = 0;
+		rap->accesses_before_lifetime = matr_accesses;
+		mark_pattern_findings(matr, rap, patterned_access);
 	}
-	// TODO: find new patterns
-	
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	VG_(memmove)(accbuf, accbuf + count - MAX_PATTERN_LENGTH, MAX_PATTERN_LENGTH);
 	matr->access_event_count = MAX_PATTERN_LENGTH;

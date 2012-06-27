@@ -52,12 +52,13 @@ typedef struct _access_event {
 	matrix_coordinates offset;
 } access_event;
 
-#define MAX_PATTERNS_PER_MATRIX 5 // TODO: negociate proper value
+#define MAX_PATTERNS_PER_MATRIX 5 // TODO: negociate proper value. Probably has to be a nice deal larger than what we display to the user
 #define MAX_PATTERN_LENGTH 16
 typedef struct _access_pattern {
 	unsigned int length;
 	matrix_access_method * steps;
 	unsigned int occurences; // accesses = ouccurences * length
+	unsigned int accesses_before_lifetime; // for deciding which pattern to purge
 } access_pattern;
 
 struct _traced_matrix;
