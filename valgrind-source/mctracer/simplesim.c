@@ -388,8 +388,10 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
     matr->loads.misses = 0;
     matr->stores.misses = 0;
 
+	// pattern finding stores
 	matr->access_buffer = (access_event*) VG_(malloc)("matrix access event buffer", MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT*sizeof(access_event));
 	matr->access_event_count = 0;
+	VG_(memset)(matr->access_patterns, 0, MAX_PATTERNS_PER_MATRIX*sizeof(access_pattern));
 
 	/* Update the matrix index */
 
