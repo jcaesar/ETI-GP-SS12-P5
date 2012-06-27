@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
-#include "pub_tool_libcbase.h" // VG_(strlen)
+#include "pub_tool_libcbase.h" // VG_(strlen), VG_(libcbase)
 #include "pub_tool_libcfile.h" // VG_(open), VG_(write)
 #include "pub_tool_vki.h" // VKI_O_TRUNC ... 
 #include "pub_tool_mallocfree.h" // VG_(malloc)
@@ -191,6 +191,57 @@ static traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
+static void process_pattern_buffer(traced_matrix * matr)
+{
+	// convenience shorthands
+	const unsigned int count = matr->access_event_count;
+	access_event * const accbuf = matr->access_buffer;
+
+	// buffer for registering that an access has been included in an existing pattern
+	bool access_processed[MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT];
+	VG_(memset)(access_processed, false, MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
+
+	// go over all the existing access patterns and find matching accesses
+	unsigned int i;
+	for(i = 0; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT; ++i) // loop over access patterns
+	{
+		access_pattern * const ap = matr->access_patterns + i; // convenience variable
+		if(ap->length == 0) 
+			continue;
+		unsigned int j;
+		for(j = 0; j < count; ++j) // loop over access buffer, loop variable is modified inside of the loop
+		{
+			if(ap->length + j >= count) // can't match pattern if it's longer than the remaining accesses
+				break;
+				
+			unsigned int apstep;
+			for(apstep = 0; apstep < ap->length; ++apstep) // loop over access method steps
+				if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
+				   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
+					break;
+			if(apstep == ap->length) // means that all were equal
+			{
+				unsigned int k;
+				for(k = 0; k < ap->length; ++k)
+				{
+					if(accbuf[j+k].is_hit)
+						++ap->steps[k].hits;
+					else
+						++ap->steps[k].misses;
+					access_processed[j+k] = true;
+				}
+				j += ap->length - 1; // -1 to counter loop increment
+				++(ap->occurences);
+			}
+		}
+	}
+	// TODO: find new patterns
+	
+	// preserve the last few accesses which can not be accounted to maximum pattern lengths
+	VG_(memmove)(accbuf, accbuf + count - MAX_PATTERN_LENGTH, MAX_PATTERN_LENGTH);
+	matr->access_event_count = MAX_PATTERN_LENGTH;
+}
+
 static void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, short offset_m, bool is_hit)
 {
 	if(!matr || !matr->access_buffer)
@@ -202,10 +253,7 @@ static void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, sh
 	ev.offset.m = offset_m;
 	matr->access_buffer[matr->access_event_count] = ev;
 	if(++matr->access_event_count == MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT)
-	{
-		// TODO: Do something...
-		matr->access_event_count = 0;
-	}
+		process_pattern_buffer(matr);
 }
 
 static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* access_data, int is_hit, Addr addr, SizeT size)

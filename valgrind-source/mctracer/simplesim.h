@@ -46,7 +46,7 @@ typedef struct _matrix_access_data
 	int access_methods_count;
 } matrix_access_data;
 
-#define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT (1<<12)
+#define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT (1<<12) // current implementation requires an array of bools with that length to fit onto the stack
 typedef struct _access_event {
 	bool is_hit;
 	matrix_coordinates offset;
@@ -57,6 +57,7 @@ typedef struct _access_event {
 typedef struct _access_pattern {
 	unsigned int length;
 	matrix_access_method * steps;
+	unsigned int occurences; // accesses = ouccurences * length
 } access_pattern;
 
 struct _traced_matrix;
