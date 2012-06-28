@@ -207,8 +207,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 			
 		unsigned int apstep;
 		for(apstep = 0; apstep < ap->length; ++apstep) // loop over access method steps
-			if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
-			   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
+			if(!coordinates_equal(ap->steps[apstep].offset, accbuf[j+apstep].offset))
 				break;
 		if(apstep == ap->length) // means that all were equal
 		{
@@ -249,19 +248,20 @@ static void process_pattern_buffer(traced_matrix * matr)
 		// single access repetition locating
 		unsigned int length;
 		for(length = 1; length <= MAX_PATTERN_LENGTH; ++length)
-			if(accbuf[i].offset.n == accbuf[i+length].offset.n &&
-			   accbuf[i].offset.m == accbuf[i+length].offset.m)
+			if(coordinates_equal(accbuf[i].offset, accbuf[i+length].offset));
 				break;
 		if(length > MAX_PATTERN_LENGTH)
 			continue;
 		unsigned int j;
 		// sequence equality check
 		for(j = 1; j < length; ++j)
-			if(accbuf[i+j].offset.n != accbuf[i+length+j].offset.n ||
-			   accbuf[i+j].offset.m != accbuf[i+length+j].offset.m)
+			if(!coordinates_equal(accbuf[i+j].offset, accbuf[i+length+j].offset))
 				break;
-		if(j < length)
+		if(j < length) {
+		//	VG_(printf)("new pattern deduction failed, pattern with start (%d|%d), length %d did not match in step %d\n", accbuf[i].offset.n, accbuf[i].offset.m, length, j);
 			continue;
+		}
+
 		// found a pattern, find a place to store it in.
 		// (Keeping a list of all located patterns around would require a much more sofisticated pattern recognition algorithm
 		//  it would probably be slower, too.)
@@ -289,8 +289,7 @@ static void process_pattern_buffer(traced_matrix * matr)
 		rap->steps = VG_(malloc)("access pattern",length*sizeof(access_pattern));
 		for(j = 0; j < length; ++j)
 		{
-			rap->steps[j].offset_n = accbuf[i+j].offset.n;
-			rap->steps[j].offset_m = accbuf[i+j].offset.m;
+			rap->steps[j].offset = accbuf[i+j].offset;
 			rap->steps[j].hits = 0;
 			rap->steps[j].misses = 0;
 		}
@@ -298,6 +297,10 @@ static void process_pattern_buffer(traced_matrix * matr)
 		rap->occurences = 0;
 		rap->accesses_before_lifetime = matr_accesses;
 		mark_pattern_findings(matr, rap, patterned_access);
+	/*	VG_(printf)("New pattern: ");
+		for(j = 0; j < length; ++j)
+			VG_(printf)("(%d|%d)",accbuf[i+j].offset.n,accbuf[i+j].offset.m);
+		VG_(printf)(" Initial occurences: %d\n", rap->occurences);*/
 	}
 	// consistency check: eleminate patterns which are subpatterns to others
 	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over patterns which may be eliminated
@@ -316,8 +319,7 @@ static void process_pattern_buffer(traced_matrix * matr)
 			{
 				unsigned int l;
 				for(l = 0; l < oap->length; ++l)
-					if(oap->steps[l].offset_n != iap->steps[k].offset_n ||
-					   oap->steps[l].offset_m != iap->steps[k].offset_m)
+					if(!coordinates_equal(oap->steps[l].offset, iap->steps[k].offset))
 						break;
 				if(l == oap->length)
 				{
@@ -376,7 +378,7 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 			{
 				matrix_access_method* am = access_data->access_methods+i;
 
-				if (am->offset_m == offset_m && am->offset_n == offset_n)
+				if (am->offset.m == offset_m && am->offset.n == offset_n)
 				{
 					// we got a matching access method
 					// ... now check for hit or miss
@@ -398,8 +400,8 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 			if (!found)
 			{
 				matrix_access_method* am = (access_data->access_methods + access_data->access_methods_count);
-				am->offset_m = offset_m;
-				am->offset_n = offset_n;
+				am->offset.m = offset_m;
+				am->offset.n = offset_n;
 
 				if (is_hit)
 				{
@@ -626,10 +628,10 @@ static void write_access_methods(Int fd, matrix_access_data* access_data) {
 		matrix_access_method accm = access_data->access_methods[k];
 
 		// ZA:OM
-		VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
+		VG_(write)(fd, &(accm.offset.m), sizeof(ushort));
 
 		// ZA:ON
-		VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
+		VG_(write)(fd, &(accm.offset.n), sizeof(ushort));
 
 		// ZA:AH
 		VG_(write)(fd, &(accm.hits), sizeof(unsigned int));

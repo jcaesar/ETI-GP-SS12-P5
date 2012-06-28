@@ -17,6 +17,7 @@ typedef struct _matrix_coordinates {
 	short m;
 	short n;
 } matrix_coordinates;
+static inline bool coordinates_equal(const matrix_coordinates a, const matrix_coordinates b) { return a.n == b.n && a.m == b.m; } // I don't understand -Wmissing-prototypes 
 
 struct _element_access_count;
 typedef struct _element_access_count
@@ -28,10 +29,8 @@ typedef struct _element_access_count
 struct _matrix_access_method;
 typedef struct _matrix_access_method
 {
-	/* relative row number */
-	short offset_m;
-	/* relative column number */
-	short offset_n;
+	/* relative coordinates */
+	matrix_coordinates offset;
 	unsigned int misses;
 	unsigned int hits;
 } matrix_access_method;
