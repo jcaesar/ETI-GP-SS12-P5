@@ -299,6 +299,38 @@ static void process_pattern_buffer(traced_matrix * matr)
 		rap->accesses_before_lifetime = matr_accesses;
 		mark_pattern_findings(matr, rap, patterned_access);
 	}
+	// consistency check: eleminate patterns which are subpatterns to others
+	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over patterns which may be eliminated
+	{
+		access_pattern * const oap = matr->access_patterns + i; // outer access pattern
+		if(oap->length == 0)
+			continue;
+		unsigned int j;
+		for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j) // loop over patterns which could eliminate oap
+		{
+			access_pattern * const iap = matr->access_patterns + j; // inner access pattern	
+			if(iap->length < oap->length)
+				continue;
+			unsigned int k;
+			for(k = 0; k < iap->length; ++k)
+			{
+				unsigned int l;
+				for(l = 0; l < oap->length; ++l)
+					if(oap->steps[l].offset_n != iap->steps[k].offset_n ||
+					   oap->steps[l].offset_m != iap->steps[k].offset_m)
+						break;
+				if(l == oap->length)
+				{
+					if(oap->steps == 0)
+						VG_(tool_panic)("inconsistent state of patterns");
+					VG_(free)(oap->steps);
+					VG_(memset)(oap, 0, sizeof(access_pattern));
+					goto outer_matrix_eliminated;
+				}
+			}
+		}
+		outer_matrix_eliminated: continue; // that continue prevents a compilation error
+	}
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	VG_(memmove)(accbuf, accbuf + count - MAX_PATTERN_LENGTH, MAX_PATTERN_LENGTH);
 	matr->access_event_count = MAX_PATTERN_LENGTH;
