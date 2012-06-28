@@ -248,7 +248,7 @@ static void process_pattern_buffer(traced_matrix * matr)
 			continue;
 		// single access repetition locating
 		unsigned int length;
-		for(length = 1; length >= MAX_PATTERN_LENGTH; ++length)
+		for(length = 1; length <= MAX_PATTERN_LENGTH; ++length)
 			if(accbuf[i].offset.n == accbuf[i+length].offset.n &&
 			   accbuf[i].offset.m == accbuf[i+length].offset.m)
 				break;
@@ -277,9 +277,12 @@ static void process_pattern_buffer(traced_matrix * matr)
 				break;
 			}
 			// the relevance of a pattern is computed by the fraction of accesses that match that pattern since that pattern emerged.
-			float expendability = (matr_accesses - ap->accesses_before_lifetime + 1000) / (ap->occurences * ap->length + 1000); // the constant summands prevent instabilities with small numbers
-			if(expendability < max_expendability)
+			float expendability = (double)(matr_accesses - ap->accesses_before_lifetime + 1000) / (ap->occurences * ap->length + 1000); // the constant summands prevent instabilities with small numbers
+			if(expendability > max_expendability)
+			{
 				rap = ap;
+				max_expendability = expendability;
+			}
 		}
 		if(rap->steps)
 			VG_(free)(rap->steps);
@@ -537,6 +540,9 @@ bool ssim_matrix_tracing_stop(Addr addr)
 		return false;
 	}
 
+	// add remaining events to sequences
+	process_pattern_buffer(matr);
+
 	/* We'll store "untraced" matrices at
 	 * the end of the array, so that we'll find the
 	 _* actively traced ones faster.
@@ -744,6 +750,8 @@ void ssim_save_stats(HChar* fname)
 		VG_(free)(stores_array);
 		VG_(free)(traced_matrices[i].load_count);
 		VG_(free)(traced_matrices[i].store_count);
+		for(l = 0; l < MAX_PATTERNS_PER_MATRIX; ++l)
+			VG_(free)(traced_matrices[i].access_patterns[l].steps);
 
         // LOADS
         write_access_methods(fd, &(traced_matrices[i].load_access_data));
