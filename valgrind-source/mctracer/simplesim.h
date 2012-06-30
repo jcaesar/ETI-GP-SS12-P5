@@ -52,6 +52,14 @@ typedef struct _access_event {
 	matrix_coordinates offset;
 } access_event;
 
+struct _access_pattern;
+typedef struct _pattern_sequence {
+	unsigned int length; // how many times did we observe the pattern subsequently?
+	struct _access_pattern * next_pattern; // which pattern did we observe next? 0 for no pattern
+	matrix_access_method access; // which access did we observe next?
+	unsigned int occurences; // how many times did we observe this sequence?
+} pattern_sequence;
+
 #define MAX_PATTERNS_PER_MATRIX 5 // TODO: negociate proper value. Probably has to be a nice deal larger than what we display to the user
 #define MAX_PATTERN_LENGTH 16
 typedef struct _access_pattern {
@@ -59,6 +67,10 @@ typedef struct _access_pattern {
 	matrix_access_method * steps;
 	unsigned int occurences; // accesses = ouccurences * length
 	unsigned int accesses_before_lifetime; // for deciding which pattern to purge
+	pattern_sequence * sequences;
+	pattern_sequence current_sequence;
+	unsigned int sequence_count;
+	unsigned int sequence_allocated;
 } access_pattern;
 
 struct _traced_matrix;
@@ -92,6 +104,7 @@ typedef struct _traced_matrix
 	unsigned int access_event_count;
 	/* access patterns */
 	access_pattern access_patterns[MAX_PATTERNS_PER_MATRIX];
+	access_pattern * last_pattern;
 } traced_matrix;
 
 void ssim_init(void);

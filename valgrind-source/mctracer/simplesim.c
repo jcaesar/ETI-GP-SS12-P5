@@ -5,6 +5,8 @@
 
 /**
  * TODO: replace C datatypes with the corresponding valgrind types
+ * TODO: on deleting/overwriting access_patterns, loop over all the other
+ *       access pattern's sequences and make next_pattern a valid value
  *
  */
 
