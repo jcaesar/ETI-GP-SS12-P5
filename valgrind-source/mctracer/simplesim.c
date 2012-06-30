@@ -299,7 +299,7 @@ static void process_pattern_buffer(traced_matrix * matr)
 		rap->accesses_before_lifetime = matr_accesses;
 		mark_pattern_findings(matr, rap, patterned_access);
 	}
-	// consistency check: eleminate patterns which are subpatterns to others
+	// consistency check: eliminate patterns which are subpatterns to others
 	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over patterns which may be eliminated
 	{
 		access_pattern * const oap = matr->access_patterns + i; // outer access pattern
@@ -308,17 +308,24 @@ static void process_pattern_buffer(traced_matrix * matr)
 		unsigned int j;
 		for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j) // loop over patterns which could eliminate oap
 		{
+			if(i == j)
+				continue;
 			access_pattern * const iap = matr->access_patterns + j; // inner access pattern	
 			if(iap->length < oap->length)
 				continue;
 			unsigned int k;
 			for(k = 0; k < iap->length; ++k)
 			{
-				unsigned int l;
-				for(l = 0; l < oap->length; ++l)
-					if(oap->steps[l].offset_n != iap->steps[k].offset_n ||
-					   oap->steps[l].offset_m != iap->steps[k].offset_m)
+				unsigned int l, o;
+				for(l = 0, o = k; l < oap->length; ++l)
+				{
+					if(o >= iap->length)
+						o = 0;
+					if(oap->steps[l].offset_n != iap->steps[o].offset_n ||
+					   oap->steps[l].offset_m != iap->steps[o].offset_m)
 						break;
+					++o;
+				}
 				if(l == oap->length)
 				{
 					if(oap->steps == 0)
