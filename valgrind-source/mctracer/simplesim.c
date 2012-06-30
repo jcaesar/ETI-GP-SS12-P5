@@ -193,7 +193,20 @@ static traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
-static void mark_pattern_findings(traced_matrix * matr, access_pattern * const ap, bool * const patterned_access)
+static void delete_access_pattern(traced_matrix * matr, access_pattern * const ap, access_pattern ** const patterned_access)
+{
+	VG_(free)(ap->steps);
+	if(patterned_access)
+	{
+		int i;
+		for(i = 0; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT; ++i)
+			if(patterned_access[i] == ap)
+				patterned_access[i] = 0;
+	}
+	VG_(memset)(ap, 0, sizeof(access_pattern));
+}
+
+static void mark_pattern_findings(traced_matrix * matr, access_pattern * const ap, /*const*/ access_pattern ** const patterned_access)
 {
 	// convenience shorthands
 	const unsigned int count = matr->access_event_count;
@@ -221,7 +234,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 					++ap->steps[k].hits;
 				else
 					++ap->steps[k].misses;
-				patterned_access[j+k] = true;
+				patterned_access[j+k] = ap;
 			}
 			j += ap->length - 1; // -1 to counter loop increment
 			++(ap->occurences);
@@ -235,9 +248,16 @@ static void process_pattern_buffer(traced_matrix * matr)
 	const unsigned int count = matr->access_event_count;
 	access_event * const accbuf = matr->access_buffer;
 
-	// buffer for registering that an access has been included in an existing pattern
-	bool patterned_access[MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT];
-	VG_(memset)(patterned_access, false, MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
+	// array for marking, for each access event, to which pattern it belongs
+	// it would fit onto the stack, but I don't feel good about putting it there.
+	// it could also be done with uint8_t indices to matr->access_patterns, if you think it consumes too much mem
+	// This is a multi-purpose-variable. It is used for checking if an access event has already been processed,
+	//  and for sequence computation
+	static access_pattern ** patterned_access = 0;
+	if(!patterned_access);
+		patterned_access = VG_(malloc)("pattern findings in access event buffer",
+		                               sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
+	VG_(memset)(patterned_access, 0, sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
 
 	// go over all the existing access patterns and find matching accesses
 	unsigned int i;
@@ -286,8 +306,7 @@ static void process_pattern_buffer(traced_matrix * matr)
 				max_expendability = expendability;
 			}
 		}
-		if(rap->steps)
-			VG_(free)(rap->steps);
+		delete_access_pattern(matr, rap, patterned_access);
 		rap->steps = VG_(malloc)("access pattern",length*sizeof(access_pattern));
 		for(j = 0; j < length; ++j)
 		{
@@ -297,7 +316,7 @@ static void process_pattern_buffer(traced_matrix * matr)
 			rap->steps[j].misses = 0;
 		}
 		rap->length = length;
-		rap->occurences = 0;
+		// rap->occurences = 0; done by deletion
 		rap->accesses_before_lifetime = matr_accesses;
 		mark_pattern_findings(matr, rap, patterned_access);
 	}
@@ -332,8 +351,8 @@ static void process_pattern_buffer(traced_matrix * matr)
 				{
 					if(oap->steps == 0)
 						VG_(tool_panic)("inconsistent state of patterns");
-					VG_(free)(oap->steps);
-					VG_(memset)(oap, 0, sizeof(access_pattern));
+					delete_access_pattern(matr, oap, patterned_access);
+					mark_pattern_findings(matr, iap, patterned_access);
 					goto outer_matrix_eliminated;
 				}
 			}
