@@ -199,7 +199,7 @@ static void delete_access_pattern(traced_matrix * matr, access_pattern * const a
 	if(patterned_access)
 	{
 		int i;
-		for(i = 0; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT; ++i)
+		for(i = 0; i < matr->access_event_count; ++i)
 			if(patterned_access[i] == ap)
 				patterned_access[i] = 0;
 	}
@@ -256,8 +256,8 @@ static void process_pattern_buffer(traced_matrix * matr)
 	static access_pattern ** patterned_access = 0;
 	if(!patterned_access);
 		patterned_access = VG_(malloc)("pattern findings in access event buffer",
-		                               sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
-	VG_(memset)(patterned_access, 0, sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT);
+		                               sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
+	VG_(memset)(patterned_access, 0, sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
 
 	// go over all the existing access patterns and find matching accesses
 	unsigned int i;
@@ -374,7 +374,7 @@ static void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, sh
 	ev.offset.n = offset_n;
 	ev.offset.m = offset_m;
 	matr->access_buffer[matr->access_event_count] = ev;
-	if(++matr->access_event_count == MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT)
+	if(++matr->access_event_count == MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH)
 		process_pattern_buffer(matr);
 }
 
@@ -559,9 +559,10 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
     matr->stores.misses = 0;
 
 	// pattern finding stores
-	matr->access_buffer = (access_event*) VG_(malloc)("matrix access event buffer", MATRIX_ACCESS_ANALYSIS_BUFFER_LENGHT*sizeof(access_event));
+	matr->access_buffer = (access_event*) VG_(malloc)("matrix access event buffer", MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH*sizeof(access_event));
 	matr->access_event_count = 0;
 	VG_(memset)(matr->access_patterns, 0, MAX_PATTERNS_PER_MATRIX*sizeof(access_pattern));
+	matr->last_pattern = 0;
 
 	/* Update the matrix index */
 
