@@ -10,6 +10,12 @@
 #define BA_MAX_HIT_VAL 254
 #define BA_NO_ACCESS_VAL 255
 
+#define MATRIX_LOAD 'L'
+#define MATRIX_STORE 'S'
+
+#define byte unsigned char
+#define ushort unsigned short
+
 struct _element_access_count;
 typedef struct _element_access_count
 {
@@ -69,6 +75,9 @@ typedef struct _traced_matrix
     /* accumulated number of hits/misses for stores over the whole matrix*/
     element_access_count stores;
 } traced_matrix;
+
+traced_matrix traced_matrices [MAX_MATRIX_COUNT];
+traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
 
 void ssim_init(void);
 void ssim_flush_cache(void);
