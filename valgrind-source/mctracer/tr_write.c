@@ -15,11 +15,6 @@
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic
 
-extern traced_matrix traced_matrices [MAX_MATRIX_COUNT];
-extern traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
-extern int traced_matrices_count;
-extern int stopped_matrices_count;
-
 void ssim_save_stats(HChar* fname)
 {
 	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, VKI_S_IRUSR|VKI_S_IWUSR|VKI_S_IRGRP|VKI_S_IWGRP);
