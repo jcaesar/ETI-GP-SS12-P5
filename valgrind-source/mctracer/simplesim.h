@@ -56,7 +56,7 @@ struct _access_pattern;
 typedef struct _pattern_sequence {
 	unsigned int length; // how many times did we observe the pattern subsequently?
 	struct _access_pattern * next_pattern; // which pattern did we observe next? 0 for no pattern
-	matrix_access_method access; // which access did we observe next?
+	matrix_access_method next_access; // which access did we observe next?
 	unsigned int occurences; // how many times did we observe this sequence?
 } pattern_sequence;
 
@@ -68,7 +68,6 @@ typedef struct _access_pattern {
 	unsigned int occurences; // accesses = ouccurences * length
 	unsigned int accesses_before_lifetime; // for deciding which pattern to purge
 	pattern_sequence * sequences;
-	pattern_sequence current_sequence;
 	unsigned int sequence_count;
 	unsigned int sequence_allocated;
 } access_pattern;
@@ -104,7 +103,8 @@ typedef struct _traced_matrix
 	unsigned int access_event_count;
 	/* access patterns */
 	access_pattern access_patterns[MAX_PATTERNS_PER_MATRIX];
-	access_pattern * last_pattern;
+	access_pattern * current_pattern;
+	unsigned int current_sequence_length;
 } traced_matrix;
 
 void ssim_init(void);

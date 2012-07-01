@@ -5,8 +5,6 @@
 
 /**
  * TODO: replace C datatypes with the corresponding valgrind types
- * TODO: on deleting/overwriting access_patterns, loop over all the other
- *       access pattern's sequences and make next_pattern a valid value
  *
  */
 
@@ -196,6 +194,8 @@ static traced_matrix* find_matrix(Addr access)
 static void delete_access_pattern(traced_matrix * matr, access_pattern * const ap, access_pattern ** const patterned_access)
 {
 	VG_(free)(ap->steps);
+	VG_(free)(ap->sequences);
+	// remove markings of ap in the access buffer
 	if(patterned_access)
 	{
 		int i;
@@ -203,6 +203,14 @@ static void delete_access_pattern(traced_matrix * matr, access_pattern * const a
 			if(patterned_access[i] == ap)
 				patterned_access[i] = 0;
 	}
+	// remove usages of ap in the sequences
+/*	int i, j;
+	ap->length = 0; // little hack to make sure current ap is not processed
+	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i)
+		if(matr->access_patterns[i].length != 0)
+			for(j = 0; j < matr->access_patterns[i].sequence_count; ++j)
+				if(matr->access_patterns[i].sequences[j].next_pattern == ap)
+					matr->access_patterns[i].sequences[j].next_pattern = 0; // TODO: eliminate equal sequences*/
 	VG_(memset)(ap, 0, sizeof(access_pattern));
 }
 
@@ -359,8 +367,66 @@ static void process_pattern_buffer(traced_matrix * matr)
 		}
 		outer_matrix_eliminated: continue; // that continue prevents a compilation error
 	}
+	// process sequences of patterns
+	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
+	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
+	if(matr->current_pattern != 0)
+		for(i = 0; i < cap->length - 1; ++i)
+			if(patterned_access[i])
+				break;
+	for(; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH - 2*MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
+	{
+		// still within the same ap? just count
+		if(patterned_access[i] == cap)
+		{
+			if(cap) // this check is irrelephant
+				matr->current_sequence_length++;
+			continue;
+		}
+		if(cap)
+		{
+			int j;
+			for(j = 0; j < cap->sequence_count; ++j)
+			{
+				if(cap->sequences[j].length == matr->current_sequence_length &&
+				   cap->sequences[j].next_access.offset_n == accbuf[i].offset.n &&
+				   cap->sequences[j].next_access.offset_m == accbuf[i].offset.m &&
+				   cap->sequences[j].next_pattern == patterned_access[i])
+					break;
+			}
+			if(j >= cap->sequence_count)
+			{
+				++(cap->sequence_count);
+				if(cap->sequence_count > cap->sequence_allocated) // oops, buffer full. Reallocate.
+				{
+					signed int newlen = cap->sequence_allocated * 2 - 16;
+					if(newlen < 32)
+						newlen = 32;
+					pattern_sequence * new = VG_(malloc)("pattern sequence", newlen*sizeof(pattern_sequence));
+					VG_(memcpy)(new, cap->sequences, cap->sequence_allocated * sizeof(pattern_sequence));
+					cap->sequence_allocated = newlen;
+					cap->sequences = new;
+				}
+				cap->sequences[j].length = matr->current_sequence_length;
+				cap->sequences[j].next_pattern = patterned_access[i];
+				cap->sequences[j].next_access.offset_n = accbuf[i].offset.n;
+				cap->sequences[j].next_access.offset_m = accbuf[i].offset.m;
+				cap->sequences[j].occurences = 0;
+			}
+			++(cap->sequences[j].occurences);
+			if(accbuf[i].is_hit)
+				++(cap->sequences[j].next_access.hits);
+			else
+				++(cap->sequences[j].next_access.misses);
+
+		}
+		cap = patterned_access[i];
+		matr->current_sequence_length = cap ? 1 : 0;
+	}
+	matr->current_pattern = cap;
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
-	VG_(memmove)(accbuf, accbuf + count - MAX_PATTERN_LENGTH, MAX_PATTERN_LENGTH);
+	// because the sequence recognition wants to know about the next pattern in case of a change, copy 2*MAX_PATTERN_LENGTH
+	VG_(memmove)(accbuf, accbuf + count - 2*MAX_PATTERN_LENGTH, 2*MAX_PATTERN_LENGTH);
 	matr->access_event_count = MAX_PATTERN_LENGTH;
 }
 
@@ -562,7 +628,8 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	matr->access_buffer = (access_event*) VG_(malloc)("matrix access event buffer", MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH*sizeof(access_event));
 	matr->access_event_count = 0;
 	VG_(memset)(matr->access_patterns, 0, MAX_PATTERNS_PER_MATRIX*sizeof(access_pattern));
-	matr->last_pattern = 0;
+	matr->current_pattern = 0;
+	matr->current_sequence_length = 0;
 
 	/* Update the matrix index */
 
