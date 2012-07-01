@@ -1,3 +1,30 @@
+/*
+ * Collects some statistics
+ */
+
+
+#include "simplesim.h"
+
+#define _GNU_SOURCE
+#include <stdbool.h>
+#include <stdint.h>
+#include <limits.h>
+#include "pub_tool_libcbase.h" // VG_(strlen)
+#include "pub_tool_libcfile.h" // VG_(open), VG_(write)
+#include "pub_tool_vki.h" // VKI_O_TRUNC ... 
+#include "pub_tool_mallocfree.h" // VG_(malloc)
+#include "pub_tool_libcprint.h" // VG_(printf)
+#include "pub_tool_libcassert.h" // VG_(tool_panic)
+
+
+traced_matrix traced_matrices [MAX_MATRIX_COUNT];
+traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
+
+// number of traced matrices
+int traced_matrices_count = 0;
+// number of stopped matrice traces
+int stopped_matrices_count = 0;
+
 static traced_matrix* find_matrix(Addr access)
 {
 	int i;
