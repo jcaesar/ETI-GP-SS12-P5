@@ -1,8 +1,3 @@
-// number of traced matrices
-int traced_matrices_count = 0;
-// number of stopped matrice traces
-int stopped_matrices_count = 0;
-
 static traced_matrix* find_matrix(Addr access)
 {
 	int i;

@@ -79,6 +79,11 @@ typedef struct _traced_matrix
 traced_matrix traced_matrices [MAX_MATRIX_COUNT];
 traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
 
+// number of traced matrices
+int traced_matrices_count = 0;
+// number of stopped matrice traces
+int stopped_matrices_count = 0;
+
 void ssim_init(void);
 void ssim_flush_cache(void);
 bool ssim_matrix_tracing_start(Addr, unsigned short m, unsigned short n, unsigned short elsize, char*);
