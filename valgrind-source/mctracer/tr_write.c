@@ -15,6 +15,10 @@
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic
 
+static void write_access_methods(Int fd, matrix_access_data* access_data);
+static void ssim_qsort(matrix_access_method arr[], int begin, int end);
+static void swap(matrix_access_method* a, matrix_access_method* b);
+
 void ssim_save_stats(HChar* fname)
 {
 	SysRes fd_res = VG_(open)(fname, VKI_O_WRONLY|VKI_O_TRUNC|VKI_O_CREAT, VKI_S_IRUSR|VKI_S_IWUSR|VKI_S_IRGRP|VKI_S_IWGRP);

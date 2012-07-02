@@ -89,4 +89,8 @@ VG_REGPARM(2) void ssim_load(Addr addr, SizeT size);
 VG_REGPARM(2) void ssim_store(Addr addr, SizeT size);
 void ssim_save_stats(char* fname);
 
+void update_matrix_stats(Addr addr, SizeT size, char type);
+traced_matrix* find_matrix(Addr access);
+int cache_ref(Addr a, int size);
+
 #endif

@@ -25,7 +25,7 @@ int traced_matrices_count = 0;
 // number of stopped matrice traces
 int stopped_matrices_count = 0;
 
-static traced_matrix* find_matrix(Addr access)
+traced_matrix* find_matrix(Addr access)
 {
 	int i;
 	int tmax = traced_matrices_count - stopped_matrices_count;
@@ -122,7 +122,7 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 	}
 }
 
-static void update_matrix_stats(Addr addr, SizeT size, char type)
+void update_matrix_stats(Addr addr, SizeT size, char type)
 {
 	traced_matrix* matr = find_matrix(addr);
 

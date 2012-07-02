@@ -93,7 +93,7 @@ static int cache_setref(int set_no, Addr tag)
 }
 
 // a reference at address <a> with size <s>, return 1 on hit
-static int cache_ref(Addr a, int size)
+int cache_ref(Addr a, int size)
 {
 	int  set1 = ( a         / LINESIZE) & (SETS-1);
 	int  set2 = ((a+size-1) / LINESIZE) & (SETS-1);
