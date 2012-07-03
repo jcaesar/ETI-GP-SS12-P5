@@ -18,6 +18,9 @@ typedef struct _matrix_coordinates {
 	short n;
 } matrix_coordinates;
 
+#define byte unsigned char
+#define ushort unsigned short
+
 struct _element_access_count;
 typedef struct _element_access_count
 {
@@ -107,6 +110,11 @@ typedef struct _traced_matrix
 	unsigned int current_sequence_length;
 } traced_matrix;
 
+extern traced_matrix traced_matrices [MAX_MATRIX_COUNT];
+extern traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
+extern int traced_matrices_count;
+extern int stopped_matrices_count;
+
 void ssim_init(void);
 void ssim_flush_cache(void);
 bool ssim_matrix_tracing_start(Addr, unsigned short m, unsigned short n, unsigned short elsize, char*);
@@ -114,5 +122,9 @@ bool ssim_matrix_tracing_stop(Addr);
 VG_REGPARM(2) void ssim_load(Addr addr, SizeT size);
 VG_REGPARM(2) void ssim_store(Addr addr, SizeT size);
 void ssim_save_stats(char* fname);
+
+void update_matrix_stats(Addr addr, SizeT size, char type);
+traced_matrix* find_matrix(Addr access);
+int cache_ref(Addr a, int size);
 
 #endif

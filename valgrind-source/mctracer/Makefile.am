@@ -6,14 +6,14 @@ EXTRA_DIST = docs/tr-manual.xml
 # mctracer-<platform>
 #----------------------------------------------------------------------------
 
-pkginclude_HEADERS = mctracer.h
+pkginclude_HEADERS = mctracer.h simplesim.h
 
 noinst_PROGRAMS  = mctracer-@VGCONF_ARCH_PRI@-@VGCONF_OS@
 if VGCONF_HAVE_PLATFORM_SEC
 noinst_PROGRAMS += mctracer-@VGCONF_ARCH_SEC@-@VGCONF_OS@
 endif
 
-MCTRACER_SOURCES_COMMON = tr_main.c simplesim.c
+MCTRACER_SOURCES_COMMON = tr_main.c tr_sim.c tr_stats.c tr_sequences.c tr_write.c
 
 mctracer_@VGCONF_ARCH_PRI@_@VGCONF_OS@_SOURCES      = \
 	$(MCTRACER_SOURCES_COMMON)
