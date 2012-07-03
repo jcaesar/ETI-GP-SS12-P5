@@ -3,26 +3,26 @@
 
 #include <valgrind/mctracer.h>
 
-#define SIZE 1024
-
-int main()
+int main(int argc, char* argv[])
 {
 	double* m;
 	int i, j, it;
 	double sum = 0.0;
+	int size = 1024;
+	if(argc == 2) size = atoi(argv[1]);
 
-	m = (double*) malloc(sizeof(double)*SIZE*SIZE);
-	SSIM_MATRIX_TRACING_START(m, SIZE, SIZE, sizeof(double), "redblack - m");
+	m = (double*) malloc(sizeof(double)*size*size);
+	SSIM_MATRIX_TRACING_START(m, size, size, sizeof(double), "redblack - m");
 
 	// init points
-	for(i=0; i<SIZE; i++)
-		for(j=0; j<SIZE; j++)
-			m[i*SIZE+j] = 0.0;
+	for(i=0; i<size; i++)
+		for(j=0; j<size; j++)
+			m[i*size+j] = 0.0;
 	// set left/right border
-	for(i=0; i<SIZE; i++)
+	for(i=0; i<size; i++)
 	{
-		m[ i*SIZE + 0        ] = 10.0;
-		m[ i*SIZE + (SIZE-1) ] = 10.0;
+		m[ i*size + 0        ] = 10.0;
+		m[ i*size + (size-1) ] = 10.0;
 	}
 
 	// run 50 iterations
@@ -30,26 +30,26 @@ int main()
 	{
 
 		// update inner black points
-		for(i=1; i<SIZE-1; i++)
-			for(j=1+(i%2); j<SIZE-1; j+=2)
-				m[i*SIZE+j] = ( m[(i-1)*SIZE +j] +
-				                m[(i+1)*SIZE +j] +
-				                m[ i*SIZE + j-1] +
-				                m[ i*SIZE + j+1] )/4.0;
+		for(i=1; i<size-1; i++)
+			for(j=1+(i%2); j<size-1; j+=2)
+				m[i*size+j] = ( m[(i-1)*size +j] +
+				                m[(i+1)*size +j] +
+				                m[ i*size + j-1] +
+				                m[ i*size + j+1] )/4.0;
 
 		// update inner red points
-		for(i=1; i<SIZE-1; i++)
-			for(j=1+((i+1)%2); j<SIZE-1; j+=2)
-				m[i*SIZE+j] = ( m[(i-1)*SIZE +j] +
-				                m[(i+1)*SIZE +j] +
-				                m[ i*SIZE + j-1] +
-				                m[ i*SIZE + j+1] )/4.0;
+		for(i=1; i<size-1; i++)
+			for(j=1+((i+1)%2); j<size-1; j+=2)
+				m[i*size+j] = ( m[(i-1)*size +j] +
+				                m[(i+1)*size +j] +
+				                m[ i*size + j-1] +
+				                m[ i*size + j+1] )/4.0;
 	}
 
 	// print checksum
-	for(i=0; i<SIZE; i++)
-		for(j=0; j<SIZE; j++)
-			sum += m[i*SIZE+j];
+	for(i=0; i<size; i++)
+		for(j=0; j<size; j++)
+			sum += m[i*size+j];
 
 	printf("Sum: %f\n", sum);
 
