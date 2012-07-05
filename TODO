@@ -1,0 +1,3 @@
+jakob
+    - jc.c crashes when executed with mctracer
+    - matrix names are not passed correctly
