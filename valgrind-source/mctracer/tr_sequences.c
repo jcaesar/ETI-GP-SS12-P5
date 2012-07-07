@@ -50,6 +50,8 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 
 	if(ap->length == 0) 
 		return;
+
+	int lastwas = -1; // variable to mark if the last cycle marked the pattern
 	unsigned int j;
 	for(j = 0; j < count; ++j) // loop over access buffer, loop variable is modified inside of the loop
 	{
@@ -61,10 +63,10 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 			if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
 			   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
 				break;
-		if(apstep == ap->length) // means that all were equal
+		if(apstep == ap->length || apstep > 0 && lastwas != -1) // means that all were equal || means that the pattern continued but didn't finish
 		{
 			unsigned int k;
-			for(k = 0; k < ap->length; ++k)
+			for(k = 0; k < apstep; ++k)
 			{
 				if(accbuf[j+k].is_hit)
 					++ap->steps[k].hits;
@@ -72,9 +74,25 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 					++ap->steps[k].misses;
 				patterned_access[j+k] = ap;
 			}
-			j += ap->length - 1; // -1 to counter loop increment
-			++(ap->occurences);
+			if(apstep == ap->length)
+			{
+				lastwas = j; 
+				j += ap->length - 1; // -1 to counter loop increment
+				++(ap->occurences);
+			}
+			else
+			{
+				// what we found and marked was shorter than the pattern.
+				// that means, that we could have matched a full pattern if it was in a different rotation
+				// => rotate the pattern
+				matrix_access_method temp[MAX_PATTERN_LENGTH];
+				VG_(memcpy)(temp, ap->steps, sizeof(matrix_access_method)*apstep);
+				VG_(memmove)(ap->steps, ap->steps + apstep, sizeof(matrix_access_method)*(ap->length - apstep));
+				VG_(memcpy)(ap->steps + (ap->length - apstep), temp, sizeof(matrix_access_method)*apstep);
+			}
 		}
+		else
+			lastwas = -1;
 	}
 }
 
@@ -207,13 +225,28 @@ void process_pattern_buffer(traced_matrix * matr)
 		// still within the same ap? just count
 		if(patterned_access[i] == cap)
 		{
-			if(cap) // this check is irrelephant
-				matr->current_sequence_length++;
-			continue;
+			if(cap)
+			{
+				// before we're ready to jump over the whole pattern length, we have to check whether the pattern is complete
+				// since mark_pattern_findings is allowed to mark sequences which are not a multiple of the pattern
+				unsigned int j;
+				for(j = 1; j < cap->length; ++j)
+					if(patterned_access[i+j] != cap)
+						break;
+				if(j >= cap->length)
+				{
+					matr->current_sequence_length++;
+					continue;
+				}
+				else
+					i += j;
+			}
+			else
+				continue;
 		}
 		if(cap)
 		{
-			int j;
+			unsigned int j;
 			for(j = 0; j < cap->sequence_count; ++j)
 			{
 				if(cap->sequences[j].length == matr->current_sequence_length &&
