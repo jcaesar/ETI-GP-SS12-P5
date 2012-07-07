@@ -315,7 +315,6 @@ IRSB* mt_instrument ( VgCallbackClosure* closure,
                       VexGuestExtents* vge,
                       IRType gWordTy, IRType hWordTy )
 {
-	IRDirty*   di;
 	Int        i;
 	IRSB*      sbOut;
 	IRTypeEnv* tyenv = sbIn->tyenv;

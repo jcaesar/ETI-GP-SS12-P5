@@ -16,7 +16,6 @@
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic)
 
-
 traced_matrix traced_matrices [MAX_MATRIX_COUNT];
 traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
 
@@ -113,6 +112,7 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 					VG_(tool_panic)("Max. number of access methods exceeded.");
 				}
 			}
+			update_matrix_pattern_stats(matr, offset_n, offset_m, is_hit);
 		}
 
 		// update

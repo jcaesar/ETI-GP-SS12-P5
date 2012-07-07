@@ -143,8 +143,8 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	matr->start = addr;
 	matr->end = addr + m*n*ele_size;
 	
-    matr->name = (char*) VG_(malloc)("name", VG_(strlen)(name)*sizeof(char));
-    VG_(strcpy)(matr->name, name);
+	matr->name = (char*) VG_(malloc)("name", VG_(strlen)(name)*sizeof(char));
+	VG_(strcpy)(matr->name, name);
 
 	// size of each element of the matrix in bytes
 	matr->ele_size = ele_size;
@@ -175,10 +175,17 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 		}
 	}
 
-    matr->loads.hits = 0;
-    matr->stores.hits = 0;
-    matr->loads.misses = 0;
-    matr->stores.misses = 0;
+	matr->loads.hits = 0;
+	matr->stores.hits = 0;
+	matr->loads.misses = 0;
+	matr->stores.misses = 0;
+
+	// pattern finding stores
+	matr->access_buffer = (access_event*) VG_(malloc)("matrix access event buffer", MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH*sizeof(access_event));
+	matr->access_event_count = 0;
+	VG_(memset)(matr->access_patterns, 0, MAX_PATTERNS_PER_MATRIX*sizeof(access_pattern));
+	matr->current_pattern = 0;
+	matr->current_sequence_length = 0;
 
 	/* Update the matrix index */
 
@@ -216,6 +223,12 @@ bool ssim_matrix_tracing_stop(Addr addr)
 	{
 		return false;
 	}
+
+	// add remaining events to sequences
+	process_pattern_buffer(matr);
+	// free now unused memory
+	VG_(free)(matr->access_buffer);
+	matr->access_buffer = NULL;
 
 	/* We'll store "untraced" matrices at
 	 * the end of the array, so that we'll find the
