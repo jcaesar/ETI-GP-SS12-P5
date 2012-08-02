@@ -12,4 +12,8 @@
 		\node (scnd) at (0,1) {}; %n+1-th access
 		\draw [->] (frst) -- (scnd) node [midway,right,draw=none] {$(-1,-1)$};
 	\end{tikzpicture}
+\item[Pattern]
+	A pattern is an ordered set of relative accesses. These accesses have been observed subsequently multiple (to be exact: at least two) times. It is not guaranteed that the first access of a pattern always occures first. Patterns can't tell you anything about when or in which compositions they occur
+\item[Sequence]
+	When scanning for patterns in the access stream, a series of consecutive accesses is often accounted to one pattern. The length of this series and what happens next is bundled into a sequence.
 \end{description}

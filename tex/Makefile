@@ -5,7 +5,7 @@ endif
 all: docs-dev docs-usr pres
 
 COMMON_FILES=$(shell find common -type f -name *.tex -print)
-COMMON_DOC_FILES=$(shell find common -type f -name *.tex -print)
+COMMON_DOC_FILES=$(shell find docs/common -type f -name *.tex -print)
 DEVDOC_FILES=$(shell find docs/dev -type f -name *.tex -print)
 USRDOC_FILES=$(shell find docs/usr -type f -name *.tex -print)
 PRES_FILES=$(shell find presentation -type f -name *.tex -print)
