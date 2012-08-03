@@ -1,3 +1,6 @@
 jakob
     - jc.c crashes when executed with mctracer
     - matrix names are not passed correctly
+
+julius
+	- warning when matrix size never exceeded cache size

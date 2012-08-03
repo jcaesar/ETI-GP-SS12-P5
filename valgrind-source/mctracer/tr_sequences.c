@@ -243,16 +243,16 @@ void process_pattern_buffer(traced_matrix * matr)
 		{
 			if(cap)
 			{
-				// before we're ready to jump over the whole pattern length, we have to check whether the pattern is complete
+				// before we're ready to jump over the whole pattern length (done by loop increment), we have to check whether the pattern is complete
 				// since mark_pattern_findings is allowed to mark sequences which are not a multiple of the pattern
 				unsigned int j;
 				for(j = 1; j < cap->length; ++j)
 					if(patterned_access[i+j] != cap)
-						break;
+						break; // skips the continue for the outermost loop
 				if(j >= cap->length)
 				{
 					matr->current_sequence_length++;
-					continue;
+					continue; // continues the outermost loop
 				}
 				else
 					i += j;
