@@ -15,9 +15,24 @@
 #include "pub_tool_libcprint.h" // VG_(printf)
 #include "pub_tool_libcassert.h" // VG_(tool_panic
 
+typedef struct _write_sequence {
+	uint8_t pattern_id;
+	uint32_t occurences;
+	uint16_t repetitions;
+	uint16_t next_acces_m;
+	uint16_t next_acces_n;
+	uint8_t next_id;
+} write_sequence;
+
+write_sequence sequences[MAX_SEQUENCES_PER_MATRIX];
+
+static void write_patterns(int fd, traced_matrix * matrix);
+static void write_sequences(int fd, traced_matrix * matrix);
 static void write_access_methods(Int fd, matrix_access_data* access_data);
-static void ssim_qsort(matrix_access_method arr[], int begin, int end);
-static void swap(matrix_access_method* a, matrix_access_method* b);
+static void ssim_qsort_s(write_sequence arr[], int begin, int end);
+static void swap_s(write_sequence* a, write_sequence* b);
+static void ssim_qsort_am(matrix_access_method arr[], int begin, int end);
+static void swap_am(matrix_access_method* a, matrix_access_method* b);
 
 void ssim_save_stats(HChar* fname)
 {
@@ -51,7 +66,7 @@ void ssim_save_stats(HChar* fname)
 	 */
 
 	// MH:MIBADR => initalize with the DH and MH size
-	unsigned int mibaddr = 4 + traced_matrices_count*34;
+	unsigned int mibaddr = 4 + traced_matrices_count*36;
 	int i;
 	for (i = 0; i < traced_matrices_count; ++i)
 	{
@@ -70,7 +85,20 @@ void ssim_save_stats(HChar* fname)
 		tmp = traced_matrices[i].store_access_data.access_methods_count;
 		byte accm_stores_count = tmp < 8 ? (byte)tmp : 8;
 		VG_(write)(fd, &accm_stores_count, sizeof(byte));
-
+		
+		// MH:AZP (1 byte)
+		byte pattern_count=0;
+		unsigned int j;
+		for (j = 0; j<MAX_PATTERNS_PER_MATRIX; j++){
+			if (traced_matrices[i].access_patterns[j].length!=0){
+				pattern_count++;
+			}
+		}
+		VG_(write) (fd, &pattern_count, sizeof(byte));
+		
+		// MH:ASQ (1 byte)
+										//todo
+		
 		// MH:ADR (8 byte)
 		VG_(write)(fd, &(traced_matrices[i].start), sizeof(Addr));
 
@@ -167,7 +195,13 @@ void ssim_save_stats(HChar* fname)
         write_access_methods(fd, &(traced_matrices[i].load_access_data));
         // STORES
         write_access_methods(fd, &(traced_matrices[i].store_access_data));
-
+		
+		//PATTERNS
+		write_patterns(fd, &(traced_matrices[i]));
+		
+		//SEQUENCES
+		write_sequences(fd, &(traced_matrices[i]));
+		
 		/**
 		 * Name (NA)
 		 */
@@ -180,6 +214,106 @@ void ssim_save_stats(HChar* fname)
 	VG_(close)(fd);
 }
 
+static void write_patterns(int fd, traced_matrix * matrix){
+	/**
+	 * Access Pattern (ZP) 7 Byte + ZP:Len * 12 Byte
+	 */
+	
+	int i;
+	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+		if (matrix->access_patterns[i].length!=0){
+			
+			//ZP:ID
+			byte id = (byte)(&matrix->access_patterns[i] - matrix->access_patterns);
+			VG_(write) (fd, &id, sizeof(byte));
+			
+			//ZP:ANZ
+			VG_(write)(fd, &(matrix->access_patterns[i].occurences), sizeof(unsigned int));
+			
+			//ZP:LEN
+			ushort len = (ushort)(matrix->access_patterns[i].length);
+			VG_(write)(fd, &(len), sizeof(ushort));
+			
+			int k;
+			for (k = 0; k < matrix->access_patterns[i].length; ++k)
+			{
+				matrix_access_method accm = matrix->access_patterns[i].steps[k];
+
+				// ZA:OM
+				VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
+
+				// ZA:ON
+				VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
+
+				// ZA:AH
+				VG_(write)(fd, &(accm.hits), sizeof(unsigned int));
+
+				// ZA:AM
+				VG_(write)(fd, &(accm.misses), sizeof(unsigned int));
+			}
+		}
+	}
+}
+
+static void write_sequences(int fd, traced_matrix * matrix){
+	
+	//unsigned int sequence_count=0;
+	unsigned int total_sequence_count=0;
+	unsigned int i;
+	unsigned int counter=0;
+	unsigned int j;
+	
+	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+		if (matrix->access_patterns[i].length!=0){
+			//count sequences
+			total_sequence_count+=matrix->access_patterns[i].sequence_count;
+		}
+	}
+	
+	//List of all Sequences
+	write_sequence * all_sequences = VG_(malloc)("all sequences", total_sequence_count*sizeof(write_sequence));
+	VG_(memset)(all_sequences, 0, total_sequence_count*sizeof(write_sequence));
+	//write_sequence * curr_sequence;
+
+	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+		if (matrix->access_patterns[i].length!=0){
+			for (j = 0; j<matrix->access_patterns[i].sequence_count; j++){
+				all_sequences[counter].pattern_id = (uint8_t)(&matrix->access_patterns[i] - matrix->access_patterns);
+				all_sequences[counter].occurences = (uint32_t)matrix->access_patterns[i].sequences[j].occurences;
+				all_sequences[counter].repetitions = (uint16_t)matrix->access_patterns[i].sequences[j].length;
+				all_sequences[counter].next_acces_m = (uint16_t)matrix->access_patterns[i].sequences[j].next_access.offset_m;
+				all_sequences[counter].next_acces_n = (uint16_t)matrix->access_patterns[i].sequences[j].next_access.offset_n;
+				if(matrix->access_patterns[i].sequences[j].next_pattern!=0){
+					all_sequences[counter].next_id = (uint8_t)(matrix->access_patterns[i].sequences[j].next_pattern - matrix->access_patterns);
+				}
+				counter++;
+			}
+		}
+	}
+	
+	//sort and select the longest Sequences
+	int max=total_sequence_count;
+	if (total_sequence_count > MAX_SEQUENCES_PER_MATRIX){
+		ssim_qsort_s(all_sequences, 0, total_sequence_count);
+		max=MAX_SEQUENCES_PER_MATRIX;
+	}
+	
+	for (i=0; i<max; i++){
+		//SQ:PID
+		VG_(write)(fd, &(all_sequences[i].pattern_id), sizeof(byte));
+		//SQ:ANZ
+		VG_(write)(fd, &(all_sequences[i].occurences), sizeof(ushort));
+		//SQ:AW
+		VG_(write)(fd, &(all_sequences[i].repetitions), sizeof(ushort));
+		//SQ:NAM
+		VG_(write)(fd, &(all_sequences[i].next_acces_m), sizeof(ushort));
+		//SQ:NAN
+		VG_(write)(fd, &(all_sequences[i].next_acces_n), sizeof(ushort));
+		//SQ:NID
+		VG_(write)(fd, &(all_sequences[i].next_id), sizeof(byte));
+	}
+}
+
 static void write_access_methods(Int fd, matrix_access_data* access_data) {
     /**
 	 * Access methods (ZA) (2*N*12 bytes)
@@ -190,7 +324,7 @@ static void write_access_methods(Int fd, matrix_access_data* access_data) {
 	if (accm_count > 8)
     {
 		// sort the access methods according to their cumulative hits and misses
-		ssim_qsort(access_data->access_methods, 0, access_data->access_methods_count);
+		ssim_qsort_am(access_data->access_methods, 0, accm_count);
 	}
 
 	accm_count = accm_count > 8 ? 8 : accm_count;
@@ -219,7 +353,41 @@ static void write_access_methods(Int fd, matrix_access_data* access_data) {
  */
 
 
-static void ssim_qsort(matrix_access_method arr[], int begin, int end)
+static void ssim_qsort_s(write_sequence arr[], int begin, int end)
+{
+	if (end > begin + 1)
+	{
+		unsigned int piv = arr[begin].repetitions;
+		int l = begin + 1, r = end;
+
+		while (l < r)
+		{
+			unsigned int ele = arr[l].repetitions;
+
+			if (ele > piv)
+			{
+				l++;
+			}
+			else
+			{
+				swap_s(&arr[l], &arr[--r]);
+			}
+		}
+
+		swap_s(&arr[--l], &arr[begin]);
+		ssim_qsort_s(arr, begin, l);
+		ssim_qsort_s(arr, r, end);
+	}
+}
+
+static void swap_s(write_sequence* a, write_sequence* b)
+{
+	write_sequence t = *a;
+	*a = *b;
+	*b = t;
+}
+
+static void ssim_qsort_am(matrix_access_method arr[], int begin, int end)
 {
 	if (end > begin + 1)
 	{
@@ -236,17 +404,17 @@ static void ssim_qsort(matrix_access_method arr[], int begin, int end)
 			}
 			else
 			{
-				swap(&arr[l], &arr[--r]);
+				swap_am(&arr[l], &arr[--r]);
 			}
 		}
 
-		swap(&arr[--l], &arr[begin]);
-		ssim_qsort(arr, begin, l);
-		ssim_qsort(arr, r, end);
+		swap_am(&arr[--l], &arr[begin]);
+		ssim_qsort_am(arr, begin, l);
+		ssim_qsort_am(arr, r, end);
 	}
 }
 
-static void swap(matrix_access_method* a, matrix_access_method* b)
+static void swap_am(matrix_access_method* a, matrix_access_method* b)
 {
 	matrix_access_method t = *a;
 	*a = *b;
