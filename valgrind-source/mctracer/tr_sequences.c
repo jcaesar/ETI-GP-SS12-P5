@@ -76,6 +76,21 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 			}
 			if(apstep == ap->length)
 			{
+				if(lastwas == -1)
+				{
+					// matching pattern for the first time in this sequence. look backward and mark accesses which also belong to this pattern
+					int l = ap->length;
+					for(k = j - 1; k > j - ap->length; --k)
+					{
+						--l;
+						if(patterned_access[k] ||
+						   ap->steps[l].offset_m != accbuf[k].offset.m ||
+						   ap->steps[l].offset_n != accbuf[k].offset.n)
+							break;
+						patterned_access[k] = ap;
+
+					}
+				}
 				lastwas = j; 
 				j += ap->length - 1; // -1 to counter loop increment
 				++(ap->occurences);
@@ -216,8 +231,9 @@ void process_pattern_buffer(traced_matrix * matr)
 	// process sequences of patterns
 	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
+	i = 0;
 	if(matr->current_pattern != 0)
-		for(i = 0; i < cap->length - 1; ++i)
+		for(; i < cap->length - 1; ++i)
 			if(patterned_access[i])
 				break;
 	for(; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH - 2*MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
