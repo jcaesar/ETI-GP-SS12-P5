@@ -63,7 +63,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 			if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
 			   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
 				break;
-		if(apstep == ap->length || apstep > 0 && lastwas != -1) // means that all were equal || means that the pattern continued but didn't finish
+		if(apstep == ap->length || (apstep > 0 && lastwas != -1)) // means that all were equal || means that the pattern continued but didn't finish
 		{
 			unsigned int k;
 			for(k = 0; k < apstep; ++k)
@@ -79,7 +79,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 				if(lastwas == -1)
 				{
 					// matching pattern for the first time in this sequence. look backward and mark accesses which also belong to this pattern
-					int l = ap->length;
+					unsigned int l = ap->length;
 					for(k = j - 1; k > j - ap->length; --k)
 					{
 						--l;
@@ -231,12 +231,8 @@ void process_pattern_buffer(traced_matrix * matr)
 	// process sequences of patterns
 	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
-	i = 0;
-	if(matr->current_pattern != 0)
-		for(; i < cap->length - 1; ++i)
-			if(patterned_access[i])
-				break;
-	for(; i < MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH - 2*MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
+	// note on the loop variable: the processing of patterns actually always lags a step behind
+	for(i = 0; i <= count - MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
 	{
 		// still within the same ap? just count
 		if(patterned_access[i] == cap)
@@ -262,6 +258,7 @@ void process_pattern_buffer(traced_matrix * matr)
 		}
 		if(cap)
 		{
+			matr->current_sequence_length++;
 			unsigned int j;
 			for(j = 0; j < cap->sequence_count; ++j)
 			{
@@ -298,13 +295,14 @@ void process_pattern_buffer(traced_matrix * matr)
 
 		}
 		cap = patterned_access[i];
-		matr->current_sequence_length = cap ? 1 : 0;
+		matr->current_sequence_length = 0;
 	}
 	matr->current_pattern = cap;
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
-	// because the sequence recognition wants to know about the next pattern in case of a change, copy 2*MAX_PATTERN_LENGTH
-	VG_(memmove)(accbuf, accbuf + count - 2*MAX_PATTERN_LENGTH, 2*MAX_PATTERN_LENGTH);
-	matr->access_event_count = MAX_PATTERN_LENGTH;
+	// copy as much patterns as the sequence recognition hasn't processed
+	unsigned int copylen = count - i;
+	VG_(memmove)(accbuf, accbuf + count - copylen, copylen);
+	matr->access_event_count = copylen;
 }
 
 void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, short offset_m, bool is_hit)
