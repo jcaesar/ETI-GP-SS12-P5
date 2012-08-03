@@ -3,6 +3,7 @@
 
 #include "pub_tool_basics.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 #define MAX_MATRIX_COUNT 256
 #define MAX_MATRIX_ACCESS_METHODS 30
@@ -74,6 +75,9 @@ typedef struct _access_pattern {
 	unsigned int sequence_count;
 	unsigned int sequence_allocated;
 } access_pattern;
+
+//for writing sequences into file
+#define MAX_SEQUENCES_PER_MATRIX 256
 
 struct _traced_matrix;
 typedef struct _traced_matrix
