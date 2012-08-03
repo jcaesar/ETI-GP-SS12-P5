@@ -300,7 +300,7 @@ void process_pattern_buffer(traced_matrix * matr)
 	matr->current_pattern = cap;
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	// copy as much patterns as the sequence recognition hasn't processed
-	unsigned int copylen = count - i;
+	unsigned int copylen = count - i - (cap? cap->length:0);
 	VG_(memmove)(accbuf, accbuf + count - copylen, copylen);
 	matr->access_event_count = copylen;
 }
