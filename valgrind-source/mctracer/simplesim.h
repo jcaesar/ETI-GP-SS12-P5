@@ -19,9 +19,6 @@ typedef struct _matrix_coordinates {
 	short n;
 } matrix_coordinates;
 
-#define byte unsigned char
-#define ushort unsigned short
-
 struct _element_access_count;
 typedef struct _element_access_count
 {
@@ -77,7 +74,7 @@ typedef struct _access_pattern {
 } access_pattern;
 
 //for writing sequences into file
-#define MAX_SEQUENCES_PER_MATRIX 256
+#define MAX_SEQUENCES_PER_MATRIX 255
 
 struct _traced_matrix;
 typedef struct _traced_matrix

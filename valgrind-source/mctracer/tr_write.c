@@ -19,14 +19,15 @@ typedef struct _write_sequence {
 	uint8_t pattern_id;
 	uint32_t occurences;
 	uint16_t repetitions;
-	uint16_t next_acces_m;
-	uint16_t next_acces_n;
+	int16_t next_acces_m;
+	int16_t next_acces_n;
 	uint8_t next_id;
 } write_sequence;
 
 write_sequence sequences[MAX_SEQUENCES_PER_MATRIX];
 
 static void write_patterns(int fd, traced_matrix * matrix);
+static int count_sequences(traced_matrix * matrix);
 static void write_sequences(int fd, traced_matrix * matrix);
 static void write_access_methods(Int fd, matrix_access_data* access_data);
 static void ssim_qsort_s(write_sequence arr[], int begin, int end);
@@ -52,14 +53,14 @@ void ssim_save_stats(HChar* fname)
 	 */
 
     // magic number
-    byte magic_num[2] = {0xAF, 0xFE};
+    uint8_t magic_num[2] = {0xAF, 0xFE};
     // version of the file format
-    byte version = 0x2;
-    byte matr_count = (byte) traced_matrices_count;
+    uint8_t version = 0x2;
+    uint8_t matr_count = (uint8_t) traced_matrices_count;
 
-	VG_(write)(fd, magic_num, 2*sizeof(byte));
-	VG_(write)(fd, &version, sizeof(byte));
-	VG_(write)(fd, &matr_count, sizeof(byte));
+	VG_(write)(fd, magic_num, 2*sizeof(uint8_t));
+	VG_(write)(fd, &version, sizeof(uint8_t));
+	VG_(write)(fd, &matr_count, sizeof(uint8_t));
 
 	/**
 	 * MATRICES HEADER (N*34 bytes)
@@ -71,51 +72,60 @@ void ssim_save_stats(HChar* fname)
 	for (i = 0; i < traced_matrices_count; ++i)
 	{
 		// MH:GM (2 bytes)
-		VG_(write)(fd, &(traced_matrices[i].m), sizeof(ushort));
+		uint16_t tmp16 = (uint16_t)traced_matrices[i].m;
+		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// MH:GN (2 bytes)
-		VG_(write)(fd, &(traced_matrices[i].n), sizeof(ushort));
+		tmp16 = (uint16_t)traced_matrices[i].n;
+		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// MH:AZL (1 byte), limited to 8
 		int tmp = traced_matrices[i].load_access_data.access_methods_count;
-		byte accm_loads_count = tmp < 8 ? (byte)tmp : 8;
-		VG_(write)(fd, &accm_loads_count, sizeof(byte));
+		uint8_t accm_loads_count = tmp < 8 ? (uint8_t)tmp : 8;
+		VG_(write)(fd, &accm_loads_count, sizeof(uint8_t));
 
         // MH:AZS (1 byte), limited to 8
 		tmp = traced_matrices[i].store_access_data.access_methods_count;
-		byte accm_stores_count = tmp < 8 ? (byte)tmp : 8;
-		VG_(write)(fd, &accm_stores_count, sizeof(byte));
+		uint8_t accm_stores_count = tmp < 8 ? (uint8_t)tmp : 8;
+		VG_(write)(fd, &accm_stores_count, sizeof(uint8_t));
 		
 		// MH:AZP (1 byte)
-		byte pattern_count=0;
+		uint8_t pattern_count=0;
 		unsigned int j;
 		for (j = 0; j<MAX_PATTERNS_PER_MATRIX; j++){
 			if (traced_matrices[i].access_patterns[j].length!=0){
 				pattern_count++;
 			}
 		}
-		VG_(write) (fd, &pattern_count, sizeof(byte));
+		VG_(write) (fd, &pattern_count, sizeof(uint8_t));
 		
 		// MH:ASQ (1 byte)
-										//todo
+		unsigned int total_sequence_count = count_sequences(&(traced_matrices[i]));
+		uint8_t sequence_count = total_sequence_count > MAX_SEQUENCES_PER_MATRIX ? MAX_SEQUENCES_PER_MATRIX : total_sequence_count;
+		VG_(write) (fd, &sequence_count, sizeof(uint8_t));
 		
 		// MH:ADR (8 byte)
 		VG_(write)(fd, &(traced_matrices[i].start), sizeof(Addr));
 
 		// MH:MIBADR (4 byte)
-		VG_(write)(fd, &mibaddr, sizeof(unsigned int));
+		uint32_t tmp32 = (uint32_t)mibaddr;
+		VG_(write)(fd, &tmp32, sizeof(uint32_t));
     
         // MH:ALH (4 byte)
-        VG_(write)(fd, &(traced_matrices[i].loads.hits), sizeof(unsigned int));
+		tmp32 = (uint32_t)traced_matrices[i].loads.hits;
+        VG_(write)(fd, &(tmp32), sizeof(uint32_t));
         
         // MH:ALM (4 byte)
-        VG_(write)(fd, &(traced_matrices[i].loads.misses), sizeof(unsigned int));
+		tmp32 = (uint32_t)traced_matrices[i].loads.misses;
+        VG_(write)(fd, &(tmp32), sizeof(uint32_t));
         
         // MH:ASH (4 byte)
-        VG_(write)(fd, &(traced_matrices[i].stores.hits), sizeof(unsigned int));
+		tmp32 = (uint32_t)traced_matrices[i].stores.hits;
+        VG_(write)(fd, &(tmp32), sizeof(uint32_t));
         
         // MH:ASM (4 byte)
-        VG_(write)(fd, &(traced_matrices[i].stores.misses), sizeof(unsigned int));
+		tmp32 = (uint32_t)traced_matrices[i].stores.misses;
+        VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 
 		// calculate the address of the next MIB
 		// matrices
@@ -134,8 +144,8 @@ void ssim_save_stats(HChar* fname)
 		int rows = traced_matrices[i].m;
 		int cols = traced_matrices[i].n;
 
-		byte* loads_array = (byte*) VG_(malloc)("loads byte array", rows * cols);
-		byte* stores_array = (byte*) VG_(malloc)("stores byte array", rows * cols);
+		uint8_t* loads_array = (uint8_t*) VG_(malloc)("loads byte array", rows * cols);
+		uint8_t* stores_array = (uint8_t*) VG_(malloc)("stores byte array", rows * cols);
 
 		/**
 		 * Bytearray (BA)
@@ -162,7 +172,7 @@ void ssim_save_stats(HChar* fname)
 				}
 				else
 				{
-					loads_array[offset] = (byte) (BA_MAX_HIT_VAL * ((float)load_count.hits) / (load_count.hits + load_count.misses));
+					loads_array[offset] = (uint8_t) (BA_MAX_HIT_VAL * ((float)load_count.hits) / (load_count.hits + load_count.misses));
 				}
 
 				/**
@@ -177,7 +187,7 @@ void ssim_save_stats(HChar* fname)
 				}
 				else
 				{
-					stores_array[offset] = (byte) (BA_MAX_HIT_VAL * ((float)store_count.hits) / (store_count.hits + store_count.misses));
+					stores_array[offset] = (uint8_t) (BA_MAX_HIT_VAL * ((float)store_count.hits) / (store_count.hits + store_count.misses));
 				}
 			}
 		}
@@ -224,15 +234,16 @@ static void write_patterns(int fd, traced_matrix * matrix){
 		if (matrix->access_patterns[i].length!=0){
 			
 			//ZP:ID
-			byte id = (byte)(&matrix->access_patterns[i] - matrix->access_patterns);
-			VG_(write) (fd, &id, sizeof(byte));
+			uint8_t id = (uint8_t)(&matrix->access_patterns[i] - matrix->access_patterns);
+			VG_(write) (fd, &id, sizeof(uint8_t));
 			
 			//ZP:ANZ
-			VG_(write)(fd, &(matrix->access_patterns[i].occurences), sizeof(unsigned int));
+			uint32_t tmp32 = (uint32_t)matrix->access_patterns[i].occurences;
+			VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 			
 			//ZP:LEN
-			ushort len = (ushort)(matrix->access_patterns[i].length);
-			VG_(write)(fd, &(len), sizeof(ushort));
+			uint16_t len = (uint16_t)(matrix->access_patterns[i].length);
+			VG_(write)(fd, &(len), sizeof(uint16_t));
 			
 			int k;
 			for (k = 0; k < matrix->access_patterns[i].length; ++k)
@@ -240,49 +251,58 @@ static void write_patterns(int fd, traced_matrix * matrix){
 				matrix_access_method accm = matrix->access_patterns[i].steps[k];
 
 				// ZA:OM
-				VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
+				uint16_t tmp16 = (uint16_t)accm.offset_m;
+				VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 				// ZA:ON
-				VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
+				tmp16 = (uint16_t)accm.offset_n;
+				VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 				// ZA:AH
-				VG_(write)(fd, &(accm.hits), sizeof(unsigned int));
+				tmp32 = (uint32_t)accm.hits;
+				VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 
 				// ZA:AM
-				VG_(write)(fd, &(accm.misses), sizeof(unsigned int));
+				tmp32 = (uint32_t)accm.misses;
+				VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 			}
 		}
 	}
 }
 
-static void write_sequences(int fd, traced_matrix * matrix){
+static int count_sequences(traced_matrix * matrix){
 	
-	//unsigned int sequence_count=0;
 	unsigned int total_sequence_count=0;
 	unsigned int i;
-	unsigned int counter=0;
-	unsigned int j;
-	
 	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
 		if (matrix->access_patterns[i].length!=0){
 			//count sequences
 			total_sequence_count+=matrix->access_patterns[i].sequence_count;
 		}
 	}
+	return total_sequence_count;
+	
+}
+
+static void write_sequences(int fd, traced_matrix * matrix){
+	
+	unsigned int total_sequence_count = count_sequences(matrix);
 	
 	//List of all Sequences
-	write_sequence * all_sequences = VG_(malloc)("all sequences", total_sequence_count*sizeof(write_sequence));
+	write_sequence * all_sequences = (write_sequence *) VG_(malloc)("all sequences", total_sequence_count*sizeof(write_sequence));
 	VG_(memset)(all_sequences, 0, total_sequence_count*sizeof(write_sequence));
-	//write_sequence * curr_sequence;
-
+	unsigned int counter=0;
+	
+	unsigned int i;
 	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+		unsigned int j;
 		if (matrix->access_patterns[i].length!=0){
 			for (j = 0; j<matrix->access_patterns[i].sequence_count; j++){
 				all_sequences[counter].pattern_id = (uint8_t)(&matrix->access_patterns[i] - matrix->access_patterns);
 				all_sequences[counter].occurences = (uint32_t)matrix->access_patterns[i].sequences[j].occurences;
 				all_sequences[counter].repetitions = (uint16_t)matrix->access_patterns[i].sequences[j].length;
-				all_sequences[counter].next_acces_m = (uint16_t)matrix->access_patterns[i].sequences[j].next_access.offset_m;
-				all_sequences[counter].next_acces_n = (uint16_t)matrix->access_patterns[i].sequences[j].next_access.offset_n;
+				all_sequences[counter].next_acces_m = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset_m;
+				all_sequences[counter].next_acces_n = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset_n;
 				if(matrix->access_patterns[i].sequences[j].next_pattern!=0){
 					all_sequences[counter].next_id = (uint8_t)(matrix->access_patterns[i].sequences[j].next_pattern - matrix->access_patterns);
 				}
@@ -300,18 +320,20 @@ static void write_sequences(int fd, traced_matrix * matrix){
 	
 	for (i=0; i<max; i++){
 		//SQ:PID
-		VG_(write)(fd, &(all_sequences[i].pattern_id), sizeof(byte));
+		VG_(write)(fd, &(all_sequences[i].pattern_id), sizeof(uint8_t));
 		//SQ:ANZ
-		VG_(write)(fd, &(all_sequences[i].occurences), sizeof(ushort));
+		VG_(write)(fd, &(all_sequences[i].occurences), sizeof(uint16_t));
 		//SQ:AW
-		VG_(write)(fd, &(all_sequences[i].repetitions), sizeof(ushort));
+		VG_(write)(fd, &(all_sequences[i].repetitions), sizeof(uint16_t));
 		//SQ:NAM
-		VG_(write)(fd, &(all_sequences[i].next_acces_m), sizeof(ushort));
+		VG_(write)(fd, &(all_sequences[i].next_acces_m), sizeof(int16_t));
 		//SQ:NAN
-		VG_(write)(fd, &(all_sequences[i].next_acces_n), sizeof(ushort));
+		VG_(write)(fd, &(all_sequences[i].next_acces_n), sizeof(int16_t));
 		//SQ:NID
-		VG_(write)(fd, &(all_sequences[i].next_id), sizeof(byte));
+		VG_(write)(fd, &(all_sequences[i].next_id), sizeof(uint8_t));
 	}
+	
+	VG_(free)(all_sequences);
 }
 
 static void write_access_methods(Int fd, matrix_access_data* access_data) {
@@ -335,16 +357,20 @@ static void write_access_methods(Int fd, matrix_access_data* access_data) {
 		matrix_access_method accm = access_data->access_methods[k];
 
 		// ZA:OM
-		VG_(write)(fd, &(accm.offset_m), sizeof(ushort));
+		uint16_t tmp16 = (uint16_t)accm.offset_m;
+		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// ZA:ON
-		VG_(write)(fd, &(accm.offset_n), sizeof(ushort));
+		tmp16 = (uint16_t)accm.offset_n;
+		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// ZA:AH
-		VG_(write)(fd, &(accm.hits), sizeof(unsigned int));
+		uint32_t tmp32 = (uint32_t)accm.hits;
+		VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 
 		// ZA:AM
-		VG_(write)(fd, &(accm.misses), sizeof(unsigned int));
+		tmp32 = (uint32_t)accm.hits;
+		VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 	}
 }
 
@@ -357,12 +383,12 @@ static void ssim_qsort_s(write_sequence arr[], int begin, int end)
 {
 	if (end > begin + 1)
 	{
-		unsigned int piv = arr[begin].repetitions;
+		uint16_t piv = arr[begin].repetitions;
 		int l = begin + 1, r = end;
 
 		while (l < r)
 		{
-			unsigned int ele = arr[l].repetitions;
+			uint16_t ele = arr[l].repetitions;
 
 			if (ele > piv)
 			{
