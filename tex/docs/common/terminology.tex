@@ -3,7 +3,9 @@
 \item[Debuggee]
 	The piece of software for which we want to analyze cache usage. The term debuggee is used because it’s run with valgrind which is usually used for debugging.
 \item[Matrix]
-	A matrix is, in our case, an area of the memory which the debuggee has marked to contain data that is to be analyzed by our software. Access An access is an event generated for the debuggee. It marks loading or storing data to the main memory with a specific address.
+	A matrix is, in our case, an area of the memory which the debuggee has marked to contain data that is to be analyzed by our software. 
+\item [Access]
+	An access is an event generated for the debuggee. It marks loading or storing data to the main memory with a specific address.
 \item[Relative Access]
 	We are matching memory accesses to matrices and compute coordinates from that. For each access and it's previous access, a difference is coputed, and that is called a relative access. \newline
 	\begin{tikzpicture} %Tikzpictures are going to be fun. Our coordinate systems diverge...

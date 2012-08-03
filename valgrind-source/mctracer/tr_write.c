@@ -71,12 +71,12 @@ void ssim_save_stats(HChar* fname)
 	int i;
 	for (i = 0; i < traced_matrices_count; ++i)
 	{
-		// MH:GM (2 bytes)
-		uint16_t tmp16 = (uint16_t)traced_matrices[i].m;
+		// MH:GM (2 bytes) signed!
+		int16_t tmp16 = (int16_t)traced_matrices[i].m;
 		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
-		// MH:GN (2 bytes)
-		tmp16 = (uint16_t)traced_matrices[i].n;
+		// MH:GN (2 bytes) signed!
+		tmp16 = (int16_t)traced_matrices[i].n;
 		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// MH:AZL (1 byte), limited to 8
@@ -281,7 +281,6 @@ static int count_sequences(traced_matrix * matrix){
 		}
 	}
 	return total_sequence_count;
-	
 }
 
 static void write_sequences(int fd, traced_matrix * matrix){
@@ -322,7 +321,7 @@ static void write_sequences(int fd, traced_matrix * matrix){
 		//SQ:PID
 		VG_(write)(fd, &(all_sequences[i].pattern_id), sizeof(uint8_t));
 		//SQ:ANZ
-		VG_(write)(fd, &(all_sequences[i].occurences), sizeof(uint16_t));
+		VG_(write)(fd, &(all_sequences[i].occurences), sizeof(uint32_t));
 		//SQ:AW
 		VG_(write)(fd, &(all_sequences[i].repetitions), sizeof(uint16_t));
 		//SQ:NAM
@@ -357,11 +356,11 @@ static void write_access_methods(Int fd, matrix_access_data* access_data) {
 		matrix_access_method accm = access_data->access_methods[k];
 
 		// ZA:OM
-		uint16_t tmp16 = (uint16_t)accm.offset_m;
+		int16_t tmp16 = (int16_t)accm.offset_m;
 		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// ZA:ON
-		tmp16 = (uint16_t)accm.offset_n;
+		tmp16 = (int16_t)accm.offset_n;
 		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// ZA:AH
@@ -369,7 +368,7 @@ static void write_access_methods(Int fd, matrix_access_data* access_data) {
 		VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 
 		// ZA:AM
-		tmp32 = (uint32_t)accm.hits;
+		tmp32 = (uint32_t)accm.misses;
 		VG_(write)(fd, &(tmp32), sizeof(uint32_t));
 	}
 }
