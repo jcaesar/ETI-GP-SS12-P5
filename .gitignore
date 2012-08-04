@@ -3,6 +3,7 @@ build.log
 jc
 mm
 redblack
+redblack_ncurses
 
 *.etis
 *.o
@@ -20,7 +21,7 @@ valgrind-source/helgrind
 valgrind-source/lackey
 valgrind-source/drd
 
-.deps
+.*
 
 
 valgrind-source/Makefile
@@ -43,3 +44,26 @@ valgrind-source/perf/Makefile
 valgrind-source/stamp-h1
 valgrind-source/tests/Makefile
 valgrind-source/valgrind.pc
+
+tex/presentation/main.log
+tex/presentation/main.toc
+tex/presentation/main.aux
+tex/presentation/main.nav
+tex/presentation/main.out
+tex/presentation/main.snm
+tex/presentation/main.pdf
+tex/docs/*/main.log
+tex/docs/*/main.toc
+tex/docs/*/main.aux
+tex/docs/*/main.nav
+tex/docs/*/main.out
+tex/docs/*/main.snm
+tex/docs/*/main.pdf
+
+
+/*
+!/tex
+!/valgrind-source
+!/examples
+!/gui
+
