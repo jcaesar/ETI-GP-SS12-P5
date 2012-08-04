@@ -1,1 +1,9 @@
-\texttt{valgrind --tool=mctracer \textit{<debuggee>}}
+\texttt{
+	valgrind --tool=mctracer
+	[--output=<\textit{outputfilepath}>]
+	<\textit{debuggee}>
+}
+\begin{description}
+\item[\texttt{outputfilepath}] Path where the analysis report file is written. Default is the debuggee filename suffixed with \texttt{.etis}
+\item[\texttt{debuggee}] Path to the program to be run and analyzed. Common valgrind usage.
+\end{escription}
