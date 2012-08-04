@@ -111,6 +111,44 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 	}
 }
 
+// check whether oap is a subpattern of any other patterns and kill it, if so
+static void subpattern_elimination_check(traced_matrix * const matr, access_pattern * const oap, access_pattern ** const patterned_access)
+{
+	if(oap->length == 0)
+		return;
+	unsigned int j;
+	for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j) // loop over patterns which could eliminate oap
+	{
+		access_pattern * const iap = matr->access_patterns + j; // inner access pattern	
+		if(iap == oap)
+			continue;
+		if(iap->length < oap->length)
+			continue;
+		unsigned int k;
+		for(k = 0; k < iap->length; ++k)
+		{
+			unsigned int l, o;
+			for(l = 0, o = k; l < oap->length; ++l)
+			{
+				if(o >= iap->length)
+					o = 0;
+				if(oap->steps[l].offset_n != iap->steps[o].offset_n ||
+				   oap->steps[l].offset_m != iap->steps[o].offset_m)
+					break;
+				++o;
+			}
+			if(l == oap->length)
+			{
+				if(oap->steps == 0)
+					VG_(tool_panic)("inconsistent state of patterns");
+				delete_access_pattern(matr, oap, patterned_access);
+				mark_pattern_findings(matr, iap, patterned_access);
+				return;
+			}
+		}
+	}
+}
+
 void process_pattern_buffer(traced_matrix * matr)
 {
 	// convenience shorthands
@@ -188,46 +226,12 @@ void process_pattern_buffer(traced_matrix * matr)
 		// rap->occurences = 0; done by deletion
 		rap->accesses_before_lifetime = matr_accesses;
 		mark_pattern_findings(matr, rap, patterned_access);
+		{
+		}
 	}
 	// consistency check: eliminate patterns which are subpatterns to others
 	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over patterns which may be eliminated
-	{
-		access_pattern * const oap = matr->access_patterns + i; // outer access pattern
-		if(oap->length == 0)
-			continue;
-		unsigned int j;
-		for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j) // loop over patterns which could eliminate oap
-		{
-			if(i == j)
-				continue;
-			access_pattern * const iap = matr->access_patterns + j; // inner access pattern	
-			if(iap->length < oap->length)
-				continue;
-			unsigned int k;
-			for(k = 0; k < iap->length; ++k)
-			{
-				unsigned int l, o;
-				for(l = 0, o = k; l < oap->length; ++l)
-				{
-					if(o >= iap->length)
-						o = 0;
-					if(oap->steps[l].offset_n != iap->steps[o].offset_n ||
-					   oap->steps[l].offset_m != iap->steps[o].offset_m)
-						break;
-					++o;
-				}
-				if(l == oap->length)
-				{
-					if(oap->steps == 0)
-						VG_(tool_panic)("inconsistent state of patterns");
-					delete_access_pattern(matr, oap, patterned_access);
-					mark_pattern_findings(matr, iap, patterned_access);
-					goto outer_matrix_eliminated;
-				}
-			}
-		}
-		outer_matrix_eliminated: continue; // that continue prevents a compilation error
-	}
+		subpattern_elimination_check(matr, matr->access_patterns + i, patterned_access); 
 	// process sequences of patterns
 	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
