@@ -48,7 +48,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 	const unsigned int count = matr->access_event_count;
 	access_event * const accbuf = matr->access_buffer;
 
-	if(ap->length == 0) 
+	if(!patterned_access || ap->length == 0) 
 		return;
 
 	int lastwas = -1; // variable to mark if the last cycle marked the pattern
@@ -80,7 +80,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 				{
 					// matching pattern for the first time in this sequence. look backward and mark accesses which also belong to this pattern
 					unsigned int l = ap->length;
-					for(k = j - 1; k > j - ap->length; --k)
+					for(k = j - 1; k > j - ap->length && k != UINT_MAX; --k)
 					{
 						--l;
 						if(patterned_access[k] ||
@@ -88,7 +88,6 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 						   ap->steps[l].offset_n != accbuf[k].offset.n)
 							break;
 						patterned_access[k] = ap;
-
 					}
 				}
 				lastwas = j; 
@@ -104,6 +103,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 				VG_(memcpy)(temp, ap->steps, sizeof(matrix_access_method)*apstep);
 				VG_(memmove)(ap->steps, ap->steps + apstep, sizeof(matrix_access_method)*(ap->length - apstep));
 				VG_(memcpy)(ap->steps + (ap->length - apstep), temp, sizeof(matrix_access_method)*apstep);
+				lastwas = -1;
 			}
 		}
 		else
@@ -112,10 +112,10 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 }
 
 // check whether oap is a subpattern of any other patterns and kill it, if so
-static void subpattern_elimination_check(traced_matrix * const matr, access_pattern * const oap, access_pattern ** const patterned_access)
+static bool subpattern_elimination_check(traced_matrix * const matr, access_pattern * const oap, access_pattern ** const patterned_access)
 {
 	if(oap->length == 0)
-		return;
+		return true;
 	unsigned int j;
 	for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j) // loop over patterns which could eliminate oap
 	{
@@ -143,10 +143,11 @@ static void subpattern_elimination_check(traced_matrix * const matr, access_patt
 					VG_(tool_panic)("inconsistent state of patterns");
 				delete_access_pattern(matr, oap, patterned_access);
 				mark_pattern_findings(matr, iap, patterned_access);
-				return;
+				return true;
 			}
 		}
 	}
+	return false;
 }
 
 void process_pattern_buffer(traced_matrix * matr)
@@ -171,7 +172,7 @@ void process_pattern_buffer(traced_matrix * matr)
 	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over access patterns
 		mark_pattern_findings(matr, matr->access_patterns + i, patterned_access);
 	// find new patterns
-	for(i = 0; i < count - MAX_PATTERN_LENGTH*2; ++i)
+	for(i = 0; i <= count - MAX_PATTERN_LENGTH*2; ++i)
 	{
 		if(patterned_access[i])
 			continue;
@@ -191,52 +192,55 @@ void process_pattern_buffer(traced_matrix * matr)
 				break;
 		if(j < length)
 			continue;
-		// found a pattern, find a place to store it in.
-		// (Keeping a list of all located patterns around would require a much more sofisticated pattern recognition algorithm
-		//  it would probably be slower, too.)
-		unsigned int matr_accesses = matr->loads.misses + matr->loads.hits + matr->stores.misses + matr->stores.hits;
-		float max_expendability = 0;
-		access_pattern * rap = 0; // replaced access pattern
-		for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j)
-		{
-			access_pattern * const ap = matr->access_patterns + j;
-			if(ap->length == 0)
-			{
-				rap = ap;
-				break;
-			}
-			// the relevance of a pattern is computed by the fraction of accesses that match that pattern since that pattern emerged.
-			float expendability = (double)(matr_accesses - ap->accesses_before_lifetime + 1000) / (ap->occurences * ap->length + 1000); // the constant summands prevent instabilities with small numbers
-			if(expendability > max_expendability)
-			{
-				rap = ap;
-				max_expendability = expendability;
-			}
-		}
-		delete_access_pattern(matr, rap, patterned_access);
-		rap->steps = VG_(malloc)("access pattern",length*sizeof(access_pattern));
+		access_pattern nap; // don't try anything funny like mark_pattern_finings on this one, many of my algorithms don't like patterns outside of matrices
+		VG_(memset)(&nap, 0, sizeof(access_pattern));
+		nap.steps = VG_(malloc)("access pattern",length*sizeof(access_pattern));
 		for(j = 0; j < length; ++j)
 		{
-			rap->steps[j].offset_n = accbuf[i+j].offset.n;
-			rap->steps[j].offset_m = accbuf[i+j].offset.m;
-			rap->steps[j].hits = 0;
-			rap->steps[j].misses = 0;
+			nap.steps[j].offset_n = accbuf[i+j].offset.n;
+			nap.steps[j].offset_m = accbuf[i+j].offset.m;
+			nap.steps[j].hits = 0;
+			nap.steps[j].misses = 0;
 		}
-		rap->length = length;
-		// rap->occurences = 0; done by deletion
-		rap->accesses_before_lifetime = matr_accesses;
-		mark_pattern_findings(matr, rap, patterned_access);
+		nap.length = length;
+		unsigned int matr_accesses = matr->loads.misses + matr->loads.hits + matr->stores.misses + matr->stores.hits;
+		nap.accesses_before_lifetime = matr_accesses;
+		if(!subpattern_elimination_check(matr, &nap, NULL))
 		{
+			// found a pattern, find a place to store it in.
+			// (Keeping a list of all located patterns around would require a much more sofisticated pattern recognition algorithm
+			//  it would probably be slower, too.)
+			float max_expendability = 0;
+			access_pattern * rap = 0; // replaced access pattern
+			for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j)
+			{
+				access_pattern * const ap = matr->access_patterns + j;
+				if(ap->length == 0)
+				{
+					rap = ap;
+					break;
+				}
+				// the relevance of a pattern is computed by the fraction of accesses that match that pattern since that pattern emerged.
+				float expendability = (double)(matr_accesses - ap->accesses_before_lifetime + 1000) / (ap->occurences * ap->length + 1000); // the constant summands prevent instabilities with small numbers
+				if(expendability > max_expendability)
+				{
+					rap = ap;
+					max_expendability = expendability;
+				}
+			}
+			delete_access_pattern(matr, rap, patterned_access);
+			VG_(memcpy)(rap, &nap, sizeof(access_pattern));
+			mark_pattern_findings(matr, rap, patterned_access);
+			{
+			}
 		}
 	}
-	// consistency check: eliminate patterns which are subpatterns to others
-	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over patterns which may be eliminated
-		subpattern_elimination_check(matr, matr->access_patterns + i, patterned_access); 
 	// process sequences of patterns
 	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
 	// note on the loop variable: the processing of patterns actually always lags a step behind
-	for(i = 0; i <= count - MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
+	// note on the condition: I've switched around between 2 and 1*MAX_PATTERN_LENGTH multiple times. It should be 2 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
+	for(i = 0; i <= count - 2*MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
 	{
 		// still within the same ap? just count
 		if(patterned_access[i] == cap)
@@ -305,7 +309,7 @@ void process_pattern_buffer(traced_matrix * matr)
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	// copy as much patterns as the sequence recognition hasn't processed
 	unsigned int copylen = count - i - (cap? cap->length:0);
-	VG_(memmove)(accbuf, accbuf + count - copylen, copylen);
+	VG_(memmove)(accbuf, accbuf + count - copylen, copylen*sizeof(access_event));
 	matr->access_event_count = copylen;
 }
 
