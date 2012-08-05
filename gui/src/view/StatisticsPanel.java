@@ -29,11 +29,11 @@ public class StatisticsPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel5 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
+        emptyLabel = new javax.swing.JLabel();
+        hitsLabel = new javax.swing.JLabel();
+        missesLabel = new javax.swing.JLabel();
+        rateLabel = new javax.swing.JLabel();
+        overallLabel = new javax.swing.JLabel();
         hitsOverall = new javax.swing.JLabel();
         missesOverall = new javax.swing.JLabel();
         rateOverall = new javax.swing.JLabel();
@@ -41,27 +41,35 @@ public class StatisticsPanel extends javax.swing.JPanel {
         hitsMatrix = new javax.swing.JLabel();
         missesMatrix = new javax.swing.JLabel();
         rateMatrix = new javax.swing.JLabel();
+        loadLabel = new javax.swing.JLabel();
+        hitsLoad = new javax.swing.JLabel();
+        missesLoad = new javax.swing.JLabel();
+        rateLoad = new javax.swing.JLabel();
+        storeLabel = new javax.swing.JLabel();
+        hitsStore = new javax.swing.JLabel();
+        missesStore = new javax.swing.JLabel();
+        rateStore = new javax.swing.JLabel();
 
         setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Overall Statistics", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
         setMinimumSize(new java.awt.Dimension(450, 50));
         setPreferredSize(new java.awt.Dimension(450, 50));
-        setLayout(new java.awt.GridLayout(3, 5));
-        add(jLabel5);
+        setLayout(new java.awt.GridLayout(5, 5));
+        add(emptyLabel);
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel2.setText("Hits");
-        add(jLabel2);
+        hitsLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        hitsLabel.setText("Hits");
+        add(hitsLabel);
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("Misses");
-        add(jLabel1);
+        missesLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        missesLabel.setText("Misses");
+        add(missesLabel);
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel3.setText("Success Rate");
-        add(jLabel3);
+        rateLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        rateLabel.setText("Success Rate");
+        add(rateLabel);
 
-        jLabel7.setText("Overall:");
-        add(jLabel7);
+        overallLabel.setText("Overall:");
+        add(overallLabel);
 
         hitsOverall.setText("0");
         add(hitsOverall);
@@ -83,20 +91,52 @@ public class StatisticsPanel extends javax.swing.JPanel {
 
         rateMatrix.setText("0");
         add(rateMatrix);
+
+        loadLabel.setText("Load:");
+        add(loadLabel);
+
+        hitsLoad.setText("0");
+        add(hitsLoad);
+
+        missesLoad.setText("0");
+        add(missesLoad);
+
+        rateLoad.setText("0");
+        add(rateLoad);
+
+        storeLabel.setText("Store:");
+        add(storeLabel);
+
+        hitsStore.setText("0");
+        add(hitsStore);
+
+        missesStore.setText("0");
+        add(missesStore);
+
+        rateStore.setText("0");
+        add(rateStore);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel emptyLabel;
+    private javax.swing.JLabel hitsLabel;
+    private javax.swing.JLabel hitsLoad;
     private javax.swing.JLabel hitsMatrix;
     private javax.swing.JLabel hitsOverall;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel hitsStore;
+    private javax.swing.JLabel loadLabel;
+    private javax.swing.JLabel missesLabel;
+    private javax.swing.JLabel missesLoad;
     private javax.swing.JLabel missesMatrix;
     private javax.swing.JLabel missesOverall;
+    private javax.swing.JLabel missesStore;
     private javax.swing.JLabel nameMatrix;
+    private javax.swing.JLabel overallLabel;
+    private javax.swing.JLabel rateLabel;
+    private javax.swing.JLabel rateLoad;
     private javax.swing.JLabel rateMatrix;
     private javax.swing.JLabel rateOverall;
+    private javax.swing.JLabel rateStore;
+    private javax.swing.JLabel storeLabel;
     // End of variables declaration//GEN-END:variables
 
     public void setOverallStatistics(long hits, long misses) {
@@ -106,12 +146,23 @@ public class StatisticsPanel extends javax.swing.JPanel {
         rateOverall.setText(f.format((double) hits / (double) (hits + misses) * 100) + " %");
     }
     
-    public void setMatrixStatistics(long hits, long misses, int number) {
-        nameMatrix.setText("Matrix " + ++number + ":");
-        hitsMatrix.setText(NumberFormat.getInstance().format(hits));
-        missesMatrix.setText(NumberFormat.getInstance().format(misses));
+    public void setMatrixStatistics(int[] load, int[] store, String name) {
+        long overallHits = load[0] + store[0];
+        long overallMisses = load[1] + store[1];
         DecimalFormat f = new DecimalFormat("#0.00");
-        rateMatrix.setText(f.format((double) hits / (double) (hits + misses) * 100)+ " %");
+        
+        nameMatrix.setText(name + ":");
+        hitsMatrix.setText(NumberFormat.getInstance().format(overallHits));
+        missesMatrix.setText(NumberFormat.getInstance().format(overallMisses));
+        rateMatrix.setText(f.format((double) overallHits / (double) (overallHits + overallMisses) * 100)+ " %");
+        
+        hitsLoad.setText(NumberFormat.getInstance().format(load[0]));
+        missesLoad.setText(NumberFormat.getInstance().format(load[1]));
+        rateLoad.setText(f.format((double) load[0] / (double) (load[0] + load[1]) * 100)+ " %");
+        
+        hitsStore.setText(NumberFormat.getInstance().format(store[0]));
+        missesStore.setText(NumberFormat.getInstance().format(store[1]));
+        rateStore.setText(f.format((double) store[0] / (double) (store[0] + store[1]) * 100)+ " %");
     }
 
 }

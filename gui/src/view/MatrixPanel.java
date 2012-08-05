@@ -5,11 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPanel;
 
@@ -33,7 +29,7 @@ public class MatrixPanel extends JPanel {
 
         this.matrix = matrix;
 
-        byte[][] pixel = matrix.getAbsoluteLoadMatrix();
+        byte[][] pixel = matrix.getAbsoluteMatrix();
         colors = new Color[pixel.length][pixel[0].length];
         for (int i = 0; i < pixel.length; i++) {
             for (int j = 0; j < pixel[0].length; j++) {

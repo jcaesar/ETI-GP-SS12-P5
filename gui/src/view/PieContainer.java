@@ -60,23 +60,25 @@ public class PieContainer extends javax.swing.JPanel {
 
                 int sum = jump.getHits() + jump.getMisses();
 
-                
-                //Zugriffsart mit größter Zugriffszagl hat maximalen Durchmesser
+
+                //Zugriffsart mit größter Zugriffszahl hat maximale Fläche
                 //Alle anderen werden entsprechend der Zugriffszahl skaliert
-                int diameter =  sum / maxAccesses * MAX_PIE_DIAMETER;
-                
-                if (diameter < 20) {
-                    diameter = 20;
+                double dia = sum;
+                dia /= maxAccesses;
+                dia = Math.sqrt(dia);
+                dia *= MAX_PIE_DIAMETER;
+                int diameter = (int) dia;
+
+                if (diameter >= 20) {
+                    //Richtige Position im Gitter setzen
+                    c.gridx = j;
+                    c.gridy = i;
+
+                    //Kuchendiagramm erstellen
+                    PieChartPanel pane = new PieChartPanel(jump, diameter);
+
+                    this.add(pane, c);
                 }
-
-                //Richtige Position im Gitter setzen
-                c.gridx = j;
-                c.gridy = i;
-
-                //Kuchendiagramm erstellen
-                PieChartPanel pane = new PieChartPanel(jump, diameter);
-
-                this.add(pane, c);
             }
         }
 

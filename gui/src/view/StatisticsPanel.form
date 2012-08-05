@@ -31,12 +31,12 @@
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
     <Property name="columns" type="int" value="5"/>
-    <Property name="rows" type="int" value="3"/>
+    <Property name="rows" type="int" value="5"/>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JLabel" name="jLabel5">
+    <Component class="javax.swing.JLabel" name="emptyLabel">
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel2">
+    <Component class="javax.swing.JLabel" name="hitsLabel">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Tahoma" size="12" style="1"/>
@@ -44,7 +44,7 @@
         <Property name="text" type="java.lang.String" value="Hits"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel1">
+    <Component class="javax.swing.JLabel" name="missesLabel">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Tahoma" size="12" style="1"/>
@@ -52,7 +52,7 @@
         <Property name="text" type="java.lang.String" value="Misses"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel3">
+    <Component class="javax.swing.JLabel" name="rateLabel">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Tahoma" size="12" style="1"/>
@@ -60,7 +60,7 @@
         <Property name="text" type="java.lang.String" value="Success Rate"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel7">
+    <Component class="javax.swing.JLabel" name="overallLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Overall:"/>
       </Properties>
@@ -96,6 +96,46 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="rateMatrix">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="loadLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Load:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="hitsLoad">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="missesLoad">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="rateLoad">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="storeLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Store:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="hitsStore">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="missesStore">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="rateStore">
       <Properties>
         <Property name="text" type="java.lang.String" value="0"/>
       </Properties>

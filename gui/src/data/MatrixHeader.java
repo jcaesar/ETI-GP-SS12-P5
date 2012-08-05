@@ -6,7 +6,9 @@ package data;
  */
 public class MatrixHeader {
 
-    private int xSize, ySize, numJumps, dataType, mibAddr;
+    private int xSize, ySize, numLoadJumps, numStoreJumps, dataType, mibAddr;
+    private int numPatterns, numSequences;
+    private int storeHits, storeMisses, loadHits, loadMisses;
     private long addr;
     private String name;
 
@@ -41,15 +43,29 @@ public class MatrixHeader {
     /**
      * @return the numJumps
      */
-    public int getNumJumps() {
-        return numJumps;
+    public int getNumLoadJumps() {
+        return numLoadJumps;
     }
 
     /**
      * @param numJumps the numJumps to set
      */
-    public void setNumJumps(int numJumps) {
-        this.numJumps = numJumps;
+    public void setNumLoadJumps(int numJumps) {
+        this.numLoadJumps = numJumps;
+    }
+
+    /**
+     * @return the numJumps
+     */
+    public int getNumStoreJumps() {
+        return numStoreJumps;
+    }
+
+    /**
+     * @param numJumps the numJumps to set
+     */
+    public void setNumStoreJumps(int numJumps) {
+        this.numStoreJumps = numJumps;
     }
 
     /**
@@ -112,6 +128,94 @@ public class MatrixHeader {
         System.out.println("Header Info for " + name);
         System.out.println("X " + xSize);
         System.out.println("Y " + ySize);
-        System.out.println("Num Jumps " + numJumps);
+        System.out.println("Num Load Jumps " + numLoadJumps);
+        System.out.println("Num Store Jumps " + numStoreJumps);
+        System.out.println("Num Patterns " + numPatterns);
+        System.out.println("Num Sequences " + numSequences);
+        System.out.println("MIBADDR " + Integer.toHexString(mibAddr));
+    }
+
+    /**
+     * @return the storeHits
+     */
+    public int getStoreHits() {
+        return storeHits;
+    }
+
+    /**
+     * @param storeHits the storeHits to set
+     */
+    public void setStoreHits(int storeHits) {
+        this.storeHits = storeHits;
+    }
+
+    /**
+     * @return the storeMisses
+     */
+    public int getStoreMisses() {
+        return storeMisses;
+    }
+
+    /**
+     * @param storeMisses the storeMisses to set
+     */
+    public void setStoreMisses(int storeMisses) {
+        this.storeMisses = storeMisses;
+    }
+
+    /**
+     * @return the loadHits
+     */
+    public int getLoadHits() {
+        return loadHits;
+    }
+
+    /**
+     * @param loadHits the loadHits to set
+     */
+    public void setLoadHits(int loadHits) {
+        this.loadHits = loadHits;
+    }
+
+    /**
+     * @return the loadMisses
+     */
+    public int getLoadMisses() {
+        return loadMisses;
+    }
+
+    /**
+     * @param loadMisses the loadMisses to set
+     */
+    public void setLoadMisses(int loadMisses) {
+        this.loadMisses = loadMisses;
+    }
+
+    /**
+     * @return the numPatterns
+     */
+    public int getNumPatterns() {
+        return numPatterns;
+    }
+
+    /**
+     * @param numPatterns the numPatterns to set
+     */
+    public void setNumPatterns(int numPatterns) {
+        this.numPatterns = numPatterns;
+    }
+
+    /**
+     * @return the numSequences
+     */
+    public int getNumSequences() {
+        return numSequences;
+    }
+
+    /**
+     * @param numSequences the numSequences to set
+     */
+    public void setNumSequences(int numSequences) {
+        this.numSequences = numSequences;
     }
 }

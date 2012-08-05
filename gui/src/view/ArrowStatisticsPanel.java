@@ -1,11 +1,9 @@
 
 package view;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
 
 /**
  *
@@ -40,13 +38,13 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         misses = new javax.swing.JLabel();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 5), new java.awt.Dimension(0, 5), new java.awt.Dimension(32767, 5));
 
-        setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        setBorder(javax.swing.BorderFactory.createEtchedBorder());
         setMaximumSize(new java.awt.Dimension(300, 300));
         setMinimumSize(new java.awt.Dimension(80, 120));
         setPreferredSize(new java.awt.Dimension(80, 120));
         setLayout(new java.awt.GridBagLayout());
 
-        jumpDirections.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        jumpDirections.setFont(new java.awt.Font("Arial", 1, 10)); // NOI18N
         jumpDirections.setText(" ( | )");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -77,7 +75,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 2.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         add(numberLabel, gridBagConstraints);
 
         number.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
@@ -87,7 +85,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         add(number, gridBagConstraints);
 
         hitsLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
@@ -97,7 +95,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 2.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         add(hitsLabel, gridBagConstraints);
 
         hits.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
@@ -107,7 +105,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         add(hits, gridBagConstraints);
 
         missesLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
@@ -117,7 +115,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 2.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         add(missesLabel, gridBagConstraints);
 
         misses.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
@@ -127,7 +125,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         add(misses, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -150,7 +148,7 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
     
     private void createArrowPanel(int x, int y, double rate) {
         arrow = new ArrowPanel(x,y,rate);
-        java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;

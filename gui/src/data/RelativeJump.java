@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package data;
 
 /**
  *
- * @author simon
+ * @author Simon Wimmer
  */
 public class RelativeJump {
 
@@ -20,6 +16,11 @@ public class RelativeJump {
         this.y_move = y_move;
         this.hits = hits;
         this.misses = misses;
+    }
+
+    @Override
+    public String toString() {
+        return "X-Move: " + x_move + " Y-Move: " + y_move + " Hits: " + hits + " Misses: " + misses;
     }
 
     /**

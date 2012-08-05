@@ -2,11 +2,15 @@ package view;
 
 import controller.EtisFileFilter;
 import data.DataInput;
+import data.Pattern;
 import data.RelativeJump;
+import data.Sequence;
+import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 
 /**
  *
@@ -21,8 +25,8 @@ public class MainFrame extends javax.swing.JFrame {
         initComponents();
 
         // Create instances of lists for dynamic GUI
-        dataStructureList = new ArrayList<JToggleButton>();
-        arrowList = new ArrayList<ArrowStatisticsPanel>();
+        arrowList = new ArrayList<>();
+        //patternList = new ArrayList<>();
     }
 
     /**
@@ -35,15 +39,34 @@ public class MainFrame extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        DataStructuresButtonGroup = new javax.swing.ButtonGroup();
+        dataStructuresButtonGroup = new javax.swing.ButtonGroup();
         fileChooser = new javax.swing.JFileChooser();
         aboutDialog = new javax.swing.JDialog();
-        jLabel1 = new javax.swing.JLabel();
-        Toolbar = new javax.swing.JToolBar();
-        LabelToolBar = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        relativeJumpPanel = new view.RelativeJumpPanel();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        jRadioButton2 = new javax.swing.JRadioButton();
+        jRadioButton3 = new javax.swing.JRadioButton();
+        loadStoreButtonGroup = new javax.swing.ButtonGroup();
+        toolbar = new javax.swing.JToolBar();
+        labelToolBar = new javax.swing.JLabel();
+        dropdownMenu = new javax.swing.JComboBox();
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        loadButton = new javax.swing.JToggleButton();
+        storeButton = new javax.swing.JToggleButton();
+        relativeAccessesTab = new javax.swing.JTabbedPane();
+        relativeJumpsTab = new javax.swing.JPanel();
+        relativeAccessPanel = new view.RelativeAccessPanel();
         piePanel = new javax.swing.JPanel();
+        patternsTab = new javax.swing.JPanel();
+        patternsPanel = new view.PatternsPanel();
+        sequencesTab = new javax.swing.JPanel();
+        sequencesPanel = new view.SequencesPanel();
         matrixPanel = new javax.swing.JPanel();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10), new java.awt.Dimension(0, 10), new java.awt.Dimension(32767, 5));
         statisticsPanel = new view.StatisticsPanel();
@@ -58,8 +81,69 @@ public class MainFrame extends javax.swing.JFrame {
 
         fileChooser.setFileFilter(new EtisFileFilter());
 
-        jLabel1.setText("Product Version: 0.8");
-        aboutDialog.getContentPane().add(jLabel1, java.awt.BorderLayout.PAGE_START);
+        aboutDialog.setTitle("About");
+        aboutDialog.setResizable(false);
+
+        jPanel1.setMinimumSize(new java.awt.Dimension(450, 300));
+        jPanel1.setPreferredSize(new java.awt.Dimension(450, 300));
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jScrollPane2.setBorder(null);
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        jTextArea2.setColumns(20);
+        jTextArea2.setEditable(false);
+        jTextArea2.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
+        jTextArea2.setLineWrap(true);
+        jTextArea2.setRows(3);
+        jTextArea2.setTabSize(4);
+        jTextArea2.setText("XXX is an analyzing tool to evaluate the cache performance of matrix operations.");
+        jTextArea2.setWrapStyleWord(true);
+        jTextArea2.setMinimumSize(new java.awt.Dimension(450, 300));
+        jTextArea2.setName("");
+        jTextArea2.setOpaque(false);
+        jScrollPane2.setViewportView(jTextArea2);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 407;
+        gridBagConstraints.ipady = 46;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
+        jPanel1.add(jScrollPane2, gridBagConstraints);
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setEditable(false);
+        jTextArea1.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
+        jTextArea1.setRows(5);
+        jTextArea1.setText("Developers\n------\nPhilip Becker-Ehmck\nThomas Breier\nMatthias Brugger\nJakob Buchgraber\nDominik Durner\nNils Kunze\nJulius Michaelis\nSimon Wimmer\n");
+        jScrollPane1.setViewportView(jTextArea1);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 407;
+        gridBagConstraints.ipady = 180;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(6, 10, 11, 10);
+        jPanel1.add(jScrollPane1, gridBagConstraints);
+
+        aboutDialog.getContentPane().add(jPanel1, java.awt.BorderLayout.LINE_START);
+
+        jCheckBoxMenuItem1.setSelected(true);
+        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
+
+        jRadioButton2.setText("jRadioButton2");
+
+        jRadioButton3.setText("jRadioButton3");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Cache Analyzer");
@@ -68,12 +152,30 @@ public class MainFrame extends javax.swing.JFrame {
         setResizable(false);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        Toolbar.setFloatable(false);
-        Toolbar.setRollover(true);
-        Toolbar.setBorderPainted(false);
+        toolbar.setFloatable(false);
+        toolbar.setRollover(true);
+        toolbar.setBorderPainted(false);
 
-        LabelToolBar.setText("Data Structures: ");
-        Toolbar.add(LabelToolBar);
+        labelToolBar.setText("Data Structures: ");
+        toolbar.add(labelToolBar);
+
+        toolbar.add(dropdownMenu);
+        toolbar.add(filler2);
+        toolbar.add(filler3);
+
+        loadStoreButtonGroup.add(loadButton);
+        loadButton.setText("Load");
+        loadButton.setFocusable(false);
+        loadButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        loadButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolbar.add(loadButton);
+
+        loadStoreButtonGroup.add(storeButton);
+        storeButton.setText("Store");
+        storeButton.setFocusable(false);
+        storeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        storeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolbar.add(storeButton);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -83,24 +185,27 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.1;
-        getContentPane().add(Toolbar, gridBagConstraints);
+        getContentPane().add(toolbar, gridBagConstraints);
 
-        jPanel2.setLayout(new java.awt.GridBagLayout());
+        relativeAccessesTab.setFocusable(false);
 
-        relativeJumpPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Relative Jumps", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
-        relativeJumpPanel.setDoubleBuffered(false);
-        relativeJumpPanel.setMinimumSize(new java.awt.Dimension(500, 250));
-        relativeJumpPanel.setName("");
-        relativeJumpPanel.setPreferredSize(new java.awt.Dimension(500, 250));
+        relativeJumpsTab.setLayout(new java.awt.GridBagLayout());
+
+        relativeAccessPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Relative Accesses", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
+        relativeAccessPanel.setDoubleBuffered(false);
+        relativeAccessPanel.setMinimumSize(new java.awt.Dimension(500, 250));
+        relativeAccessPanel.setName("");
+        relativeAccessPanel.setPreferredSize(new java.awt.Dimension(500, 250));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        jPanel2.add(relativeJumpPanel, gridBagConstraints);
+        relativeJumpsTab.add(relativeAccessPanel, gridBagConstraints);
+        relativeAccessPanel.getAccessibleContext().setAccessibleName("Relative Accesses");
 
-        piePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Pie Chart Representation", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
+        piePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Hit/Miss Ratio", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
         piePanel.setMinimumSize(new java.awt.Dimension(500, 250));
         piePanel.setName("");
         piePanel.setPreferredSize(new java.awt.Dimension(500, 250));
@@ -111,17 +216,45 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        jPanel2.add(piePanel, gridBagConstraints);
+        relativeJumpsTab.add(piePanel, gridBagConstraints);
+        piePanel.getAccessibleContext().setAccessibleDescription("");
+
+        relativeAccessesTab.addTab("Relative Accesses", relativeJumpsTab);
+
+        patternsTab.setLayout(new java.awt.GridBagLayout());
+
+        patternsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Patterns", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
+        patternsPanel.setPreferredSize(new java.awt.Dimension(450, 250));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        patternsTab.add(patternsPanel, gridBagConstraints);
+
+        relativeAccessesTab.addTab("Patterns", patternsTab);
+
+        sequencesTab.setLayout(new java.awt.GridBagLayout());
+
+        sequencesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sequences", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        sequencesTab.add(sequencesPanel, gridBagConstraints);
+
+        relativeAccessesTab.addTab("Sequences", sequencesTab);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 2.0;
-        getContentPane().add(jPanel2, gridBagConstraints);
+        getContentPane().add(relativeAccessesTab, gridBagConstraints);
+        relativeAccessesTab.getAccessibleContext().setAccessibleDescription("");
 
         matrixPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Absolute Matrix Representation", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
         matrixPanel.setMinimumSize(new java.awt.Dimension(450, 450));
@@ -140,9 +273,9 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         getContentPane().add(filler1, gridBagConstraints);
 
-        statisticsPanel.setMinimumSize(new java.awt.Dimension(450, 80));
+        statisticsPanel.setMinimumSize(new java.awt.Dimension(450, 100));
         statisticsPanel.setName("");
-        statisticsPanel.setPreferredSize(new java.awt.Dimension(450, 80));
+        statisticsPanel.setPreferredSize(new java.awt.Dimension(450, 100));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -153,20 +286,27 @@ public class MainFrame extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
+        openFileMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/16px-Document-open.png"))); // NOI18N
         openFileMenuItem.setText("Open File...");
+        openFileMenuItem.setPreferredSize(new java.awt.Dimension(150, 22));
         fileMenu.add(openFileMenuItem);
         fileMenu.add(seperator);
 
+        exitMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/16px-System-log-out.png"))); // NOI18N
         exitMenuItem.setText("Exit");
+        exitMenuItem.setToolTipText("");
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
 
         helpMenu.setText("Help");
 
-        docMenuItem.setText("Documentation");
+        docMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/16px-Help-browser.png"))); // NOI18N
+        docMenuItem.setText("Help Contents");
+        docMenuItem.setPreferredSize(new java.awt.Dimension(150, 22));
         helpMenu.add(docMenuItem);
 
+        aboutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/16px-About.png"))); // NOI18N
         aboutMenuItem.setText("About");
         helpMenu.add(aboutMenuItem);
 
@@ -213,72 +353,99 @@ public class MainFrame extends javax.swing.JFrame {
          */
         java.awt.EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 new MainFrame().setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup DataStructuresButtonGroup;
-    private javax.swing.JLabel LabelToolBar;
-    private javax.swing.JToolBar Toolbar;
     public javax.swing.JDialog aboutDialog;
-    public javax.swing.JMenuItem aboutMenuItem;
-    public javax.swing.JMenuItem docMenuItem;
-    public javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.ButtonGroup dataStructuresButtonGroup;
+    private javax.swing.JMenuItem docMenuItem;
+    private javax.swing.JComboBox dropdownMenu;
+    private javax.swing.JMenuItem exitMenuItem;
     public javax.swing.JFileChooser fileChooser;
     private javax.swing.JMenu fileMenu;
     private javax.swing.Box.Filler filler1;
+    private javax.swing.Box.Filler filler2;
+    private javax.swing.Box.Filler filler3;
     private javax.swing.JMenu helpMenu;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel2;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JRadioButton jRadioButton2;
+    private javax.swing.JRadioButton jRadioButton3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea jTextArea2;
+    private javax.swing.JLabel labelToolBar;
+    private javax.swing.JToggleButton loadButton;
+    private javax.swing.ButtonGroup loadStoreButtonGroup;
     private javax.swing.JPanel matrixPanel;
     private javax.swing.JMenuBar menuBar;
-    public javax.swing.JMenuItem openFileMenuItem;
+    private javax.swing.JMenuItem openFileMenuItem;
+    private view.PatternsPanel patternsPanel;
+    private javax.swing.JPanel patternsTab;
     private javax.swing.JPanel piePanel;
-    private view.RelativeJumpPanel relativeJumpPanel;
+    private view.RelativeAccessPanel relativeAccessPanel;
+    private javax.swing.JTabbedPane relativeAccessesTab;
+    private javax.swing.JPanel relativeJumpsTab;
     private javax.swing.JPopupMenu.Separator seperator;
+    private view.SequencesPanel sequencesPanel;
+    private javax.swing.JPanel sequencesTab;
     private view.StatisticsPanel statisticsPanel;
+    private javax.swing.JToggleButton storeButton;
+    private javax.swing.JToolBar toolbar;
     // End of variables declaration//GEN-END:variables
     // Declaration of variables for a dynamic GUI
-    private List<JToggleButton> dataStructureList;
+    private JPopupMenu popup;
     private List<ArrowStatisticsPanel> arrowList;
+    // private List<PatternStatisticsPanel> patternList;
     // End of variables declaration
+
+    public void updateDropdownMenu(List<String> names) {
+        dropdownMenu.removeAllItems();
+        for (String name : names) {
+            dropdownMenu.addItem(name);
+        }
+        dropdownMenu.getItemAt(0);
+        dropdownMenu.setSelectedIndex(0);
+        loadButton.setSelected(true);
+    }
 
     /**
      *
-     * Adds a button for the specified matrix in the toolbar.
-     *
-     * @param matrix
-     * @param number number of the matrix in the intern ArrayList
+     * @param names list of names of the matrices
      */
-    public void addToggleButton(DataInput matrix, int number) {
-        JToggleButton button = new JToggleButton();
-
-        DataStructuresButtonGroup.add(button);
-        // initialize Data
-        button.setText(String.valueOf(number));
-        button.setFocusable(false);
-        button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        button.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        if (number == 1) {
-            button.setSelected(true);
-        }
-        // add to toolbar
-        Toolbar.add(button);
-        // add to list (so that I can be removed later)
-        dataStructureList.add(button);
+    /**
+     * public void updateDropdownButton(List<String> names) { popup = new
+     * JPopupMenu(); Iterator<String> iter = names.iterator(); while
+     * (iter.hasNext()) { String name = iter.next(); JMenuItem item = new
+     * JMenuItem(name); item.setName(name); popup.add(item); }
+     *
+     * toolbar.removeAll(); toolbar.add(labelToolBar); dropDownButton = new
+     * JButton("test"); dropDownButton.setFocusable(false);
+     * toolbar.add(dropDownButton); toolbar.add(filler2);
+     * toolbar.add(loadButton); toolbar.add(storeButton);
+     * loadButton.setSelected(true); }
+    *
+     */
+    /**
+     *
+     * @param overallHits
+     * @param overallMisses
+     */
+    public void updateOverallStatistics(long overallHits, long overallMisses) {
+        statisticsPanel.setOverallStatistics(overallHits, overallMisses);
     }
 
-    public void removeToggleButton() {
-        for (JToggleButton btn : dataStructureList) {
-            Toolbar.remove(btn);
-            DataStructuresButtonGroup.remove(btn);
-        }
-        Toolbar.updateUI();
-        dataStructureList = new ArrayList<JToggleButton>();
+    public void updateMatrixStatistics(int[] load, int[] store, String name) {
+        statisticsPanel.setMatrixStatistics(load, store, name);
     }
-    
+
     /**
      *
      * @param matrix @TODO just quickly added, needs another class for "clean"
@@ -288,7 +455,6 @@ public class MainFrame extends javax.swing.JFrame {
         MatrixPanel m = new MatrixPanel(matrix);
         m.setPreferredSize(new java.awt.Dimension(450, 450));
         matrixPanel.add(m);
-        matrixPanel.updateUI();
     }
 
     /**
@@ -305,7 +471,7 @@ public class MainFrame extends javax.swing.JFrame {
      *
      * @param jump
      */
-    public void addArrowStatisticsPanel(RelativeJump jump) {
+    public void addArrowStatistics(RelativeJump jump) {
         ArrowStatisticsPanel arrow = new ArrowStatisticsPanel();
         // initialize Data
         arrow.setJumpDirections(jump.getX_move(), jump.getY_move(),
@@ -315,18 +481,17 @@ public class MainFrame extends javax.swing.JFrame {
         arrow.setMisses(jump.getMisses());
         arrow.setSuccessrate((double) jump.getHits()
                 / (double) (jump.getHits() + jump.getMisses()) * 100);
-        // add to list (so that I can be removed later)
         arrowList.add(arrow);
-        relativeJumpPanel.addArrowStatisticsPanel(arrow);
+        relativeAccessPanel.addArrowStatisticsPanel(arrow);
     }
 
     /**
      *
-     * Removes the all the relative jump panels from the GUI.
+     * Removes the all the rrelativeAccessPanells from the GUI.
      */
     public void removeArrowStatistics() {
-        relativeJumpPanel.removeArrowStatistics();
-        relativeJumpPanel.updateUI();
+        relativeAccessPanel.removeArrowStatistics();
+        relativeAccessPanel.updateUI();
     }
 
     /**
@@ -349,45 +514,113 @@ public class MainFrame extends javax.swing.JFrame {
         piePanel.removeAll();
     }
 
-    public void updateOverallStatistics(long overallHits, long overallMisses) {
-        statisticsPanel.setOverallStatistics(overallHits, overallMisses);
-    }
-
-    public void updateDetailedStatistics(long hits, long misses, int n) {
-        statisticsPanel.setMatrixStatistics(hits, misses, n);
+    /**
+     *
+     * @param s
+     */
+    public void addSequences(Sequence s) {
+        sequencesPanel.addSequence(s);
     }
 
     /**
      *
-     * Adds an MatrixListener to all the buttons.
+     */
+    public void removeSequences() {
+        sequencesPanel.removeSequences();
+    }
+
+    /**
+     *
+     * @param s
+     */
+    public void addPattern(Pattern p) {
+        patternsPanel.addPattern(p);
+    }
+
+    /**
+     *
+     */
+    public void removePatterns() {
+        patternsPanel.removePatterns();
+    }
+
+    /**
+     *
+     * Adds a MatrixListener to all the items. ActionCommand equals the number
+     * in the matrices array.
      *
      * @param al
      */
     public void addMatrixListener(ActionListener al) {
-        for (JToggleButton button : dataStructureList) {
-            button.addActionListener(al);
+        int number = 0;
+        Component[] components = popup.getComponents();
+        for (Component c : components) {
+            if (c instanceof JMenuItem) {
+                ((JMenuItem) c).addActionListener(al);
+                ((JMenuItem) c).setActionCommand(String.valueOf(number));
+                number++;
+            }
         }
+    }
+
+    public void addMatrixComboListener(ActionListener al) {
+        dropdownMenu.addActionListener(al);
     }
 
     /**
      *
-     * Adds an FileMenuListener to all the buttons.
+     * Adds a FileMenuListener to all the buttons.
      *
      * @param al
      */
     public void addFileMenuListener(ActionListener al) {
         openFileMenuItem.addActionListener(al);
+        openFileMenuItem.setActionCommand("open-file");
         exitMenuItem.addActionListener(al);
+        exitMenuItem.setActionCommand("exit");
     }
 
+    /**
+     *
+     * @param al
+     */
     public void addHelpMenuListener(ActionListener al) {
         docMenuItem.addActionListener(al);
+        docMenuItem.setActionCommand("doc");
         aboutMenuItem.addActionListener(al);
+        aboutMenuItem.setActionCommand("about");
+    }
+
+    /**
+     *
+     * @param al
+     */
+    public void addAccessModeListener(ActionListener al) {
+        loadButton.addActionListener(al);
+        loadButton.setActionCommand("load");
+        storeButton.addActionListener(al);
+        storeButton.setActionCommand("store");
     }
 
     public void showAboutDialog() {
-        aboutDialog.setSize(400, 400);
+        aboutDialog.setSize(465, 300);
         aboutDialog.setDefaultCloseOperation(javax.swing.JFrame.HIDE_ON_CLOSE);
         aboutDialog.setVisible(true);
+    }
+
+    public JComboBox getDropDownMenu() {
+        return dropdownMenu;
+    }
+
+    public JToggleButton getLoadButton() {
+        return loadButton;
+    }
+
+    public RelativeAccessPanel getRelativeJumpPanel() {
+        return relativeAccessPanel;
+    }
+
+    public PatternsPanel getPatternsPanel() {
+        return patternsPanel;
     }
 }

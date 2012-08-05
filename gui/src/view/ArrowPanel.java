@@ -1,9 +1,6 @@
 package view;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 /**
@@ -17,9 +14,13 @@ public class ArrowPanel extends javax.swing.JPanel {
     private int x_move;
     private int y_move;
     private Color color;
+    private final int ARR_SIZE = 7;
 
     /**
-     * Creates new form ArrowPanel
+     * 
+     * @param x move along the x-axis
+     * @param y move along the y-axis
+     * @param rate sucess rate to determine the color of the arrow
      */
     public ArrowPanel(int x, int y, double rate) {
         initComponents();
@@ -28,11 +29,20 @@ public class ArrowPanel extends javax.swing.JPanel {
         this.y_move = y;
         setColor(rate);
     }
-    private final int ARR_SIZE = 7;
-
+    
+    /**
+     * 
+     * @param g1
+     * @param x1 x-coordinate of the startpoint
+     * @param y1 y-coordinate of the startpoint
+     * @param x2 x-coordinate of the endpoint
+     * @param y2 y-coordinate of the endpoint
+     */
     private void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
         Graphics2D g = (Graphics2D) g1.create();
-
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+        
         double dx = x2 - x1, dy = y2 - y1;
         double angle = Math.atan2(dy, dx);
         int len = (int) Math.sqrt(dx * dx + dy * dy);
@@ -42,20 +52,24 @@ public class ArrowPanel extends javax.swing.JPanel {
 
         // set Color according to successrate
         g.setColor(color);
-        g.setStroke(new BasicStroke(2));
+        g.setStroke(new BasicStroke(3));
         // Draw horizontal arrow starting in (0, 0)
         g.drawLine(-7, 0, len - 7, 0);
         g.fillPolygon(new int[]{len, len - ARR_SIZE, len - ARR_SIZE, len},
                 new int[]{0, -ARR_SIZE, ARR_SIZE, 0}, 4);
     }
 
+    /**
+     * 
+     * @param g 
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         // square root function for length + a minimum lenght of 2
-        int length_x = (int) (Math.sqrt(Math.abs(x_move)) + 2);
-        int length_y = (int) (Math.sqrt(Math.abs(y_move)) + 2);
+        int length_x = (int) (Math.sqrt(Math.abs(x_move)) + 4);
+        int length_y = (int) (Math.sqrt(Math.abs(y_move)) + 4);
 
         // check maximum length of an arrow 
         if (length_x > MAX_X) {
@@ -90,7 +104,11 @@ public class ArrowPanel extends javax.swing.JPanel {
             }
         }
     }
-
+    
+    /*
+     * Determines the color of the arrow according to the success rate
+     * 100 % green - 0 % red
+     */
     private void setColor(double rate) {
         color = new Color((int) (255 * (100 - rate)) / 100, (int) (255 * rate) / 100, 0);
     }

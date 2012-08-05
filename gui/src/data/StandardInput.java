@@ -9,36 +9,60 @@ import java.util.List;
  */
 public class StandardInput implements DataInput {
 
-    private byte[][] absoluteStoreMatrix, absoluteLoadMatrix;
+    private byte[][] absoluteMatrix;
     private List<RelativeJump> relativeJumps;
+    private int Hits, Misses;
+    private String name;
+    private Sequence[] sequences;
+    private Pattern[] patterns;
 
-    @Override
-    public byte[][] getAbsoluteStoreMatrix() {
-        return absoluteStoreMatrix;
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    public byte[][] getAbsoluteLoadMatrix() {
-        return absoluteLoadMatrix;
+    public void printInfo() {
+        System.out.println("Name " + getName());
+        System.out.println("Hits " + Hits);
+        System.out.println("Misses " + Misses);
+        System.out.println("Num Jumps " + relativeJumps.size());
+        System.out.println("Jumps:");
+        for (RelativeJump jump : relativeJumps) {
+            System.out.println(jump);
+        }
+        System.out.println("Sequences:");
+        if (sequences == null) {
+            System.out.println("No Sequences found.");
+            return;
+        }
+        for (Sequence seq : sequences) {
+            System.out.println(seq == null ? "No Sequence found" : seq);
+        }
     }
 
+    /**
+     * @return the absoluteMatrix
+     */
+    @Override
+    public byte[][] getAbsoluteMatrix() {
+        return absoluteMatrix;
+    }
+
+    /**
+     * @param absoluteMatrix the absoluteMatrix to set
+     */
+    public void setAbsoluteMatrix(byte[][] absoluteMatrix) {
+        this.absoluteMatrix = absoluteMatrix;
+    }
+
+    /**
+     * @return the relativeJumps
+     */
     @Override
     public List<RelativeJump> getRelativeJumps() {
         return Collections.unmodifiableList(relativeJumps);
-    }
-
-    /**
-     * @param absoluteMatrix the absoluteMatrix to set
-     */
-    public void setAbsoluteStoreMatrix(byte[][] absoluteMatrix) {
-        this.absoluteStoreMatrix = absoluteMatrix;
-    }
-
-    /**
-     * @param absoluteMatrix the absoluteMatrix to set
-     */
-    public void setAbsoluteLoadMatrix(byte[][] absoluteMatrix) {
-        this.absoluteLoadMatrix = absoluteMatrix;
     }
 
     /**
@@ -48,17 +72,74 @@ public class StandardInput implements DataInput {
         this.relativeJumps = relativeJumps;
     }
 
+    /**
+     * @return the Hits
+     */
+    public int getHits() {
+        return Hits;
+    }
+
+    /**
+     * @param Hits the Hits to set
+     */
+    public void setHits(int Hits) {
+        this.Hits = Hits;
+    }
+
+    /**
+     * @return the Misses
+     */
+    public int getMisses() {
+        return Misses;
+    }
+
+    /**
+     * @param Misses the Misses to set
+     */
+    public void setMisses(int Misses) {
+        this.Misses = Misses;
+    }
+
+    /**
+     * @return the name
+     */
     @Override
-    public long[] getAbsoluteNumAccesses() {
-        if (relativeJumps == null) {
-            return new long[]{0, 0};
-        }
-        long hits = 0;
-        long misses = 0;
-        for (RelativeJump jump : relativeJumps) {
-            hits += jump.getHits();
-            misses += jump.getMisses();
-        }
-        return new long[]{hits, misses};
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int[] getAbsoluteNumAccesses() {
+        return new int[]{Hits, Misses};
+    }
+
+    /**
+     * @return the sequences
+     */
+    @Override
+    public Sequence[] getSequences() {
+        return sequences;
+    }
+
+    /**
+     * @param sequences the sequences to set
+     */
+    public void setSequences(Sequence[] sequences) {
+        this.sequences = sequences;
+    }
+
+    /**
+     * @return the patterns
+     */
+    @Override
+    public Pattern[] getPatterns() {
+        return patterns;
+    }
+
+    /**
+     * @param patterns the patterns to set
+     */
+    public void setPatterns(Pattern[] patterns) {
+        this.patterns = patterns;
     }
 }
