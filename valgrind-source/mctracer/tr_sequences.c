@@ -32,13 +32,13 @@ static void delete_access_pattern(traced_matrix * matr, access_pattern * const a
 				patterned_access[i] = 0;
 	}
 	// remove usages of ap in the sequences
-/*	int i, j;
+	int i, j;
 	ap->length = 0; // little hack to make sure current ap is not processed
 	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i)
 		if(matr->access_patterns[i].length != 0)
 			for(j = 0; j < matr->access_patterns[i].sequence_count; ++j)
 				if(matr->access_patterns[i].sequences[j].next_pattern == ap)
-					matr->access_patterns[i].sequences[j].next_pattern = 0; // TODO: eliminate equal sequences*/
+					matr->access_patterns[i].sequences[j].next_pattern = 0; // TODO: eliminate equal sequences
 	VG_(memset)(ap, 0, sizeof(access_pattern));
 }
 
@@ -231,6 +231,8 @@ void process_pattern_buffer(traced_matrix * matr)
 			delete_access_pattern(matr, rap, patterned_access);
 			VG_(memcpy)(rap, &nap, sizeof(access_pattern));
 			mark_pattern_findings(matr, rap, patterned_access);
+			for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j)
+				subpattern_elimination_check(matr, matr->access_patterns + j, patterned_access);
 			{
 			}
 		}
