@@ -240,78 +240,70 @@ void process_pattern_buffer(traced_matrix * matr)
 	// process sequences of patterns
 	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
-	// note on the loop variable: the processing of patterns actually always lags a step behind
-	// note on the condition: I've switched around between 2 and 1*MAX_PATTERN_LENGTH multiple times. It should be 2 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
-	for(i = 0; i <= count - 2*MAX_PATTERN_LENGTH; i += cap ? cap->length : 1)
+	// note on the condition: I've switched around between 3,2 and 1*MAX_PATTERN_LENGTH multiple times. It should be 3 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
+	i = 0;
+	while(i <= count - 3*MAX_PATTERN_LENGTH)
 	{
-		// still within the same ap? just count
-		if(patterned_access[i] == cap)
+		if(patterned_access[i] != cap)
 		{
 			if(cap)
 			{
-				// before we're ready to jump over the whole pattern length (done by loop increment), we have to check whether the pattern is complete
-				// since mark_pattern_findings is allowed to mark sequences which are not a multiple of the pattern
 				unsigned int j;
-				for(j = 1; j < cap->length; ++j)
-					if(patterned_access[i+j] != cap)
-						break; // skips the continue for the outermost loop
-				if(j >= cap->length)
+				for(j = 0; j < cap->sequence_count; ++j)
 				{
-					matr->current_sequence_length++;
-					continue; // continues the outermost loop
+					if(cap->sequences[j].length == matr->current_sequence_length &&
+					   cap->sequences[j].next_access.offset_n == accbuf[i].offset.n &&
+					   cap->sequences[j].next_access.offset_m == accbuf[i].offset.m &&
+					   cap->sequences[j].next_pattern == patterned_access[i])
+						break;
 				}
+				if(j >= cap->sequence_count)
+				{
+					++(cap->sequence_count);
+					if(cap->sequence_count > cap->sequence_allocated) // oops, buffer full. Reallocate.
+					{
+						signed int newlen = cap->sequence_allocated * 2 - 16;
+						if(newlen < 18)
+							newlen = 18;
+						pattern_sequence * new = VG_(malloc)("pattern sequence", newlen*sizeof(pattern_sequence));
+						VG_(memcpy)(new, cap->sequences, cap->sequence_allocated * sizeof(pattern_sequence));
+						VG_(free)(cap->sequences);
+						cap->sequence_allocated = newlen;
+						cap->sequences = new;
+					}
+					cap->sequences[j].length = matr->current_sequence_length;
+					cap->sequences[j].next_pattern = patterned_access[i];
+					cap->sequences[j].next_access.offset_n = accbuf[i].offset.n;
+					cap->sequences[j].next_access.offset_m = accbuf[i].offset.m;
+					cap->sequences[j].occurences = 0;
+				}
+				++(cap->sequences[j].occurences);
+				if(accbuf[i].is_hit)
+					++(cap->sequences[j].next_access.hits);
 				else
-					i += j;
+					++(cap->sequences[j].next_access.misses);
+
 			}
-			else
-				continue;
+			cap = patterned_access[i];
+			matr->current_sequence_length = 0;
 		}
 		if(cap)
 		{
-			matr->current_sequence_length++;
 			unsigned int j;
-			for(j = 0; j < cap->sequence_count; ++j)
-			{
-				if(cap->sequences[j].length == matr->current_sequence_length &&
-				   cap->sequences[j].next_access.offset_n == accbuf[i].offset.n &&
-				   cap->sequences[j].next_access.offset_m == accbuf[i].offset.m &&
-				   cap->sequences[j].next_pattern == patterned_access[i])
+			for(j = 1; j < cap->length; ++j)
+				if(patterned_access[i+j] != cap)
 					break;
-			}
-			if(j >= cap->sequence_count)
-			{
-				++(cap->sequence_count);
-				if(cap->sequence_count > cap->sequence_allocated) // oops, buffer full. Reallocate.
-				{
-					signed int newlen = cap->sequence_allocated * 2 - 16;
-					if(newlen < 32)
-						newlen = 32;
-					pattern_sequence * new = VG_(malloc)("pattern sequence", newlen*sizeof(pattern_sequence));
-					VG_(memcpy)(new, cap->sequences, cap->sequence_allocated * sizeof(pattern_sequence));
-					VG_(free)(cap->sequences);
-					cap->sequence_allocated = newlen;
-					cap->sequences = new;
-				}
-				cap->sequences[j].length = matr->current_sequence_length;
-				cap->sequences[j].next_pattern = patterned_access[i];
-				cap->sequences[j].next_access.offset_n = accbuf[i].offset.n;
-				cap->sequences[j].next_access.offset_m = accbuf[i].offset.m;
-				cap->sequences[j].occurences = 0;
-			}
-			++(cap->sequences[j].occurences);
-			if(accbuf[i].is_hit)
-				++(cap->sequences[j].next_access.hits);
-			else
-				++(cap->sequences[j].next_access.misses);
-
+			if(j >= cap->length)
+				matr->current_sequence_length++;
+			i += j;
 		}
-		cap = patterned_access[i];
-		matr->current_sequence_length = 0;
+		else
+			++i;
 	}
 	matr->current_pattern = cap;
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	// copy as much patterns as the sequence recognition hasn't processed
-	unsigned int copylen = count - i - (cap? cap->length:0);
+	unsigned int copylen = count - i;
 	VG_(memmove)(accbuf, accbuf + count - copylen, copylen*sizeof(access_event));
 	matr->access_event_count = copylen;
 }
