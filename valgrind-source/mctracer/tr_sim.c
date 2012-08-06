@@ -143,7 +143,7 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	matr->start = addr;
 	matr->end = addr + m*n*ele_size;
 
-    if(name != NULL) {    
+    if(name != NULL && VG_(strlen)(name) > 0) {    
 	    matr->name = (char*) VG_(malloc)("name", VG_(strlen)(name)*sizeof(char));
 	    VG_(strcpy)(matr->name, name);
     } else {
