@@ -226,21 +226,25 @@ void run_version(int v, int sz, double a[sz][sz], double b[sz][sz], double c[sz]
 {
 	// generate tracking identifier for each matrix
 	const int len = 256;
+    int prefix_len;
 	char name[len];
 
-	strcpy(name + strlen(mmversion[v].name), " - a");
-        SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
+    strcpy(name, mmversion[v].name);
+    prefix_len = strlen(name);
 
-	strcpy(name + strlen(mmversion[v].name), " - b");
+	strcpy(name + prefix_len, " - a");
+    SSIM_MATRIX_TRACING_START(a, sz, sz, sizeof(double), name);
+
+	strcpy(name + prefix_len, " - b");
 	SSIM_MATRIX_TRACING_START(b, sz, sz, sizeof(double), name);
 
-	strcpy(name + strlen(mmversion[v].name), " - c");
-        SSIM_MATRIX_TRACING_START(c, sz, sz, sizeof(double), name);
+	strcpy(name + prefix_len, " - c");
+    SSIM_MATRIX_TRACING_START(c, sz, sz, sizeof(double), name);
 
 	run_mul(mmversion[v].func, mmversion[v].name, sz, a, b, c);
 
-        SSIM_MATRIX_TRACING_STOP(a);
-        SSIM_MATRIX_TRACING_STOP(b);
+    SSIM_MATRIX_TRACING_STOP(a);
+    SSIM_MATRIX_TRACING_STOP(b);
 	SSIM_MATRIX_TRACING_STOP(c);
 }
 
