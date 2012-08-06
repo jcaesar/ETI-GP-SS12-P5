@@ -288,6 +288,7 @@ void process_pattern_buffer(traced_matrix * matr)
 						newlen = 32;
 					pattern_sequence * new = VG_(malloc)("pattern sequence", newlen*sizeof(pattern_sequence));
 					VG_(memcpy)(new, cap->sequences, cap->sequence_allocated * sizeof(pattern_sequence));
+					VG_(free)(cap->sequences);
 					cap->sequence_allocated = newlen;
 					cap->sequences = new;
 				}
