@@ -21,28 +21,28 @@
  * Simulator for a shared cache
  */
 
-// Cache with 8192 cache lines a 64 byte = 1 MB cache size
-// Associativity 16 (= number of cache lines per set)
+// cache line size
 #define LINESIZE     64
-#define CACHELINES 8192
-#define SETSIZE      16
-
-// derived parameter
-#define SETS (CACHELINES / SETSIZE)
 
 typedef struct _cacheline
 {
 	Addr tag;            // 64 bit architecture
 } Cacheline;
 
-Cacheline cache[CACHELINES];
-
+Cacheline *cache;
 bool init_done = false;
+Int cachelines, setsize, sets;
 
-void ssim_init(void)
+void ssim_init(Int sets_, Int setsize_)
 {
-	if(init_done) return;
+    if(init_done) return;
 	init_done = true;
+    
+    sets = sets_;
+    setsize = setsize_;
+    cachelines = sets*setsize;
+
+    cache = VG_(malloc)("cache", sizeof(Cacheline) * cachelines);
 
 	ssim_flush_cache();
 }
@@ -51,7 +51,7 @@ void ssim_flush_cache(void)
 {
 	int i;
 
-	for(i=0; i<CACHELINES; i++)
+	for(i=0; i<cachelines; i++)
 	{
 		cache[i].tag = 0;
 	}
@@ -62,13 +62,13 @@ void ssim_flush_cache(void)
 static int cache_setref(int set_no, Addr tag)
 {
 	int i, j;
-	Cacheline* set = cache + set_no * SETSIZE;
+	Cacheline* set = cache + set_no * setsize;
 
 	/* Test all lines in the set for a tag match
 	 * If the tag is another than the MRU, move it into the MRU spot
 	 * and shuffle the rest down.
 	 */
-	for (i = 0; i < SETSIZE; i++)
+	for (i = 0; i < setsize; i++)
 	{
 		if (tag == set[i].tag)
 		{
@@ -83,7 +83,7 @@ static int cache_setref(int set_no, Addr tag)
 	}
 
 	/* A miss;  install this tag as MRU, shuffle rest down. */
-	for (j = SETSIZE - 1; j > 0; j--)
+	for (j = setsize - 1; j > 0; j--)
 	{
 		set[j].tag = set[j - 1].tag;
 	}
@@ -95,9 +95,9 @@ static int cache_setref(int set_no, Addr tag)
 // a reference at address <a> with size <s>, return 1 on hit
 int cache_ref(Addr a, int size)
 {
-	int  set1 = ( a         / LINESIZE) & (SETS-1);
-	int  set2 = ((a+size-1) / LINESIZE) & (SETS-1);
-	Addr tag  = a / LINESIZE / SETS;
+	int  set1 = ( a         / LINESIZE) & (sets-1);
+	int  set2 = ((a+size-1) / LINESIZE) & (sets-1);
+	Addr tag  = a / LINESIZE / sets;
 	Addr tag2;
 	int res1, res2;
 
@@ -107,7 +107,7 @@ int cache_ref(Addr a, int size)
 
 	/* Access straddles two lines. */
 	/* NOTE: We assume an access not overlapping >2 cache lines ! */
-	tag2  = (a+size-1) / LINESIZE / SETS;
+	tag2  = (a+size-1) / LINESIZE / sets;
 
 	/* the call updates cache structures as side effect */
 	res1 =  cache_setref(set1, tag);
