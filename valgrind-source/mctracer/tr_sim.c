@@ -242,7 +242,7 @@ bool ssim_matrix_tracing_stop(Addr addr)
 	// look for the mtr from 0 to last_traced_mtr_offset-1, so
 	// that we don't swap a matrix with itself
 	int i;
-	for (i=0; i < last_traced_mtr_offset-1; ++i)
+	for (i=0; i < last_traced_mtr_offset; ++i)
 	{
 		if (traced_matrices_index[i]->start == matr->start)
 		{
