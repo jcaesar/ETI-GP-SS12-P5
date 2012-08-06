@@ -162,7 +162,7 @@ void process_pattern_buffer(traced_matrix * matr)
 	// This is a multi-purpose-variable. It is used for checking if an access event has already been processed,
 	//  and for sequence computation
 	static access_pattern ** patterned_access = 0;
-	if(!patterned_access);
+	if(!patterned_access)
 		patterned_access = VG_(malloc)("pattern findings in access event buffer",
 		                               sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
 	VG_(memset)(patterned_access, 0, sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
