@@ -29,7 +29,9 @@
 	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/instrument.c}	
 \end{frame}
 
-\begin{frame}{Valgrind Client Request}
+\subsection{Valgrind Client Requests}
+
+\begin{frame}{Valgrind Client Requests}
 	\begin{itemize}
 		\item Client Requests erlauben dem analysierten Programm mit Valgrind bzw. dem Tool zu kommunizieren.
 		\pause \item Client Requests sind ein Trapdoor Mechanismus.
@@ -40,4 +42,9 @@
 
 	\lstset{frame=single}
 	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/client_example.c}	
+\end{frame}
+
+\begin{frame}{Valgrind Client Requests}
+	\lstset{frame=single}
+	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/client_impl.c}	
 \end{frame}
