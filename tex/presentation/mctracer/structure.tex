@@ -54,9 +54,69 @@
 		\path [draw] (calc) -- (raccv);
 		\node [block, below of=raccv] (patseq) {Pattern/Sequence-Logik};
 		\path [draw,->] (raccv) -- (patseq);
-		\node [cloud] (pat) at (5.7,-5.0) {Zugriffe pro Matrix-Zelle};
-		\node [cloud] (seq) at (5.7,-5.9) {Statistik: Relative Zugriffe};
+		\node [cloud] (pat) at (5.7,-5.0) {Muster};
+		\node [cloud] (seq) at (5.7,-5.9) {Sequenzen von Mustern};
 		\path [draw,->] (patseq.north east) -- (pat.west);
 		\path [draw,->] (patseq) -- (seq.west);
+	\end{tikzpicture}
+\end{frame}
+
+\tikzstyle{accarrw} = [draw,->,thick, shorten <=10, shorten >=10]
+\begin{frame}{Patterns, Sequences}
+	\begin{tikzpicture}
+		\draw (-0.5,0) grid (9.5,1);
+		\path [accarrw,green] (0,1) -- (1,0);
+		\path [accarrw,green] (1,1) -- (2,0);
+		\path [accarrw,red]   (2,0) -- (3,1);
+		\path [accarrw,green] (3,0) -- (4,1);
+		\path [accarrw,green] (4,1) -- (5,0);
+		\path [accarrw,green] (5,1) -- (6,0);
+		\path [accarrw,red]   (6,0) -- (7,1);
+		\path [accarrw,green] (7,0) -- (8,1);
+		\path [accarrw,green] (8.5,1.15) -- (8.5,-0.15);
+		\node at (1,-1.5) {Existierende Patterns:};
+		\path [accarrw] (3,-1) -- (4,-2);
+		\path [accarrw] (4,-2) -- (5,-1);
+		\draw [rounded corners] (3,-1) rectangle (5,-2) node [right] {A};
+		\pause
+		\node at (1.5,1.5) {A};
+		\node at (2.5,1.5) {A};
+		\node at (5.5,1.5) {A};
+		\node at (6.5,1.5) {A};
+		\pause
+		\draw [->] (0.5,0) to [bend right](4.5,0);
+		\pause
+		\draw [->] (1.5,0) to [bend right](5.5,0);
+		\draw [->] (2.5,0) to [bend right](6.5,0);
+		\draw [->] (3.5,0) to [bend right](7.5,0);
+		\pause
+		\path [accarrw] (3,-2.5) -- (4,-3.5);
+		\path [accarrw] (4,-2.5) -- (5,-3.5);
+		\path [accarrw] (5,-3.5) -- (6,-2.5);
+		\path [accarrw] (6,-3.5) -- (7,-2.5);
+		\draw [rounded corners] (3,-2.5) rectangle (7,-3.5) node [right] {B};
+		\pause
+		% Nicht so elegant da weiß drüberzuzeichnen, ja. Wie geht's besser? :/
+		\fill [fill=white] (0,-0.01) rectangle (8,-1);
+		\fill [fill=white] (0,2) rectangle (9,1.01);
+		\fill [fill=white,draw=white] (2.99,-1) rectangle (9,-4);
+		\path [accarrw] (3,-1.0) -- (4,-2.0);
+		\path [accarrw] (4,-1.0) -- (5,-2.0);
+		\path [accarrw] (5,-2.0) -- (6,-1.0);
+		\path [accarrw] (6,-2.0) -- (7,-1.0);
+		\draw [rounded corners] (3,-1) rectangle (7,-2) node [right] {B};
+		\pause
+		\node at (0.5,1.5) {B};
+		\node at (1.5,1.5) {B};
+		\node at (2.5,1.5) {B};
+		\node at (3.5,1.5) {B};
+		\node at (4.5,1.5) {B};
+		\node at (5.5,1.5) {B};
+		\node at (6.5,1.5) {B};
+		\node at (7.5,1.5) {B};
+		\pause
+		\draw [red] (2,1.5) ellipse (1.9 and 0.45);
+		\draw [red] (6,1.5) ellipse (1.9 and 0.45);
+		\fill [red] (8.5,1.5) circle (0.15);
 	\end{tikzpicture}
 \end{frame}
