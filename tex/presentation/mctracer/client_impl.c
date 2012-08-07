@@ -1,5 +1,4 @@
 /* mctracer.h */
-
 #define SSIM_MATRIX_TRACING_START(addr, m, n, ele_size, name)   \
 {
     unsigned int _qzz_res;                                      \
@@ -10,7 +9,7 @@
 
 #define SSIM_MATRIX_TRACING_STOP(...
 
-/* McTracer Implementierung */
+/* tr_main.c */
 Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret) {
     switch(args[0]) {
 	case VG_USERREQ__TRACE_MATRIX:
