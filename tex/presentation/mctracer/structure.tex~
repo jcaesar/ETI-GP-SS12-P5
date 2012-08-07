@@ -34,7 +34,7 @@
 			\item Mehrere nebeneinanderliegende Tags werden zu einem Set zusammengefasst
 			\item Bei einem Speicherzugriff wird die Speicheradresse in ein Set abgebildet
 			\item Alle Tags dieses Sets werden überprüft, bei einer Übereinstimmung handelt es sich um einen Hit
-			\item Bei einem Miss wird der Tag des Zugriffs an den Anfang des Sets geschrieben und alle anderen werden nach hinten verdrängt
+			\item Bei einem miss wird der Tag des Zugriffs an den anfang des Sets geschrieben und alle anderen nach hinten verdrängt
 		\end{itemize}
 	\end{block}
 \end{frame}

@@ -3,9 +3,9 @@
 \begin{block}{Teamaufteilung}
 \begin{itemize}[<+->]
 \pause\item 3 Personen beschäftigen sich mit dem MCTracer und SimpleSim
-\item 2 Personen sind für die graphische Oberfläche zuständig
+\item 2 Personen sind für die Graphische Oberfläche zuständig
 \item 1 Person kümmert sich um die Beispielprogramme
-\item 1 Person fungiert als Springer, welcher anfangs bei der Projektleitung und danach bei der GUI mithilft
+\item 1 Person fungiert als Springer, welcher Anfangs bei der Projektleitung und danach bei der GUI mithilft
 \item 1 Person ist für die Projektleitung verantwortlich
 \end{itemize}
 \end{block}
@@ -29,8 +29,8 @@
 \begin{itemize}[<+->]
 \pause\item Valgrind, SimpleSim und MCTracer verstehen und für unsere Anwendung bearbeiten
 \item Zuordnung der Speicherzugriffe für die detaillierte Auswertung
-\item Analyse der Zugriffe und Finden von Mustern, nach denen die Matrix durchlaufen wird
-\item Bereitstellung der Daten für die GUI mithilfe des \glqq etis\grqq-Dateiformats
+\item Analyse der Zugriffe und Finden von Mustern, wie die Matrix durchlaufen wird
+\item Bereitstellung der Daten für die GUI mithilfe des etis Dateiformat
 \end{itemize}
 \end{block}
 \end{frame}
@@ -40,8 +40,8 @@
 \begin{itemize}[<+->]
 \pause\item Grafische Darstellung der Zellen der Matrix
 \item Darstellung der relativen Zugriffe
-\item Ausgabe der Statistiken über Hits und Misses
-\item Darstellung der Sequenzen und durchlaufenen Muster
+\item Ausgabe der Hits und Misses Statistiken
+\item Darstellung der Sequenzen und Mustern, welche durchlaufen werden
 \end{itemize}
 \end{block}
 \end{frame}
@@ -86,7 +86,7 @@
 \begin{block}{Erste Besprechung}
 \begin{itemize}[<+->]
 \pause\item Herr Weidendorfer stellt uns vor, was genau zu tun ist :)
-\item Überlegung, ob relative Zugriffe oder absolute Zugriffe anzuzeigen sind
+\item Überlegung ob relative Zugriffe anzeigen oder absolute Zugriffe anzeigen
 \item Aufgabenstellungslänge wird definiert
 \item Termin zur Zwischenpräsentation (13.06.2012) wird vereinbart
 \item Benötigt wird eine Benutzer- und eine technische Dokumentation
@@ -100,7 +100,7 @@
 \begin{itemize}[<+->]
 \pause\item Ziel: Fertigstellung des Projektes noch in diesem Semester
 \item Zuteilung der Teams mit Wunschberücksichtigung
-\item Grobe Anforderungen werden formuliert, die die Teams bearbeiten müssen
+\item grobe Anforderungen werden formuliert, die die Teams bearbeiten müssen
 \item Teaminterne Deadlines zur besseren Übersicht werden ausgemacht
 \end{itemize}
 \end{block}
@@ -130,7 +130,7 @@
 \begin{block}{Meeting am 01.08.2012}
 \begin{itemize}[<+->]
 \pause\item Kurze Vorstellung der aktuellen Ergebnisse
-\item Erarbeiten einer Timetable für die Abschlusspräsentation
+\item Erarbeiten eines Timetables für die Abschlusspräsentation
 \item Letzte Anforderungen werden umgesetzt
 \item Für die Präsentation und spätere Dokumentation werden Vorbereitungen getroffen
 \end{itemize}
