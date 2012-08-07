@@ -94,7 +94,7 @@ public class SequencesPanel extends javax.swing.JPanel {
         Object[] tmp = new Object[4];
         tmp[0] = seq.getNumRepetitions();
         tmp[1] = seq.getNumOccurrences();
-        tmp[2] = "(" + seq.getNextAccessMOffset() + "|" + seq.getNextAccessNOffset() + ")";
+        tmp[2] = "(" + seq.getNextAccessNOffset() + "|" + seq.getNextAccessMOffset() + ")";
         if (seq.getNextPattern() != null) {
             tmp[3] = seq.getNextPattern().getPID();
         }
