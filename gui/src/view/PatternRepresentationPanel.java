@@ -68,8 +68,6 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
 
         int x = 0;
         int y = 0;
-        int x_old = 0;
-        int y_old = 0;
         double x_max = 0;
         double x_min = 0;
         double y_max = 0;
@@ -135,7 +133,8 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
                 2, 2);
 
         
-
+        int x_old = 0;
+        int y_old = 0;
         for (RelativeJump jump : jumps) {
             x_old = x;
             y_old = y;
