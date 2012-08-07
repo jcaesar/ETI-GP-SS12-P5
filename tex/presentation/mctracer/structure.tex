@@ -2,7 +2,7 @@
 \tikzstyle{block} = [rectangle, draw, fill=blue!20,text centered, rounded corners, minimum height=3em, node distance=2cm]
 \tikzstyle{cloud} = [ellipse,   draw, fill=red!20, text badly centered, node distance=2cm]
 
-\begin{frame}{Struktur mctracer}
+\begin{frame}<1>[label=mctstructure]{mctracer Struktur}
 	%\begin{block}
 		\begin{tikzpicture}
 			\node [block,minimum height=120] (valg) at (0,0) {valgrind};
@@ -39,25 +39,29 @@
 	\end{block}
 \end{frame}
 
+\againframe<2>{mctstructure}
+
 \begin{frame}{Statistik-Bereich}
 	\begin{tikzpicture}
 		\node [cloud] (accev) {Speicherzugriffe};
-		\pause
-		\node [block, below of=accev] (calc) {Reverse Adressrechnung};
-		\path [draw,->] (accev) -- (calc);
-		\node [cloud] (absstat) at (5.7,-1.7) {Zugriffe pro Matrix-Zelle};
-		\node [cloud] (relstat) at (5.7,-2.6) {Statistik: Relative Zugriffe};
-		\path [draw,->] (calc) -- (absstat.west);
-		\path [draw,->] (calc) -- (relstat.west);
-		\pause
-		\node [cloud, below of=calc] (raccv) {Relative Zugriffe};
-		\path [draw] (calc) -- (raccv);
-		\node [block, below of=raccv] (patseq) {Pattern/Sequence-Logik};
-		\path [draw,->] (raccv) -- (patseq);
-		\node [cloud] (pat) at (5.7,-5.0) {Muster};
-		\node [cloud] (seq) at (5.7,-5.9) {Sequenzen von Mustern};
-		\path [draw,->] (patseq.north east) -- (pat.west);
-		\path [draw,->] (patseq) -- (seq.west);
+		\onslide<2->{
+			\node [block, below of=accev] (calc) {Reverse Adressrechnung};
+			\path [draw,->] (accev) -- (calc);
+			\node [cloud] (absstat) at (5.7,-1.7) {Zugriffe pro Matrix-Zelle};
+			\node [cloud] (relstat) at (5.7,-2.6) {Statistik: Relative Zugriffe};
+			\path [draw,->] (calc) -- (absstat.west);
+			\path [draw,->] (calc) -- (relstat.west);
+		}
+		\onslide<3->{
+			\node [cloud, below of=calc] (raccv) {Relative Zugriffe};
+			\path [draw] (calc) -- (raccv);
+			\node [block, below of=raccv] (patseq) {Pattern/Sequence-Logik};
+			\path [draw,->] (raccv) -- (patseq);
+			\node [cloud] (pat) at (5.7,-5.0) {Muster};
+			\node [cloud] (seq) at (5.7,-5.9) {Sequenzen von Mustern};
+			\path [draw,->] (patseq.north east) -- (pat.west);
+			\path [draw,->] (patseq) -- (seq.west);
+		}
 	\end{tikzpicture}
 \end{frame}
 
@@ -75,48 +79,56 @@
 		\path [accarrw,green] (7,0) -- (8,1);
 		\path [accarrw,green] (8.5,1.15) -- (8.5,-0.15);
 		\node at (1,-1.5) {Existierende Patterns:};
-		\path [accarrw] (3,-1) -- (4,-2);
-		\path [accarrw] (4,-2) -- (5,-1);
-		\draw [rounded corners] (3,-1) rectangle (5,-2) node [right] {A};
-		\pause
-		\node at (1.5,1.5) {A};
-		\node at (2.5,1.5) {A};
-		\node at (5.5,1.5) {A};
-		\node at (6.5,1.5) {A};
-		\pause
-		\draw [->] (0.5,0) to [bend right](4.5,0);
-		\pause
-		\draw [->] (1.5,0) to [bend right](5.5,0);
-		\draw [->] (2.5,0) to [bend right](6.5,0);
-		\draw [->] (3.5,0) to [bend right](7.5,0);
-		\pause
-		\path [accarrw] (3,-2.5) -- (4,-3.5);
-		\path [accarrw] (4,-2.5) -- (5,-3.5);
-		\path [accarrw] (5,-3.5) -- (6,-2.5);
-		\path [accarrw] (6,-3.5) -- (7,-2.5);
-		\draw [rounded corners] (3,-2.5) rectangle (7,-3.5) node [right] {B};
-		\pause
-		% Nicht so elegant da weiß drüberzuzeichnen, ja. Wie geht's besser? :/
-		\fill [fill=white] (0,-0.01) rectangle (8,-1);
-		\fill [fill=white] (0,2) rectangle (9,1.01);
-		\fill [fill=white,draw=white] (2.99,-1) rectangle (9,-4);
-		\path [accarrw] (3,-1.0) -- (4,-2.0);
-		\path [accarrw] (4,-1.0) -- (5,-2.0);
-		\path [accarrw] (5,-2.0) -- (6,-1.0);
-		\path [accarrw] (6,-2.0) -- (7,-1.0);
-		\draw [rounded corners] (3,-1) rectangle (7,-2) node [right] {B};
-		\pause
-		\node at (0.5,1.5) {B};
-		\node at (1.5,1.5) {B};
-		\node at (2.5,1.5) {B};
-		\node at (3.5,1.5) {B};
-		\node at (4.5,1.5) {B};
-		\node at (5.5,1.5) {B};
-		\node at (6.5,1.5) {B};
-		\node at (7.5,1.5) {B};
-		\pause
-		\draw [red] (2,1.5) ellipse (1.9 and 0.45);
-		\draw [red] (6,1.5) ellipse (1.9 and 0.45);
-		\fill [red] (8.5,1.5) circle (0.15);
+		\onslide<1-5>{
+			\path [accarrw] (3,-1) -- (4,-2);
+			\path [accarrw] (4,-2) -- (5,-1);
+			\draw [rounded corners,] (3,-1) rectangle (5,-2) node [right] {A};
+		}
+		\onslide<2-5>{
+			\node at (1.5,1.5) {A};
+			\node at (2.5,1.5) {A};
+			\node at (5.5,1.5) {A};
+			\node at (6.5,1.5) {A};
+		}
+		\onslide<3-4>{
+			\draw [->] (0.5,0) to [bend right](4.5,0);
+		}
+		\onslide<4>{
+			\draw [->] (1.5,0) to [bend right](5.5,0);
+			\draw [->] (2.5,0) to [bend right](6.5,0);
+			\draw [->] (3.5,0) to [bend right](7.5,0);
+		}
+		\onslide<5>{
+			\path [accarrw] (3,-2.5) -- (4,-3.5);
+			\path [accarrw] (4,-2.5) -- (5,-3.5);
+			\path [accarrw] (5,-3.5) -- (6,-2.5);
+			\path [accarrw] (6,-3.5) -- (7,-2.5);
+			\draw [rounded corners] (3,-2.5) rectangle (7,-3.5) node [right] {B};
+		}
+		%fill [fill=white] (0,-0.01) rectangle (8,-1);
+		%fill [fill=white] (0,2) rectangle (9,1.01);
+		%fill [fill=white,draw=white] (2.99,-1) rectangle (9,-4);
+		\onslide<6->{
+			\path [accarrw] (3,-1.0) -- (4,-2.0);
+			\path [accarrw] (4,-1.0) -- (5,-2.0);
+			\path [accarrw] (5,-2.0) -- (6,-1.0);
+			\path [accarrw] (6,-2.0) -- (7,-1.0);
+			\draw [rounded corners] (3,-1) rectangle (7,-2) node [right] {B};
+		}
+		\onslide<7->{
+			\node at (0.5,1.5) {B};
+			\node at (1.5,1.5) {B};
+			\node at (2.5,1.5) {B};
+			\node at (3.5,1.5) {B};
+			\node at (4.5,1.5) {B};
+			\node at (5.5,1.5) {B};
+			\node at (6.5,1.5) {B};
+			\node at (7.5,1.5) {B};
+		}
+		\onslide<8->{
+			\draw [red] (2,1.5) ellipse (1.9 and 0.45);
+			\draw [red] (6,1.5) ellipse (1.9 and 0.45);
+			\fill [red] (8.5,1.5) circle (0.15);
+		}
 	\end{tikzpicture}
 \end{frame}
