@@ -35,14 +35,14 @@ Int cachelines, setsize, sets;
 
 void ssim_init(Int sets_, Int setsize_)
 {
-    if(init_done) return;
+	if(init_done) return;
 	init_done = true;
-    
-    sets = sets_;
-    setsize = setsize_;
-    cachelines = sets*setsize;
 
-    cache = VG_(malloc)("cache", sizeof(Cacheline) * cachelines);
+	sets = sets_;
+	setsize = setsize_;
+	cachelines = sets*setsize;
+
+	cache = VG_(malloc)("cache", sizeof(Cacheline) * cachelines);
 
 	if(clo_ssim_max_pattern_length > MAX_MAX_PATTERN_LENGTH)
 	{
@@ -54,7 +54,7 @@ void ssim_init(Int sets_, Int setsize_)
 		VG_(printf)("mctracer: --max-pattern-length=%d too small. Extending to 4\n", clo_ssim_max_pattern_length);
 		clo_ssim_max_pattern_length = 4;
 	}
-	
+
 	if(clo_ssim_max_patterns_per_matrix > 255)
 	{
 		VG_(printf)("mctracer: --max-patterns-per-matrix=%d too large. Cropping to 256\n", clo_ssim_max_patterns_per_matrix);
@@ -167,15 +167,18 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	matr->start = addr;
 	matr->end = addr + m*n*ele_size;
 
-    if(name != NULL && VG_(strlen)(name) > 0) {    
-	    matr->name = (char*) VG_(malloc)("name", VG_(strlen)(name)*sizeof(char));
-	    VG_(strcpy)(matr->name, name);
-    } else {
-        /** use VG_(malloc) so we don't an extra condition for the VG_(free) in tr_write.c **/
-        matr->name = (char*) VG_(malloc)("empty name", sizeof(char));
-        char* emptyName = "\n";
-        VG_(strcpy)(matr->name, emptyName);
-    }
+	if(name != NULL && VG_(strlen)(name) > 0)
+	{
+		matr->name = (char*) VG_(malloc)("name", VG_(strlen)(name)*sizeof(char));
+		VG_(strcpy)(matr->name, name);
+	}
+	else
+	{
+		/** use VG_(malloc) so we don't an extra condition for the VG_(free) in tr_write.c **/
+		matr->name = (char*) VG_(malloc)("empty name", sizeof(char));
+		char* emptyName = "\n";
+		VG_(strcpy)(matr->name, emptyName);
+	}
 
 	// size of each element of the matrix in bytes
 	matr->ele_size = ele_size;

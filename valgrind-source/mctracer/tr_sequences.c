@@ -48,7 +48,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 	const unsigned int count = matr->access_event_count;
 	access_event * const accbuf = matr->access_buffer;
 
-	if(!patterned_access || ap->length == 0) 
+	if(!patterned_access || ap->length == 0)
 		return;
 
 	int lastwas = -1; // variable to mark if the last cycle marked the pattern
@@ -57,7 +57,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 	{
 		if(ap->length + j >= count) // can't match pattern if it's longer than the remaining accesses
 			break;
-			
+
 		unsigned int apstep;
 		for(apstep = 0; apstep < ap->length; ++apstep) // loop over access method steps
 			if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
@@ -90,7 +90,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 						patterned_access[k] = ap;
 					}
 				}
-				lastwas = j; 
+				lastwas = j;
 				j += ap->length - 1; // -1 to counter loop increment
 				++(ap->occurences);
 			}
@@ -119,7 +119,7 @@ static bool subpattern_elimination_check(traced_matrix * const matr, access_patt
 	unsigned int j;
 	for(j = 0; j < clo_ssim_max_patterns_per_matrix; ++j) // loop over patterns which could eliminate oap
 	{
-		access_pattern * const iap = matr->access_patterns + j; // inner access pattern	
+		access_pattern * const iap = matr->access_patterns + j; // inner access pattern
 		if(iap == oap)
 			continue;
 		if(iap->length < oap->length)
