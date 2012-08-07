@@ -47,7 +47,7 @@ typedef struct _matrix_access_data
 	int access_methods_count;
 } matrix_access_data;
 
-#define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH (1<<12) // current implementation requires an array of bools with that length to fit onto the stack
+#define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH (1<<16)
 typedef struct _access_event {
 	bool is_hit;
 	matrix_coordinates offset;
@@ -61,8 +61,7 @@ typedef struct _pattern_sequence {
 	unsigned int occurences; // how many times did we observe this sequence?
 } pattern_sequence;
 
-#define MAX_PATTERNS_PER_MATRIX 5 // TODO: negociate proper value. Probably has to be a nice deal larger than what we display to the user
-#define MAX_PATTERN_LENGTH 16
+#define MAX_MAX_PATTERN_LENGTH (MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH/8)
 typedef struct _access_pattern {
 	unsigned int length;
 	matrix_access_method * steps;
@@ -106,7 +105,7 @@ typedef struct _traced_matrix
 	access_event * access_buffer; // relative
 	unsigned int access_event_count;
 	/* access patterns */
-	access_pattern access_patterns[MAX_PATTERNS_PER_MATRIX];
+	access_pattern * access_patterns;
 	access_pattern * current_pattern;
 	unsigned int current_sequence_length;
 } traced_matrix;
@@ -129,5 +128,8 @@ void process_pattern_buffer(traced_matrix * matr);
 void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, short offset_m, bool is_hit);
 traced_matrix* find_matrix(Addr access);
 int cache_ref(Addr a, int size);
+
+extern Int clo_ssim_max_pattern_length;
+extern Int clo_ssim_max_patterns_per_matrix;
 
 #endif

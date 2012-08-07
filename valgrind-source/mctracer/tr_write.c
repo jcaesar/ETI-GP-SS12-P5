@@ -92,7 +92,7 @@ void ssim_save_stats(HChar* fname)
 		// MH:AZP (1 byte)
 		uint8_t pattern_count=0;
 		unsigned int j;
-		for (j = 0; j<MAX_PATTERNS_PER_MATRIX; j++){
+		for (j = 0; j<clo_ssim_max_patterns_per_matrix; j++){
 			if (traced_matrices[i].access_patterns[j].length!=0){
 				pattern_count++;
 			}
@@ -230,7 +230,7 @@ static void write_patterns(int fd, traced_matrix * matrix){
 	 */
 	
 	int i;
-	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+	for (i = 0; i<clo_ssim_max_patterns_per_matrix; i++){
 		if (matrix->access_patterns[i].length!=0){
 			
 			//ZP:ID
@@ -274,7 +274,7 @@ static int count_sequences(traced_matrix * matrix){
 	
 	unsigned int total_sequence_count=0;
 	unsigned int i;
-	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+	for (i = 0; i<clo_ssim_max_patterns_per_matrix; i++){
 		if (matrix->access_patterns[i].length!=0){
 			//count sequences
 			total_sequence_count+=matrix->access_patterns[i].sequence_count;
@@ -293,7 +293,7 @@ static void write_sequences(int fd, traced_matrix * matrix){
 	unsigned int counter=0;
 	
 	unsigned int i;
-	for (i = 0; i<MAX_PATTERNS_PER_MATRIX; i++){
+	for (i = 0; i<clo_ssim_max_patterns_per_matrix; i++){
 		unsigned int j;
 		if (matrix->access_patterns[i].length!=0){
 			for (j = 0; j<matrix->access_patterns[i].sequence_count; j++){

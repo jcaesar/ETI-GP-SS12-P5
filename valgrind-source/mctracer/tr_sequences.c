@@ -34,7 +34,7 @@ static void delete_access_pattern(traced_matrix * matr, access_pattern * const a
 	// remove usages of ap in the sequences
 	int i, j;
 	ap->length = 0; // little hack to make sure current ap is not processed
-	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i)
+	for(i = 0; i < clo_ssim_max_patterns_per_matrix; ++i)
 		if(matr->access_patterns[i].length != 0)
 			for(j = 0; j < matr->access_patterns[i].sequence_count; ++j)
 				if(matr->access_patterns[i].sequences[j].next_pattern == ap)
@@ -99,7 +99,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 				// what we found and marked was shorter than the pattern.
 				// that means, that we could have matched a full pattern if it was in a different rotation
 				// => rotate the pattern
-				matrix_access_method temp[MAX_PATTERN_LENGTH];
+				matrix_access_method temp[clo_ssim_max_pattern_length];
 				VG_(memcpy)(temp, ap->steps, sizeof(matrix_access_method)*apstep);
 				VG_(memmove)(ap->steps, ap->steps + apstep, sizeof(matrix_access_method)*(ap->length - apstep));
 				VG_(memcpy)(ap->steps + (ap->length - apstep), temp, sizeof(matrix_access_method)*apstep);
@@ -117,7 +117,7 @@ static bool subpattern_elimination_check(traced_matrix * const matr, access_patt
 	if(oap->length == 0)
 		return true;
 	unsigned int j;
-	for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j) // loop over patterns which could eliminate oap
+	for(j = 0; j < clo_ssim_max_patterns_per_matrix; ++j) // loop over patterns which could eliminate oap
 	{
 		access_pattern * const iap = matr->access_patterns + j; // inner access pattern	
 		if(iap == oap)
@@ -169,20 +169,20 @@ void process_pattern_buffer(traced_matrix * matr)
 
 	// go over all the existing access patterns and find matching accesses
 	unsigned int i;
-	for(i = 0; i < MAX_PATTERNS_PER_MATRIX; ++i) // loop over access patterns
+	for(i = 0; i < clo_ssim_max_patterns_per_matrix; ++i) // loop over access patterns
 		mark_pattern_findings(matr, matr->access_patterns + i, patterned_access);
 	// find new patterns
-	for(i = 0; i <= count - MAX_PATTERN_LENGTH*2; ++i)
+	for(i = 0; i <= count - clo_ssim_max_pattern_length*2; ++i)
 	{
 		if(patterned_access[i])
 			continue;
 		// single access repetition locating
 		unsigned int length;
-		for(length = 1; length <= MAX_PATTERN_LENGTH; ++length)
+		for(length = 1; length <= clo_ssim_max_pattern_length; ++length)
 			if(accbuf[i].offset.n == accbuf[i+length].offset.n &&
 			   accbuf[i].offset.m == accbuf[i+length].offset.m)
 				break;
-		if(length > MAX_PATTERN_LENGTH)
+		if(length > clo_ssim_max_pattern_length)
 			continue;
 		unsigned int j;
 		// sequence equality check
@@ -212,7 +212,7 @@ void process_pattern_buffer(traced_matrix * matr)
 			//  it would probably be slower, too.)
 			float max_expendability = 0;
 			access_pattern * rap = 0; // replaced access pattern
-			for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j)
+			for(j = 0; j < clo_ssim_max_patterns_per_matrix; ++j)
 			{
 				access_pattern * const ap = matr->access_patterns + j;
 				if(ap->length == 0)
@@ -231,7 +231,7 @@ void process_pattern_buffer(traced_matrix * matr)
 			delete_access_pattern(matr, rap, patterned_access);
 			VG_(memcpy)(rap, &nap, sizeof(access_pattern));
 			mark_pattern_findings(matr, rap, patterned_access);
-			for(j = 0; j < MAX_PATTERNS_PER_MATRIX; ++j)
+			for(j = 0; j < clo_ssim_max_patterns_per_matrix; ++j)
 				subpattern_elimination_check(matr, matr->access_patterns + j, patterned_access);
 			{
 			}
@@ -240,9 +240,9 @@ void process_pattern_buffer(traced_matrix * matr)
 	// process sequences of patterns
 	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
-	// note on the condition: I've switched around between 3,2 and 1*MAX_PATTERN_LENGTH multiple times. It should be 3 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
+	// note on the condition: I've switched around between 3,2 and 1*clo_ssim_max_pattern_length multiple times. It should be 3 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
 	i = 0;
-	while(i <= count - 3*MAX_PATTERN_LENGTH)
+	while(i <= count - 3*clo_ssim_max_pattern_length)
 	{
 		if(patterned_access[i] != cap)
 		{
