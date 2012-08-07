@@ -228,6 +228,7 @@ bool ssim_matrix_tracing_stop(Addr addr)
 
 	if(!matr)
 	{
+		VG_(printf)("mctracer: call to SSIM_MATRIX_TRACING_STOP with invalid address %lu\n", addr);
 		return false;
 	}
 
