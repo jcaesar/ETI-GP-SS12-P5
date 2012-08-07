@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 public class RelativeAccessPanel extends javax.swing.JPanel {
 
     /**
-     * Creates new form RelativeJumpPanel
+     * Creates new form RelativeAccessPanel
      */
     public RelativeAccessPanel() {
         initComponents();
@@ -61,7 +61,7 @@ public class RelativeAccessPanel extends javax.swing.JPanel {
     }
 
     /**
-     * Fills unused space if there are less than 8 relative jumps
+     * Fills unused space if there are less than 8 relative accesses
      */
     public void fillSpace() {
         if (constraints.gridx < 5 && constraints.gridy < 2) {
@@ -69,7 +69,6 @@ public class RelativeAccessPanel extends javax.swing.JPanel {
                 JPanel filler = new JPanel();
                 filler.setMinimumSize(new java.awt.Dimension(80, 120));
                 filler.setPreferredSize(new java.awt.Dimension(80, 120));
-                // test.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
                 add(filler, constraints);
                 constraints.gridx++;
             }
@@ -81,7 +80,6 @@ public class RelativeAccessPanel extends javax.swing.JPanel {
                 JPanel filler = new JPanel();
                 filler.setMinimumSize(new java.awt.Dimension(80, 120));
                 filler.setPreferredSize(new java.awt.Dimension(80, 120));
-                // test.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
                 add(filler, constraints);
                 constraints.gridx++;
             }

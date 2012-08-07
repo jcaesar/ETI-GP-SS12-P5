@@ -5,6 +5,8 @@
 package view;
 
 import data.Sequence;
+import javax.swing.JLabel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,6 +20,12 @@ public class SequencesPanel extends javax.swing.JPanel {
      */
     public SequencesPanel() {
         initComponents();
+        
+        // Next Access column should be aligned to the center
+        JLabel label = null;
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(label.RIGHT);
+        sequencesTable.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
     }
 
     /**
@@ -32,25 +40,31 @@ public class SequencesPanel extends javax.swing.JPanel {
 
         seqScrollPane = new javax.swing.JScrollPane();
         sequencesTable = new javax.swing.JTable();
-        sequencesTable.setAutoCreateRowSorter(true);
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("view/Bundle"); // NOI18N
-        setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("SequencesPanel.border.title"))); // NOI18N
+        setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), bundle.getString("SequencesPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 12))); // NOI18N
+        setToolTipText("A Sequence is a repetition of a specific pattern.");
         setLayout(new java.awt.GridBagLayout());
 
+        seqScrollPane.setMaximumSize(new java.awt.Dimension(500, 150));
+        seqScrollPane.setMinimumSize(new java.awt.Dimension(500, 150));
+        seqScrollPane.setName(bundle.getString("SequencesPanel.seqScrollPane.name")); // NOI18N
+        seqScrollPane.setPreferredSize(new java.awt.Dimension(500, 150));
+
+        sequencesTable.setAutoCreateRowSorter(true);
         sequencesTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Pattern-ID", "Repetitions", "Occurences", "MOffset", "NOffset", "Next Pattern"
+                "Repetitions", "Occurences", "Next Access", "Next Pattern"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class
+                java.lang.Integer.class, java.lang.Double.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -77,14 +91,12 @@ public class SequencesPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     public void addSequence(Sequence seq) {
-        Object[] tmp = new Object[6];
-        tmp[0] = seq.getPattern().getPID();
-        tmp[1] = seq.getNumRepetitions();
-        tmp[2] = seq.getNumOccurrences();
-        tmp[3] = seq.getNextAccessMOffset();
-        tmp[4] = seq.getNextAccessNOffset();
+        Object[] tmp = new Object[4];
+        tmp[0] = seq.getNumRepetitions();
+        tmp[1] = seq.getNumOccurrences();
+        tmp[2] = "(" + seq.getNextAccessMOffset() + "|" + seq.getNextAccessNOffset() + ")";
         if (seq.getNextPattern() != null) {
-            tmp[5] = seq.getNextPattern().getPID();
+            tmp[3] = seq.getNextPattern().getPID();
         }
         ((DefaultTableModel)sequencesTable.getModel()).addRow(tmp);
     }

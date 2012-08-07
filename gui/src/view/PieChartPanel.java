@@ -74,7 +74,7 @@ public class PieChartPanel extends javax.swing.JPanel {
     private void drawPie(Graphics graphics, int x_pos, int y_pos, int diameter, int hits, int misses) {
 
         //Gradzahl entsprechend der Anzahl der Hits berechnen
-        int degHits = (int) (((double) hits /(double)(hits + misses)) * 360);
+        int degHits = (int) (((double) hits / (double) (hits + misses)) * 360);
 
         //Die beiden Segmente zeichnen
         graphics.setColor(Color.green.darker());

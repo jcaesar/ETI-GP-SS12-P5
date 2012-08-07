@@ -6,9 +6,8 @@ import data.Pattern;
 import data.RelativeJump;
 import data.Sequence;
 import java.awt.Component;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.*;
 
@@ -18,15 +17,13 @@ import javax.swing.*;
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    private PatternDetailedPanel detailedPanel;
+
     /**
      * Creates new MainFrame
      */
     public MainFrame() {
         initComponents();
-
-        // Create instances of lists for dynamic GUI
-        arrowList = new ArrayList<>();
-        //patternList = new ArrayList<>();
     }
 
     /**
@@ -42,16 +39,16 @@ public class MainFrame extends javax.swing.JFrame {
         dataStructuresButtonGroup = new javax.swing.ButtonGroup();
         fileChooser = new javax.swing.JFileChooser();
         aboutDialog = new javax.swing.JDialog();
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
-        jPopupMenu1 = new javax.swing.JPopupMenu();
-        jRadioButton2 = new javax.swing.JRadioButton();
-        jRadioButton3 = new javax.swing.JRadioButton();
+        aboutPanel = new javax.swing.JPanel();
+        aboutScrollPane = new javax.swing.JScrollPane();
+        aboutTextArea = new javax.swing.JTextArea();
+        teamScrollPane = new javax.swing.JScrollPane();
+        teamTextArea = new javax.swing.JTextArea();
         loadStoreButtonGroup = new javax.swing.ButtonGroup();
+        helpDialog = new javax.swing.JDialog();
+        helpPanel = new javax.swing.JPanel();
+        helpScrollPane = new javax.swing.JScrollPane();
+        helpPane = new javax.swing.JEditorPane();
         toolbar = new javax.swing.JToolBar();
         labelToolBar = new javax.swing.JLabel();
         dropdownMenu = new javax.swing.JComboBox();
@@ -64,9 +61,8 @@ public class MainFrame extends javax.swing.JFrame {
         relativeAccessPanel = new view.RelativeAccessPanel();
         piePanel = new javax.swing.JPanel();
         patternsTab = new javax.swing.JPanel();
-        patternsPanel = new view.PatternsPanel();
-        sequencesTab = new javax.swing.JPanel();
-        sequencesPanel = new view.SequencesPanel();
+        patternsOverviewPanel = new view.PatternOverviewPanel();
+        patternDetailsPanel = new javax.swing.JPanel();
         matrixPanel = new javax.swing.JPanel();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10), new java.awt.Dimension(0, 10), new java.awt.Dimension(32767, 5));
         statisticsPanel = new view.StatisticsPanel();
@@ -81,29 +77,29 @@ public class MainFrame extends javax.swing.JFrame {
 
         fileChooser.setFileFilter(new EtisFileFilter());
 
-        aboutDialog.setTitle("About");
+        aboutDialog.setTitle("About ETIS");
         aboutDialog.setResizable(false);
 
-        jPanel1.setMinimumSize(new java.awt.Dimension(450, 300));
-        jPanel1.setPreferredSize(new java.awt.Dimension(450, 300));
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        aboutPanel.setMinimumSize(new java.awt.Dimension(450, 300));
+        aboutPanel.setPreferredSize(new java.awt.Dimension(450, 300));
+        aboutPanel.setLayout(new java.awt.GridBagLayout());
 
-        jScrollPane2.setBorder(null);
-        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        aboutScrollPane.setBorder(null);
+        aboutScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        aboutScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setEditable(false);
-        jTextArea2.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
-        jTextArea2.setLineWrap(true);
-        jTextArea2.setRows(3);
-        jTextArea2.setTabSize(4);
-        jTextArea2.setText("XXX is an analyzing tool to evaluate the cache performance of matrix operations.");
-        jTextArea2.setWrapStyleWord(true);
-        jTextArea2.setMinimumSize(new java.awt.Dimension(450, 300));
-        jTextArea2.setName("");
-        jTextArea2.setOpaque(false);
-        jScrollPane2.setViewportView(jTextArea2);
+        aboutTextArea.setColumns(20);
+        aboutTextArea.setEditable(false);
+        aboutTextArea.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
+        aboutTextArea.setLineWrap(true);
+        aboutTextArea.setRows(3);
+        aboutTextArea.setTabSize(4);
+        aboutTextArea.setText("ETIS is an analyzing tool that allows you to evaluate the cache performance of matrix operations.");
+        aboutTextArea.setWrapStyleWord(true);
+        aboutTextArea.setMinimumSize(new java.awt.Dimension(450, 300));
+        aboutTextArea.setName("");
+        aboutTextArea.setOpaque(false);
+        aboutScrollPane.setViewportView(aboutTextArea);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -115,14 +111,14 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
-        jPanel1.add(jScrollPane2, gridBagConstraints);
+        aboutPanel.add(aboutScrollPane, gridBagConstraints);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setEditable(false);
-        jTextArea1.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
-        jTextArea1.setRows(5);
-        jTextArea1.setText("Developers\n------\nPhilip Becker-Ehmck\nThomas Breier\nMatthias Brugger\nJakob Buchgraber\nDominik Durner\nNils Kunze\nJulius Michaelis\nSimon Wimmer\n");
-        jScrollPane1.setViewportView(jTextArea1);
+        teamTextArea.setColumns(20);
+        teamTextArea.setEditable(false);
+        teamTextArea.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
+        teamTextArea.setRows(5);
+        teamTextArea.setText("Developers\n------\nPhilip Becker-Ehmck\nThomas Breier\nMatthias Brugger\nJakob Buchgraber\nDominik Durner\nNils Kunze\nJulius Michaelis\nSimon Wimmer\n");
+        teamScrollPane.setViewportView(teamTextArea);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -134,21 +130,27 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(6, 10, 11, 10);
-        jPanel1.add(jScrollPane1, gridBagConstraints);
+        aboutPanel.add(teamScrollPane, gridBagConstraints);
 
-        aboutDialog.getContentPane().add(jPanel1, java.awt.BorderLayout.LINE_START);
+        aboutDialog.getContentPane().add(aboutPanel, java.awt.BorderLayout.LINE_START);
 
-        jCheckBoxMenuItem1.setSelected(true);
-        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
+        helpDialog.setTitle("Help Contents");
 
-        jRadioButton2.setText("jRadioButton2");
+        helpPanel.setLayout(new java.awt.GridLayout(1, 0));
 
-        jRadioButton3.setText("jRadioButton3");
+        helpPane.setContentType("text/html");
+        helpPane.setEditable(false);
+        helpPane.setText("<html>\r\n  <head>\r\n\r\n  </head>\r\n  <body>\r\n    <p style=\"margin-top: 0\">\r\n     \n<b>\rData Structures</b><br /> \nIn the selector right next to this label, one can select a matrix by its name, for which all of the information gathered by McTracer should be displayed.\n\n<br /> <br /> \n<b>Load/Store switch</b><br /> \nThis switch is located in the top right corner and determines if the information displayed throughout the rest of the GUI refers to load or store type accesses.\n\n<br /> <br /> \n<b>Absolute Matrix Representation</b><br /> \nThis part visualizes the accesses (that is loads or stores as selected by the load/store switch) that happened on the matrix on a per field basis. Each field is coloured on a scale from red to green, where red means that 0% of the accesses on this field were hits, whereas green means that 100% of the accesses were successful. This colour scheme is also used throughout the rest of the graphics appearing in the GUI.\n\n<br /> <br /> \n<b>Relative Accesses</b><br /> In this part the single accesses (that is loads or stores as selected by the load/store switch) on different fields are classified by the difference in position of two consecutive accesses. For example, if the program makes two consecutive accesses to the fields at positions (1|1) and (1|3) this will give a new relative access class identified by the position delta of (0|2). The following information is displayed for the 8 access classes that were found most often: The number of hits and misses that occurred for accesses belonging to that class, the corresponding hit/miss ratio and a graphical representation of the access' position delta with an arrow. These arrows are coloured in accordance to the hit/miss ratio.\nIn the area the hit/miss ratio for each relative access is visualized with a pie chart. The area of each pie chart corresponds to the overall number of accesses that where found for this relative access compared to the others. That means an access with a lot of occurrences will have a big chart, while an access with fewer occurrences will have a smaller pie chart. It can happen that some of the accesses do not appear as a pie chart, because their charts would be too small to be displayed.\n\n<br /> <br /> \n<b>Patterns</b><br />\nA pattern groups multiple relative accesses into a bigger sequence in order to give the user a feeling of how the matrix is traversed by the program. By selecting a pattern from the list, the following detail information is shown below the pattern list: Each pattern consists of a number of relative accesses that are traversed in the displayed order. Also for each pattern the total number of occurrences and the number of hits and misses is presented to the user. Each pattern is graphically represented by a picture showing a start point and an arrow for each consecutive relative access. Again the colouring of the arrows correlates to the hit/miss ratio. The bottom part shows a list of sequences, of which this pattern is part of. Patterns do not distinguish between load and store.\n\n<br /> <br /> \n<b>Sequences</b><br /> \nA sequence is basically a repetition of a certain pattern. It displays how often the pattern in question was repeated and which relative access did \"break\" the sequence, that means which relative access was the first one that did not belong to the pattern. For this relative access the delta in x and y position is shown. Sometimes the program can recognize a pattern that directly follows the repetition of the pattern corresponding to the sequence. If this is the case, this following pattern is identified by its id as assigned in the pattern list. Of course the same sequence can appear multiple times, so the number of occurrences of that sequence is shown. \n\n    </p>\r\n  </body>\r\n</html>\r\n");
+        helpScrollPane.setViewportView(helpPane);
+
+        helpPanel.add(helpScrollPane);
+
+        helpDialog.getContentPane().add(helpPanel, java.awt.BorderLayout.CENTER);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Cache Analyzer");
-        setMinimumSize(new java.awt.Dimension(1000, 700));
-        setPreferredSize(new java.awt.Dimension(1000, 700));
+        setTitle("ETIS");
+        setMinimumSize(new java.awt.Dimension(1005, 700));
+        setPreferredSize(new java.awt.Dimension(1005, 700));
         setResizable(false);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -203,7 +205,6 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         relativeJumpsTab.add(relativeAccessPanel, gridBagConstraints);
-        relativeAccessPanel.getAccessibleContext().setAccessibleName("Relative Accesses");
 
         piePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Hit/Miss Ratio", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
         piePanel.setMinimumSize(new java.awt.Dimension(500, 250));
@@ -223,30 +224,31 @@ public class MainFrame extends javax.swing.JFrame {
 
         patternsTab.setLayout(new java.awt.GridBagLayout());
 
-        patternsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Patterns", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
-        patternsPanel.setPreferredSize(new java.awt.Dimension(450, 250));
+        patternsOverviewPanel.setMinimumSize(new java.awt.Dimension(500, 120));
+        patternsOverviewPanel.setPreferredSize(new java.awt.Dimension(500, 120));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 1;
+        gridBagConstraints.ipady = 1;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        patternsTab.add(patternsOverviewPanel, gridBagConstraints);
+
+        patternDetailsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
+        patternDetailsPanel.setMinimumSize(new java.awt.Dimension(500, 250));
+        patternDetailsPanel.setPreferredSize(new java.awt.Dimension(500, 250));
+        patternDetailsPanel.setLayout(new java.awt.GridBagLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        patternsTab.add(patternsPanel, gridBagConstraints);
+        gridBagConstraints.weighty = 3.0;
+        patternsTab.add(patternDetailsPanel, gridBagConstraints);
 
         relativeAccessesTab.addTab("Patterns", patternsTab);
-
-        sequencesTab.setLayout(new java.awt.GridBagLayout());
-
-        sequencesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sequences", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 1, 14))); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        sequencesTab.add(sequencesPanel, gridBagConstraints);
-
-        relativeAccessesTab.addTab("Sequences", sequencesTab);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -362,6 +364,9 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JDialog aboutDialog;
     private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.JPanel aboutPanel;
+    private javax.swing.JScrollPane aboutScrollPane;
+    private javax.swing.JTextArea aboutTextArea;
     private javax.swing.ButtonGroup dataStructuresButtonGroup;
     private javax.swing.JMenuItem docMenuItem;
     private javax.swing.JComboBox dropdownMenu;
@@ -371,40 +376,31 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.Box.Filler filler1;
     private javax.swing.Box.Filler filler2;
     private javax.swing.Box.Filler filler3;
+    private javax.swing.JDialog helpDialog;
     private javax.swing.JMenu helpMenu;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPopupMenu jPopupMenu1;
-    private javax.swing.JRadioButton jRadioButton2;
-    private javax.swing.JRadioButton jRadioButton3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea jTextArea2;
+    private javax.swing.JEditorPane helpPane;
+    private javax.swing.JPanel helpPanel;
+    private javax.swing.JScrollPane helpScrollPane;
     private javax.swing.JLabel labelToolBar;
     private javax.swing.JToggleButton loadButton;
     private javax.swing.ButtonGroup loadStoreButtonGroup;
     private javax.swing.JPanel matrixPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openFileMenuItem;
-    private view.PatternsPanel patternsPanel;
+    private javax.swing.JPanel patternDetailsPanel;
+    private view.PatternOverviewPanel patternsOverviewPanel;
     private javax.swing.JPanel patternsTab;
     private javax.swing.JPanel piePanel;
     private view.RelativeAccessPanel relativeAccessPanel;
     private javax.swing.JTabbedPane relativeAccessesTab;
     private javax.swing.JPanel relativeJumpsTab;
     private javax.swing.JPopupMenu.Separator seperator;
-    private view.SequencesPanel sequencesPanel;
-    private javax.swing.JPanel sequencesTab;
     private view.StatisticsPanel statisticsPanel;
     private javax.swing.JToggleButton storeButton;
+    private javax.swing.JScrollPane teamScrollPane;
+    private javax.swing.JTextArea teamTextArea;
     private javax.swing.JToolBar toolbar;
     // End of variables declaration//GEN-END:variables
-    // Declaration of variables for a dynamic GUI
-    private JPopupMenu popup;
-    private List<ArrowStatisticsPanel> arrowList;
-    // private List<PatternStatisticsPanel> patternList;
-    // End of variables declaration
 
     public void updateDropdownMenu(List<String> names) {
         dropdownMenu.removeAllItems();
@@ -416,23 +412,6 @@ public class MainFrame extends javax.swing.JFrame {
         loadButton.setSelected(true);
     }
 
-    /**
-     *
-     * @param names list of names of the matrices
-     */
-    /**
-     * public void updateDropdownButton(List<String> names) { popup = new
-     * JPopupMenu(); Iterator<String> iter = names.iterator(); while
-     * (iter.hasNext()) { String name = iter.next(); JMenuItem item = new
-     * JMenuItem(name); item.setName(name); popup.add(item); }
-     *
-     * toolbar.removeAll(); toolbar.add(labelToolBar); dropDownButton = new
-     * JButton("test"); dropDownButton.setFocusable(false);
-     * toolbar.add(dropDownButton); toolbar.add(filler2);
-     * toolbar.add(loadButton); toolbar.add(storeButton);
-     * loadButton.setSelected(true); }
-    *
-     */
     /**
      *
      * @param overallHits
@@ -448,13 +427,14 @@ public class MainFrame extends javax.swing.JFrame {
 
     /**
      *
-     * @param matrix @TODO just quickly added, needs another class for "clean"
-     * implementation
+     * @param matrix implementation
      */
     public void addAbsoluteRepresentation(DataInput matrix) {
         MatrixPanel m = new MatrixPanel(matrix);
-        m.setPreferredSize(new java.awt.Dimension(450, 450));
-        matrixPanel.add(m);
+        JScrollPane scrollPane = new JScrollPane(m,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setPreferredSize(new java.awt.Dimension(450, 450));
+        matrixPanel.add(scrollPane);
     }
 
     /**
@@ -481,7 +461,6 @@ public class MainFrame extends javax.swing.JFrame {
         arrow.setMisses(jump.getMisses());
         arrow.setSuccessrate((double) jump.getHits()
                 / (double) (jump.getHits() + jump.getMisses()) * 100);
-        arrowList.add(arrow);
         relativeAccessPanel.addArrowStatisticsPanel(arrow);
     }
 
@@ -518,52 +497,47 @@ public class MainFrame extends javax.swing.JFrame {
      *
      * @param s
      */
-    public void addSequences(Sequence s) {
-        sequencesPanel.addSequence(s);
-    }
-
-    /**
-     *
-     */
-    public void removeSequences() {
-        sequencesPanel.removeSequences();
-    }
-
-    /**
-     *
-     * @param s
-     */
     public void addPattern(Pattern p) {
-        patternsPanel.addPattern(p);
+        patternsOverviewPanel.addPattern(p);
     }
 
     /**
      *
      */
     public void removePatterns() {
-        patternsPanel.removePatterns();
+        patternsOverviewPanel.removePatterns();
+    }
+
+    public void updateDetailedPatternStatistics(Pattern p) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+
+        patternDetailsPanel.removeAll();
+        detailedPanel = new PatternDetailedPanel();
+        detailedPanel.setPattern(p);
+
+        patternDetailsPanel.add(detailedPanel, constraints);
+        patternDetailsPanel.updateUI();
+    }
+
+    public void addSequencesToPattern(List<Sequence> seq) {
+        if (detailedPanel != null) {
+            detailedPanel.setSequences(seq);
+        }
     }
 
     /**
      *
-     * Adds a MatrixListener to all the items. ActionCommand equals the number
-     * in the matrices array.
+     * Adds a MatrixListener to all the combobox. ActionCommand equals the
+     * number in the matrices array.
      *
      * @param al
      */
     public void addMatrixListener(ActionListener al) {
-        int number = 0;
-        Component[] components = popup.getComponents();
-        for (Component c : components) {
-            if (c instanceof JMenuItem) {
-                ((JMenuItem) c).addActionListener(al);
-                ((JMenuItem) c).setActionCommand(String.valueOf(number));
-                number++;
-            }
-        }
-    }
-
-    public void addMatrixComboListener(ActionListener al) {
         dropdownMenu.addActionListener(al);
     }
 
@@ -607,6 +581,12 @@ public class MainFrame extends javax.swing.JFrame {
         aboutDialog.setDefaultCloseOperation(javax.swing.JFrame.HIDE_ON_CLOSE);
         aboutDialog.setVisible(true);
     }
+    
+    public void showHelpDialog() {
+        helpDialog.setSize(700, 600);
+        helpDialog.setDefaultCloseOperation(javax.swing.JFrame.HIDE_ON_CLOSE);
+        helpDialog.setVisible(true);
+    }
 
     public JComboBox getDropDownMenu() {
         return dropdownMenu;
@@ -620,7 +600,7 @@ public class MainFrame extends javax.swing.JFrame {
         return relativeAccessPanel;
     }
 
-    public PatternsPanel getPatternsPanel() {
-        return patternsPanel;
+    public PatternOverviewPanel getPatternsOverviewPanel() {
+        return patternsOverviewPanel;
     }
 }

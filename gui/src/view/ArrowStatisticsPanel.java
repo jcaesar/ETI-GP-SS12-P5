@@ -1,4 +1,3 @@
-
 package view;
 
 import java.awt.GridBagConstraints;
@@ -145,9 +144,9 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
     private javax.swing.JLabel successrate;
     // End of variables declaration//GEN-END:variables
     private ArrowPanel arrow;
-    
+
     private void createArrowPanel(int x, int y, double rate) {
-        arrow = new ArrowPanel(x,y,rate);
+        arrow = new ArrowPanel(x, y, rate);
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -159,28 +158,26 @@ public class ArrowStatisticsPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = GridBagConstraints.VERTICAL;
         add(arrow, gridBagConstraints);
     }
-    
+
     public void setJumpDirections(int x, int y, double rate) {
         jumpDirections.setText(" (" + x + "|" + y + ")");
-        createArrowPanel(x,y,rate);
+        createArrowPanel(x, y, rate);
     }
-    
+
     public void setNumber(int n) {
         number.setText(NumberFormat.getInstance().format(n));
     }
-    
+
     public void setHits(int hits) {
         this.hits.setText(NumberFormat.getInstance().format(hits));
     }
-    
+
     public void setMisses(int misses) {
         this.misses.setText(NumberFormat.getInstance().format(misses));
     }
 
     public void setSuccessrate(double rate) {
         DecimalFormat f = new DecimalFormat("#0.00");
-        // Color c = new Color((int) (255*(100-rate))/100, (int) (255*rate)/100,0);
-        // successrate.setForeground(c);
         successrate.setText(String.valueOf(f.format(rate)) + "%");
-    } 
+    }
 }

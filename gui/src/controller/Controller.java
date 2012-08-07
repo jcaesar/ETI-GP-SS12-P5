@@ -12,6 +12,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import view.EtiGP;
 import view.MainFrame;
 
@@ -39,22 +43,51 @@ public class Controller {
         view.addFileMenuListener(new Controller.FileMenuListener());
         view.addHelpMenuListener(new Controller.HelpMenuListener());
         view.addAccessModeListener(new Controller.AccessModeListener());
+        view.addMatrixListener(new Controller.MatrixListener());
     }
 
     public Controller(MainFrame view, DataInput[][] matrixList) {
         this.view = view;
         this.matrixList = matrixList;
         this.currentMatrix = -1;
+
         addMatrices();
 
         view.addFileMenuListener(new Controller.FileMenuListener());
         view.addHelpMenuListener(new Controller.HelpMenuListener());
         view.addAccessModeListener(new Controller.AccessModeListener());
+        view.addMatrixListener(new Controller.MatrixListener());
     }
 
-    /**
-     *
-     */
+    class PatternsTableListener implements ListSelectionListener {
+
+        private JTable table;
+
+        public PatternsTableListener(JTable table) {
+            this.table = table;
+        }
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            // If no data is load (may happen when you load a new file)
+            if (currentMatrix < 0) {
+                return;
+            }
+
+            if (e.getSource() == table.getSelectionModel()) {
+
+                // determine selected row
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow < 0) {
+                    return;
+                }
+                // receive the corresponding pattern id from to display detailed data
+                int pid = (int) ((DefaultTableModel) table.getModel()).getValueAt(selectedRow, 0);
+                updateDetailedPatternStatistics(pid);
+            }
+        }
+    }
+
     class FileMenuListener implements ActionListener {
 
         @Override
@@ -65,6 +98,7 @@ public class Controller {
                     if (returnVal == JFileChooser.APPROVE_OPTION) {
                         File file = view.fileChooser.getSelectedFile();
 
+                        // try to read the file and display the first matrix by default
                         try {
                             DataInput[][] tmp = DataReader.readData(file);
                             removeMatrices();
@@ -84,8 +118,6 @@ public class Controller {
                             Logger.getLogger(EtiGP.class.getName()).log(Level.SEVERE, null,
                                     ex);
                         }
-                    } else {
-                        // System.out.println("File access cancelled by user.");
                     }
                     break;
                 case "exit":
@@ -104,6 +136,7 @@ public class Controller {
         public void actionPerformed(ActionEvent e) {
             switch (e.getActionCommand()) {
                 case "doc":
+                    view.showHelpDialog();
                     break;
                 case "about":
                     view.showAboutDialog();
@@ -115,32 +148,15 @@ public class Controller {
     /**
      * ActionListener which checks whether a new matrix/data structre has been
      * selected in the toolbar. Initiates the update process of the GUI.
-     
+     */
     class MatrixListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            displayMatrix(Integer.valueOf(e.getActionCommand()));
-            view.getDropDownButton().setIcon(
-                    new TextIcon(view.getDropDownButton(),
-                    matrixList[Integer.valueOf(e.getActionCommand())][0].getName()));
-            view.getLoadButton().setSelected(true);
-        }
-    }
-    */
-    
-    /**
-     * ActionListener which checks whether a new matrix/data structre has been
-     * selected in the toolbar. Initiates the update process of the GUI.
-     */
-    class MatrixComboListener implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JComboBox cb = (JComboBox)e.getSource();
-            System.out.println(cb.getSelectedIndex());
-            if (cb.getSelectedIndex() >= 0)
-            displayMatrix(cb.getSelectedIndex());
+            JComboBox cb = (JComboBox) e.getSource();
+            if (cb.getSelectedIndex() >= 0) {
+                displayMatrix(cb.getSelectedIndex());
+            }
         }
     }
 
@@ -205,8 +221,7 @@ public class Controller {
         // Automatically display data from the first matrix
         displayMatrix(0);
         currentMatrix = 0;
-        
-        view.addMatrixComboListener(new Controller.MatrixComboListener());
+
     }
 
     /**
@@ -232,9 +247,10 @@ public class Controller {
         view.removeAbsoluteRepresentation();
         view.removeArrowStatistics();
         view.removePieChart();
-        view.removeSequences();
+        // view.removeSequences();
         view.removePatterns();
-        
+
+
         // Add/Update relevant data
         currentMatrix = n;
         updateMatrixStatistics(matrix);
@@ -242,35 +258,28 @@ public class Controller {
         addArrowStatistics(matrix[0]);
         view.addPieChart(matrix[0]);
         matrix[0].getSequences();
-        addSequences(matrix[0]);
+        // addSequences(matrix[0]);
         addPatterns(matrix[0]);
+        view.getPatternsOverviewPanel().getPatternsTable().getSelectionModel().
+                addListSelectionListener(new Controller.PatternsTableListener(
+                view.getPatternsOverviewPanel().getPatternsTable()));
+        updateDetailedPatternStatistics(0);
+        // Load Accesses are shown by default
         view.getLoadButton().setSelected(true);
     }
-    
+
     private void updateMatrixStatistics(DataInput[] matrix) {
         int[] numLoadAccesses = matrix[0].getAbsoluteNumAccesses();
         int[] numStoreAccesses = matrix[1].getAbsoluteNumAccesses();
-        
+
         view.updateMatrixStatistics(numLoadAccesses, numStoreAccesses, matrix[0].getName());
     }
 
-    /**
-     *
-     * @param matrix
-     */
-    private void addSequences(DataInput matrix) {
-        Sequence[] sequences = matrix.getSequences();
-        for (Sequence seq : sequences) {
-            view.addSequences(seq);
-        }
-    }
-    
     private void addPatterns(DataInput matrix) {
         Pattern[] patterns = matrix.getPatterns();
         for (Pattern p : patterns) {
             view.addPattern(p);
         }
-        view.getPatternsPanel().fillSpace();
     }
 
     /**
@@ -286,5 +295,26 @@ public class Controller {
             view.addArrowStatistics(jump);
         }
         view.getRelativeJumpPanel().fillSpace();
+    }
+
+    /**
+     *
+     * @param pid id of the selected pattern
+     */
+    private void updateDetailedPatternStatistics(int pid) {
+        Pattern[] patterns = matrixList[currentMatrix][0].getPatterns();
+        for (Pattern p : patterns) {
+            if (p.getPID() == pid) {
+                view.updateDetailedPatternStatistics(p);
+                List<Sequence> relevantSequences = new LinkedList<>();
+                for (Sequence s : matrixList[currentMatrix][0].getSequences()) {
+                    if (s.getPattern().getPID() == pid) {
+                        relevantSequences.add(s);
+                    }
+                }
+                view.addSequencesToPattern(relevantSequences);
+                break;
+            }
+        }
     }
 }

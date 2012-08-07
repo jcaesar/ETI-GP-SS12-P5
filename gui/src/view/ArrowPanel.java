@@ -17,7 +17,7 @@ public class ArrowPanel extends javax.swing.JPanel {
     private final int ARR_SIZE = 7;
 
     /**
-     * 
+     *
      * @param x move along the x-axis
      * @param y move along the y-axis
      * @param rate sucess rate to determine the color of the arrow
@@ -29,9 +29,9 @@ public class ArrowPanel extends javax.swing.JPanel {
         this.y_move = y;
         setColor(rate);
     }
-    
+
     /**
-     * 
+     *
      * @param g1
      * @param x1 x-coordinate of the startpoint
      * @param y1 y-coordinate of the startpoint
@@ -41,8 +41,8 @@ public class ArrowPanel extends javax.swing.JPanel {
     private void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
         Graphics2D g = (Graphics2D) g1.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
-        
+                RenderingHints.VALUE_ANTIALIAS_ON);
+
         double dx = x2 - x1, dy = y2 - y1;
         double angle = Math.atan2(dy, dx);
         int len = (int) Math.sqrt(dx * dx + dy * dy);
@@ -60,8 +60,8 @@ public class ArrowPanel extends javax.swing.JPanel {
     }
 
     /**
-     * 
-     * @param g 
+     *
+     * @param g
      */
     @Override
     protected void paintComponent(Graphics g) {
@@ -104,10 +104,10 @@ public class ArrowPanel extends javax.swing.JPanel {
             }
         }
     }
-    
+
     /*
-     * Determines the color of the arrow according to the success rate
-     * 100 % green - 0 % red
+     * Determines the color of the arrow according to the success rate 100 %
+     * green - 0 % red
      */
     private void setColor(double rate) {
         color = new Color((int) (255 * (100 - rate)) / 100, (int) (255 * rate) / 100, 0);

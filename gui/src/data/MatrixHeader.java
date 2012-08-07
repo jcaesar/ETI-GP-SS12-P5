@@ -2,15 +2,16 @@ package data;
 
 /**
  *
- * @author Simon Wimmer
+ * @author Simon Wimmer Represents a Matrix-Header as specified in the
+ * Dataformat-Documentation on
+ * https://github.com/bucjac/ETI-GP-SS12-P5/wiki/Dateiformat
  */
 public class MatrixHeader {
 
-    private int xSize, ySize, numLoadJumps, numStoreJumps, dataType, mibAddr;
+    private int xSize, ySize, numLoadJumps, numStoreJumps, mibAddr;
     private int numPatterns, numSequences;
     private int storeHits, storeMisses, loadHits, loadMisses;
     private long addr;
-    private String name;
 
     /**
      * @return the xSize
@@ -69,20 +70,6 @@ public class MatrixHeader {
     }
 
     /**
-     * @return the dataType
-     */
-    public int getDataType() {
-        return dataType;
-    }
-
-    /**
-     * @param dataType the dataType to set
-     */
-    public void setDataType(int dataType) {
-        this.dataType = dataType;
-    }
-
-    /**
      * @return the mibAddr
      */
     public int getMibAddr() {
@@ -110,22 +97,8 @@ public class MatrixHeader {
         this.addr = addr;
     }
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public void printInfo() {
-        System.out.println("Header Info for " + name);
+        System.out.println("Header Info:");
         System.out.println("X " + xSize);
         System.out.println("Y " + ySize);
         System.out.println("Num Load Jumps " + numLoadJumps);

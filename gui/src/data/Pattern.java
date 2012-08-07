@@ -4,7 +4,9 @@ import java.util.List;
 
 /**
  *
- * @author Simon Wimmer
+ * @author Simon Wimmer Represents a Pattern as specified in the
+ * Dataformat-Documentation on
+ * https://github.com/bucjac/ETI-GP-SS12-P5/wiki/Dateiformat
  */
 public class Pattern {
 

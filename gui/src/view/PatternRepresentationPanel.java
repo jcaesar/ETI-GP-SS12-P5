@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  *
- * @author admin
+ * @author Philip Becker-Ehmck
  */
 public class PatternRepresentationPanel extends javax.swing.JPanel {
 
@@ -181,8 +181,6 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
         at.concatenate(AffineTransform.getRotateInstance(angle));
         g.transform(at);
 
-        // set Color according to successrate
-        // g.setColor(color);
         g.setStroke(new BasicStroke(1));
         // Draw horizontal arrow starting in (0, 0)
         g.drawLine(0, 0, len - 1, 0);

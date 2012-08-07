@@ -2,12 +2,14 @@ package data;
 
 /**
  *
- * @author Simon Wimmer
+ * @author Simon Wimmer Represents a RelativeJump as specified in the
+ * Dataformat-Documentation on
+ * https://github.com/bucjac/ETI-GP-SS12-P5/wiki/Dateiformat
  */
 public class RelativeJump {
 
-    private int x_move;
-    private int y_move;
+    private int x_move; //N-Offset in specification
+    private int y_move; //M-Offset in specification
     private int hits;
     private int misses;
 

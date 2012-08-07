@@ -139,30 +139,52 @@ public class StatisticsPanel extends javax.swing.JPanel {
     private javax.swing.JLabel storeLabel;
     // End of variables declaration//GEN-END:variables
 
+    /**
+     *
+     * @param hits hits across all matrices
+     * @param misses misses across all matrices
+     */
     public void setOverallStatistics(long hits, long misses) {
         hitsOverall.setText(NumberFormat.getInstance().format(hits));
         missesOverall.setText(NumberFormat.getInstance().format(misses));
         DecimalFormat f = new DecimalFormat("#0.00");
         rateOverall.setText(f.format((double) hits / (double) (hits + misses) * 100) + " %");
     }
-    
+
+    /**
+     *
+     * @param load hits, misses of load accesses
+     * @param store hits, misses of store acesses
+     * @param name name of the matrix
+     */
     public void setMatrixStatistics(int[] load, int[] store, String name) {
         long overallHits = load[0] + store[0];
         long overallMisses = load[1] + store[1];
         DecimalFormat f = new DecimalFormat("#0.00");
-        
+
         nameMatrix.setText(name + ":");
         hitsMatrix.setText(NumberFormat.getInstance().format(overallHits));
         missesMatrix.setText(NumberFormat.getInstance().format(overallMisses));
-        rateMatrix.setText(f.format((double) overallHits / (double) (overallHits + overallMisses) * 100)+ " %");
-        
+        if ((overallHits + overallMisses) == 0) {
+            rateMatrix.setText("0.00 %");
+        } else {
+            rateMatrix.setText(f.format((double) overallHits / (double) (overallHits + overallMisses) * 100) + " %");
+        }
+
         hitsLoad.setText(NumberFormat.getInstance().format(load[0]));
         missesLoad.setText(NumberFormat.getInstance().format(load[1]));
-        rateLoad.setText(f.format((double) load[0] / (double) (load[0] + load[1]) * 100)+ " %");
-        
+        if ((load[0] + load[1]) == 0) {
+            rateLoad.setText("0.00 %");
+        } else {
+            rateLoad.setText(f.format((double) load[0] / (double) (load[0] + load[1]) * 100) + " %");
+        }
+
         hitsStore.setText(NumberFormat.getInstance().format(store[0]));
         missesStore.setText(NumberFormat.getInstance().format(store[1]));
-        rateStore.setText(f.format((double) store[0] / (double) (store[0] + store[1]) * 100)+ " %");
+        if ((store[0] + store[1]) == 0) {
+            rateStore.setText("0.00 %");
+        } else {
+            rateStore.setText(f.format((double) store[0] / (double) (store[0] + store[1]) * 100) + " %");
+        }
     }
-
 }
