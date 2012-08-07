@@ -49,11 +49,15 @@
 
 /* The path where the statistics will be written. */
 static Char* clo_ssim_output = NULL;
+static Int clo_ssim_cache_set_size = 16;
+static Int clo_ssim_cache_sets = 512;
 
 static Bool mt_process_cmd_line_option(Char* arg)
 {
-	if      VG_STR_CLO(arg, "--output", clo_ssim_output) {}
-	else
+	if VG_STR_CLO(arg, "--output", clo_ssim_output) {}
+    else if VG_INT_CLO(arg, "--cache-set-size", clo_ssim_cache_set_size) {}
+    else if VG_INT_CLO(arg, "--cache-sets", clo_ssim_cache_sets) {} 
+    else
 		return False;
 
 	return True;
@@ -62,7 +66,13 @@ static Bool mt_process_cmd_line_option(Char* arg)
 static void mt_print_usage(void)
 {
 	VG_(printf)(
-	    "    --output=<filepath>     write cache statistics to this file [<executable name>.etis]\n"
+	    "    --output=<filepath>          write cache statistics to this file [<executable name>.etis]\n"
+	);
+	VG_(printf)(
+	    "    --cache-sets=<number>        number of cache sets [512]\n"
+	);
+	VG_(printf)(
+	    "    --cache-set-size=<number>    number of cachelines per cache set [16]\n"
 	);
 }
 
@@ -304,7 +314,7 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 
 static void mt_post_clo_init(void)
 {
-	ssim_init();
+    ssim_init(clo_ssim_cache_sets, clo_ssim_cache_set_size);
 }
 
 static

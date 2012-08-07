@@ -302,6 +302,7 @@ static void write_sequences(int fd, traced_matrix * matrix){
 				all_sequences[counter].repetitions = (uint16_t)matrix->access_patterns[i].sequences[j].length;
 				all_sequences[counter].next_acces_m = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset_m;
 				all_sequences[counter].next_acces_n = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset_n;
+				all_sequences[counter].next_id = 0xff;
 				if(matrix->access_patterns[i].sequences[j].next_pattern!=0){
 					all_sequences[counter].next_id = (uint8_t)(matrix->access_patterns[i].sequences[j].next_pattern - matrix->access_patterns);
 				}

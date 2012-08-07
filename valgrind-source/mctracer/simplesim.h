@@ -116,7 +116,7 @@ extern traced_matrix* traced_matrices_index[MAX_MATRIX_COUNT];
 extern int traced_matrices_count;
 extern int stopped_matrices_count;
 
-void ssim_init(void);
+void ssim_init(Int sets_, Int setsize_);
 void ssim_flush_cache(void);
 bool ssim_matrix_tracing_start(Addr, unsigned short m, unsigned short n, unsigned short elsize, char*);
 bool ssim_matrix_tracing_stop(Addr);
