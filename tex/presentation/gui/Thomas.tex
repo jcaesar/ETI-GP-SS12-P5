@@ -1,0 +1,60 @@
+\subsection{Absolute Matrixdarstellung}
+\begin{frame}{Absolute Matrixdarstellung}
+	\begin{block}{Anforderungen}
+		\pause
+		\begin{itemize}[<+->]
+			\item Repräsentation aller Matrixelemente, farbliche Codierung als Indikator für Hits/Misses-Verhältnis\\\pause
+				$\Rightarrow$ Graphics.setColor(Color c)\\
+				$\Rightarrow$ Graphics.drawRect(int x, int y, int width, int height)\pause
+			\item Zoomen und Verschieben\\\pause
+			$\Rightarrow$ JScrollPane\\
+			$\Rightarrow$ Affine Abbildung
+		\end{itemize}
+	\end{block}
+\pause
+\end{frame}
+
+\subsection{Affine Abbildung}
+\begin{frame}{Affine Abbildung}
+	\begin{block}{Definition}
+		Abbildung zwischen 2 (affinen) Räumen, wobei
+		\pause
+		\begin{itemize}[<+->]
+			\item Kollinearität
+			\item Parallelität
+			\item Teilverhältnisse
+		\end{itemize}
+		bewahrt bleiben oder gegestandslos werden.
+	\end{block}
+\pause
+$\Rightarrow$ Affine Abbildung von Raum mit ursprünglich gezeichneter Matrix in gezoomte/verschobene Darstellung
+\end{frame}
+
+\begin{frame}
+\frametitle{Affine Abbildung - Implementierung}
+\pause
+\scriptsize$\underbrace {\left(
+   \begin{array}{ccc}
+     1 & 0 & scale*d_{x} \\
+     0 & 1 & scale*d_{y} \\
+     0 & 0 & 1
+   \end{array}
+\right)}_{Verschiebung}\pause*\underbrace {\left(
+   \begin{array}{ccc}
+     scale & 0 & 0 \\
+     0 & scale & 0 \\
+     0 & 0 & 1
+   \end{array}
+\right)}_{Zoom}=\pause\left(
+   \begin{array}{ccc}
+     scale & 0 & scale*d_{x} \\
+     0 & scale & scale*d_{y} \\
+     0 & 0 & 1
+   \end{array}
+\right)$
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\pause
+\lstset{frame=single}
+\lstinputlisting[language=JAVA]{gui/affine.java}
+\end{frame}
