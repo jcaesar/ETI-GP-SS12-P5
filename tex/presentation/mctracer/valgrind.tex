@@ -1,0 +1,43 @@
+\begin{frame}{Valgrind}
+	\begin{itemize}
+		\item Valgrind ist ein Framework um dynamische Analyseprogramme (Tools) zu entwickeln.
+		\pause \item Valgrind ist eine virtuelle Maschine und JIT Compiler.
+		\pause \item Valgrind verwendet Dynamic Binary Translation (DBT) 
+		\pause \item Tools führen Analyse und/oder Instrumentierung durch.
+		\pause \item{\bf Tools:} Memcheck, Cachegrind, Callgrind, {\bf McTracer} 
+	\end{itemize}
+\end{frame}
+
+\subsection{Valgrind Workflow}
+
+\begin{frame}{Valgrind Workflow}
+	\begin{enumerate}
+		\item Das Programm wird eingelesen und in die Vex Intermediate Representation (Vex IR) ueberfuehrt.
+		\pause \item IRSB's (IR Super Block) werden an das Skin uebergeben. 
+		\pause \item Das Skin instrumentiert/analysiert die IRSB's.
+		\pause \item Die IRSB's werden zu Maschinencode kompiliert und nativ ausgefuehrt. 
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Darstellung des Maschinencodes in Vex IR}
+	\lstset{frame=single}
+	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/irsb.c}
+\end{frame}
+
+\begin{frame}{Instrumentierung}
+	\lstset{frame=single}
+	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/instrument.c}	
+\end{frame}
+
+\begin{frame}{Valgrind Client Request}
+	\begin{itemize}
+		\item Client Requests erlauben dem analysierten Programm mit Valgrind bzw. dem Tool zu kommunizieren.
+		\pause \item Client Requests sind ein Trapdoor Mechanismus.
+		\pause \item Werden bei McTracer verwendet um die zu analysierenden Datenstrukturen festzulegen.
+	\end{itemize}
+
+	\pause
+
+	\lstset{frame=single}
+	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/client_example.c}	
+\end{frame}
