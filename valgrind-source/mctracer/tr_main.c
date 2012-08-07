@@ -282,8 +282,7 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 		*ret = 0;                 /* meaningless */
 		break;
 	case VG_USERREQ__UNTRACE_MATRIX:
-		if(!ssim_matrix_tracing_stop((Addr)args[1]))
-			VG_(tool_panic)("Invalid freeing notification");
+		ssim_matrix_tracing_stop((Addr)args[1]);
 		*ret = 0;                 /* meaningless */
 		break;
 
