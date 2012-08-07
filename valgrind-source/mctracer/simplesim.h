@@ -14,7 +14,8 @@
 #define MATRIX_LOAD 'L'
 #define MATRIX_STORE 'S'
 
-typedef struct _matrix_coordinates {
+typedef struct _matrix_coordinates
+{
 	short m;
 	short n;
 } matrix_coordinates;
@@ -48,13 +49,15 @@ typedef struct _matrix_access_data
 } matrix_access_data;
 
 #define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH (1<<16)
-typedef struct _access_event {
+typedef struct _access_event
+{
 	bool is_hit;
 	matrix_coordinates offset;
 } access_event;
 
 struct _access_pattern;
-typedef struct _pattern_sequence {
+typedef struct _pattern_sequence
+{
 	unsigned int length; // how many times did we observe the pattern subsequently?
 	struct _access_pattern * next_pattern; // which pattern did we observe next? 0 for no pattern
 	matrix_access_method next_access; // which access did we observe next?
@@ -62,7 +65,8 @@ typedef struct _pattern_sequence {
 } pattern_sequence;
 
 #define MAX_MAX_PATTERN_LENGTH (MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH/8)
-typedef struct _access_pattern {
+typedef struct _access_pattern
+{
 	unsigned int length;
 	matrix_access_method * steps;
 	unsigned int occurences; // accesses = ouccurences * length
@@ -92,15 +96,15 @@ typedef struct _traced_matrix
 	unsigned short n;
 	/* contains data about the memory and cache access (patterns) */
 	matrix_access_data load_access_data;
-    matrix_access_data store_access_data;
+	matrix_access_data store_access_data;
 	/* number of hits/misses per element for loads */
 	element_access_count* load_count;
 	/* number of hits/misses per element for stores */
 	element_access_count* store_count;
-    /* accumulated number of hits/misses for loads over the whole matrix */
-    element_access_count loads;
-    /* accumulated number of hits/misses for stores over the whole matrix*/
-    element_access_count stores;
+	/* accumulated number of hits/misses for loads over the whole matrix */
+	element_access_count loads;
+	/* accumulated number of hits/misses for stores over the whole matrix*/
+	element_access_count stores;
 	/* buffer for finding access patterns */
 	access_event * access_buffer; // relative
 	unsigned int access_event_count;

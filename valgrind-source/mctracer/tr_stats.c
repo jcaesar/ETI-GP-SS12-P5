@@ -131,28 +131,37 @@ void update_matrix_stats(Addr addr, SizeT size, char type)
 		int is_hit = cache_ref(addr, size);
 		int offset = (addr - matr->start) / matr->ele_size;
 
-        if (type == MATRIX_LOAD) {
-            //update access method stats
-            update_matrix_access_stats(matr, &(matr->load_access_data), is_hit, addr, size);
+		if (type == MATRIX_LOAD)
+		{
+			//update access method stats
+			update_matrix_access_stats(matr, &(matr->load_access_data), is_hit, addr, size);
 
-            // update general access stats
-            if (is_hit) {
-                matr->load_count[offset].hits++;
-                matr->loads.hits++;
-            } else {
-                matr->load_count[offset].misses++;
-                matr->loads.misses++;
-            }
-        } else {
-            update_matrix_access_stats(matr, &(matr->store_access_data), is_hit, addr, size);
+			// update general access stats
+			if (is_hit)
+			{
+				matr->load_count[offset].hits++;
+				matr->loads.hits++;
+			}
+			else
+			{
+				matr->load_count[offset].misses++;
+				matr->loads.misses++;
+			}
+		}
+		else
+		{
+			update_matrix_access_stats(matr, &(matr->store_access_data), is_hit, addr, size);
 
-            if (is_hit) {
-                matr->store_count[offset].hits++;
-                matr->stores.hits++; 
-            } else {
-                matr->store_count[offset].misses++;
-                matr->stores.misses++;
-            }
-        }
+			if (is_hit)
+			{
+				matr->store_count[offset].hits++;
+				matr->stores.hits++;
+			}
+			else
+			{
+				matr->store_count[offset].misses++;
+				matr->stores.misses++;
+			}
+		}
 	}
 }
