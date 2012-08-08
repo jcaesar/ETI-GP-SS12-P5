@@ -1,3 +1,43 @@
+\subsection{Call hierarchy: Memory access}
+
+\tikzstyle{accarrw} = [draw,->,thick, shorten <=10, shorten >=10]
+\tikzstyle{trmain} = [draw,fill=red!50]
+\tikzstyle{trsim} = [draw,fill=green!50]
+\tikzstyle{trstats} = [draw,fill=blue!50]
+\tikzstyle{trseq} = [draw,fill=purple!50]
+\begin{tikzpicture}[scale=0.9]
+	\node [trmain]  (instrument) at (0,2.5) {\texttt{mt\_instrument}};
+	\node [trmain]  (fE) at (0,1.5)         {\texttt{flushEvents}};
+	\node [cloud,draw,aspect=2,cloud puffs=9] (magic) at (0,0.25) {magic};
+	\node [trsim]   (load) at (2,-1)        {\texttt{ssim\_load}} node [trsim] (store) at (-2,-1) {\texttt{ssim\_store}};
+	\node [trsim]   (ums)  at (0,-2)        {\texttt{update\_matrix\_stats}};
+	\node [trstats] (fm)   at (5,-1.5)      {\texttt{find\_matrix}};
+	\node [trsim]   (cr)   at (5,-2.5)      {\texttt{cache\_ref}};
+	\node [trsim]   (csr)  at (6,-3.5)      {\texttt{cache\_setref}};
+	\node [trstats] (umas) at (0,-3)        {\texttt{update\_matrix\_access\_stats}};
+	\node [trseq]   (umps) at (0,-4)        {\texttt{update\_matrix\_pattern\_stats}};
+	\node [trseq]   (ppb)  at (0,-6)        {\texttt{process\_pattern\_buffer}};
+	\node [trseq]   (sec)  at (-4,-8)       {\texttt{subpatttern\_elimination\_check}};
+	\node [trseq]   (mpf)  at (-5.25,-7)    {\texttt{mark\_pattern\_findings}};
+	\node [trseq]   (dap)  at (3.5,-8)      {\texttt{delete\_access\_pattern}};
+	\node [trseq]   (fnp)  at (0,-7)        {\texttt{find\_new\_patterns}};
+	\node [trseq]   (fs)   at (5,-7)        {\texttt{find\_sequences}};
+	\foreach \s/\e in {instrument/fE, fE/magic.north east, fE/magic.north west, magic.south west/store, magic.south east/load, load/ums, store/ums, ums/fm, ums/cr, cr/csr, ums/umas, umas/umps, ppb/mpf, ppb/fnp, ppb/fs}{
+		\path [->,thick,draw] (\s) -- (\e);
+	}
+	\foreach \s/\e in {sec/mpf, sec/dap, fnp/sec, fnp/dap}{
+		\path [->,thick,draw,dashed] (\s) -- (\e);
+	}
+	\draw (-7.25,-8.5) rectangle (-1,-12.75);
+	\path [->,thick,draw,dashed] (umps) -- (ppb) node [midway,right,draw,xshift=0.5em] {When the buffer is full};
+	\path [->,thick,draw]        (-7,-9) -- (-6,-9) node [right] {Call, always};
+	\path [->,thick,draw,dashed] (-7,-9.5) -- (-6,-9.5) node [right] {Call, conditional};
+	\node [anchor=west,trmain]  at(-7,-10.5)   {Method from \texttt{tr\_main.c}};
+	\node [anchor=west,trsim]   at(-7,-11.1) {Method from \texttt{tr\_sim.c}};
+	\node [anchor=west,trstats] at(-7,-11.7) {Method from \texttt{tr\_stats.c}};
+	\node [anchor=west,trseq]   at(-7,-12.3) {Method from \texttt{tr\_sequences.c}};
+\end{tikzpicture}
+
 \subsection{Writing to file}
 
 In the end all the collected data has to be written into one file. We use the etis format as specified in the next section. The process is pretty simple with the only noteworthy detail being that we sort relative accesses

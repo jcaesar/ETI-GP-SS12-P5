@@ -145,28 +145,13 @@ static bool subpattern_elimination_check(traced_matrix * const matr, access_patt
 	return false;
 }
 
-void process_pattern_buffer(traced_matrix * matr)
+static void find_new_patterns(traced_matrix * const matr, access_pattern ** const patterned_access)
 {
 	// convenience shorthands
 	const unsigned int count = matr->access_event_count;
 	access_event * const accbuf = matr->access_buffer;
 
-	// array for marking, for each access event, to which pattern it belongs
-	// it would fit onto the stack, but I don't feel good about putting it there.
-	// it could also be done with uint8_t indices to matr->access_patterns, if you think it consumes too much mem
-	// This is a multi-purpose-variable. It is used for checking if an access event has already been processed,
-	//  and for sequence computation
-	static access_pattern ** patterned_access = 0;
-	if(!patterned_access)
-		patterned_access = VG_(malloc)("pattern findings in access event buffer",
-		                               sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
-	VG_(memset)(patterned_access, 0, sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
-
-	// go over all the existing access patterns and find matching accesses
 	unsigned int i;
-	for(i = 0; i < clo_ssim_max_patterns_per_matrix; ++i) // loop over access patterns
-		mark_pattern_findings(matr, matr->access_patterns + i, patterned_access);
-	// find new patterns
 	for(i = 0; i <= count - clo_ssim_max_pattern_length*2; ++i)
 	{
 		if(patterned_access[i])
@@ -230,11 +215,33 @@ void process_pattern_buffer(traced_matrix * matr)
 				subpattern_elimination_check(matr, matr->access_patterns + j, patterned_access);
 		}
 	}
-	// process sequences of patterns
-	// if we already have a pattern, skip the first few accesses that could be a part of it. If they were, they were counted in the previous iteration
+}
+
+static void reallocate_sequencearray(access_pattern * const cap)
+{
+	if(cap->sequence_count > cap->sequence_allocated) // oops, buffer full. Reallocate.
+	{
+		signed int newlen = cap->sequence_allocated * 2 - 16;
+		if(newlen < 18)
+			newlen = 18;
+		pattern_sequence * new = VG_(malloc)("pattern sequence", newlen*sizeof(pattern_sequence));
+		VG_(memcpy)(new, cap->sequences, cap->sequence_allocated * sizeof(pattern_sequence));
+		VG_(free)(cap->sequences);
+		cap->sequence_allocated = newlen;
+		cap->sequences = new;
+	}
+
+}
+
+static unsigned int find_sequences(traced_matrix * const matr, access_pattern ** const patterned_access)
+{
+	// convenience shorthands
+	const unsigned int count = matr->access_event_count;
+	access_event * const accbuf = matr->access_buffer;
+
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
 	// note on the condition: I've switched around between 3,2 and 1*clo_ssim_max_pattern_length multiple times. It should be 3 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
-	i = 0;
+	unsigned int i = 0;
 	while(i <= count - 3*clo_ssim_max_pattern_length)
 	{
 		if(patterned_access[i] != cap)
@@ -242,7 +249,7 @@ void process_pattern_buffer(traced_matrix * matr)
 			if(cap)
 			{
 				unsigned int j;
-				for(j = 0; j < cap->sequence_count; ++j)
+				for(j = 0; j < cap->sequence_count; ++j) // can we find a sequence that looks like the current one?
 				{
 					if(cap->sequences[j].length == matr->current_sequence_length &&
 					   cap->sequences[j].next_access.offset_n == accbuf[i].offset.n &&
@@ -250,20 +257,10 @@ void process_pattern_buffer(traced_matrix * matr)
 					   cap->sequences[j].next_pattern == patterned_access[i])
 						break;
 				}
-				if(j >= cap->sequence_count)
+				if(j >= cap->sequence_count) // There was no sequence like the current one
 				{
 					++(cap->sequence_count);
-					if(cap->sequence_count > cap->sequence_allocated) // oops, buffer full. Reallocate.
-					{
-						signed int newlen = cap->sequence_allocated * 2 - 16;
-						if(newlen < 18)
-							newlen = 18;
-						pattern_sequence * new = VG_(malloc)("pattern sequence", newlen*sizeof(pattern_sequence));
-						VG_(memcpy)(new, cap->sequences, cap->sequence_allocated * sizeof(pattern_sequence));
-						VG_(free)(cap->sequences);
-						cap->sequence_allocated = newlen;
-						cap->sequences = new;
-					}
+					reallocate_sequencearray(cap);
 					cap->sequences[j].length = matr->current_sequence_length;
 					cap->sequences[j].next_pattern = patterned_access[i];
 					cap->sequences[j].next_access.offset_n = accbuf[i].offset.n;
@@ -288,7 +285,7 @@ void process_pattern_buffer(traced_matrix * matr)
 				if(patterned_access[i+j] != cap)
 					break;
 				// Here is the best place to do the statistics on the pattern. Why?
-				// Because we know which accesses will be copied and have to be counted next round
+				// Because we know which accesses will not be copied and have to be counted next round
 				if(accbuf[i+j].is_hit)
 					++cap->steps[j].hits;
 				else
@@ -302,9 +299,38 @@ void process_pattern_buffer(traced_matrix * matr)
 			++i;
 	}
 	matr->current_pattern = cap;
+	return i;
+}
+
+void process_pattern_buffer(traced_matrix * matr)
+{
+	// convenience shorthands
+	const unsigned int count = matr->access_event_count;
+	access_event * const accbuf = matr->access_buffer;
+
+	// array for marking, for each access event, to which pattern it belongs
+	// it would fit onto the stack, but I don't feel good about putting it there.
+	// it could also be done with uint8_t indices to matr->access_patterns, if you think it consumes too much mem
+	// This is a multi-purpose-variable. It is used for checking if an access event has already been processed,
+	//  and for sequence computation
+	static access_pattern ** patterned_access = 0; // If I didn't use it to 
+	if(!patterned_access)
+		patterned_access = VG_(malloc)("pattern findings in access event buffer",
+		                               sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
+	VG_(memset)(patterned_access, 0, sizeof(access_pattern*)*MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH);
+
+	// go over all the existing access patterns and find matching accesses
+	unsigned int i;
+	for(i = 0; i < clo_ssim_max_patterns_per_matrix; ++i) // loop over access patterns
+		mark_pattern_findings(matr, matr->access_patterns + i, patterned_access);
+	// find new patterns
+	find_new_patterns(matr, patterned_access);
+	// process sequences of patterns
+	unsigned int uncounted = 
+	find_sequences(matr, patterned_access); // this is also where the hit/miss statistics for the patterns' accesses are updated
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	// copy as much patterns as the sequence recognition hasn't processed
-	unsigned int copylen = count - i;
+	unsigned int copylen = count - uncounted;
 	VG_(memmove)(accbuf, accbuf + count - copylen, copylen*sizeof(access_event));
 	matr->access_event_count = copylen;
 }
