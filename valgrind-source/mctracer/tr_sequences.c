@@ -228,8 +228,6 @@ void process_pattern_buffer(traced_matrix * matr)
 			mark_pattern_findings(matr, rap, patterned_access);
 			for(j = 0; j < clo_ssim_max_patterns_per_matrix; ++j)
 				subpattern_elimination_check(matr, matr->access_patterns + j, patterned_access);
-			{
-			}
 		}
 	}
 	// process sequences of patterns
