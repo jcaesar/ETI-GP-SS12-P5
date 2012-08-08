@@ -185,7 +185,7 @@ static void find_new_patterns(traced_matrix * const matr, access_pattern ** cons
 		nap.length = length;
 		unsigned int matr_accesses = matr->loads.misses + matr->loads.hits + matr->stores.misses + matr->stores.hits;
 		nap.accesses_before_lifetime = matr_accesses;
-		if(!subpattern_elimination_check(matr, &nap, NULL))
+		if(!subpattern_elimination_check(matr, &nap, NULL)) // Should never return true, buuut, you know, safety first
 		{
 			// found a pattern, find a place to store it in.
 			// (Keeping a list of all located patterns around would require a much more sofisticated pattern recognition algorithm
