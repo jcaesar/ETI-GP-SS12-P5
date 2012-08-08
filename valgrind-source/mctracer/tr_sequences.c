@@ -67,13 +67,8 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 		{
 			unsigned int k;
 			for(k = 0; k < apstep; ++k)
-			{
-				if(accbuf[j+k].is_hit)
-					++ap->steps[k].hits;
-				else
-					++ap->steps[k].misses;
+				// The access statistics is not done here because we don't yet know which accesses will be saved for the next round
 				patterned_access[j+k] = ap;
-			}
 			if(apstep == ap->length)
 			{
 				if(lastwas == -1)
@@ -290,9 +285,17 @@ void process_pattern_buffer(traced_matrix * matr)
 		if(cap)
 		{
 			unsigned int j;
-			for(j = 1; j < cap->length; ++j)
+			for(j = 0; j < cap->length; ++j)
+			{
 				if(patterned_access[i+j] != cap)
 					break;
+				// Here is the best place to do the statistics on the pattern. Why?
+				// Because we know which accesses will be copied and have to be counted next round
+				if(accbuf[i+j].is_hit)
+					++cap->steps[j].hits;
+				else
+					++cap->steps[j].misses;
+			}
 			if(j >= cap->length)
 				matr->current_sequence_length++;
 			i += j;
