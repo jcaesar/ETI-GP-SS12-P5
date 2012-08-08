@@ -1,0 +1,21 @@
+\subsection{Call hierarchy: Memory access}
+\tikzstyle{accarrw} = [draw,->,thick, shorten <=10, shorten >=10]
+\begin{tikzpicture}[scale=0.8]
+	\node (instrument) at (0,2.5) {\texttt{mt\_instrument}};
+	\node (fE) at (0,1.5) {\texttt{flushEvents}};
+	\node [cloud,draw,aspect=2,cloud puffs=9] (magic) at (0,0.25) {magic};
+	\node (load) at (2,-1) {\texttt{ssim\_load}}; \node (store) at (-2,-1) {\texttt{ssim\_store}};
+	\node (ums) at (0,-2) {\texttt{update\_matrix\_stats}};
+	\node (fm) at (5,-1.5) {\texttt{find\_matrix}};
+	\node (cr) at (5,-2.5) {\texttt{cache\_ref}};
+	\node (csr) at (6,-3.5) {\texttt{cache\_setref}};
+	\node (umas) at (0,-3) {\texttt{update\_matrix\_access\_stats}};
+	\node (umps) at (0,-4) {\texttt{update\_matrix\_pattern\_stats}};
+	\node (ppb) at (0,-5) {\texttt{process\_pattern\_buffer}};
+	\node (sec) at (0,-7) {\texttt{subpatttern\_elimination\_check}};
+	\node (mpf) at (-4,-6) {\texttt{mark\_pattern\_findings}};
+	\node (dap) at (4,-6) {\texttt{delete\_access\_pattern}};
+	\foreach \s/\e in {instrument/fE, fE/magic.north east, fE/magic.north west, magic.south west/store, magic.south east/load, load/ums, store/ums, ums/fm, ums/cr, cr/csr, ums/umas, umas/umps, umps/ppb, ppb/mpf, ppb/sec, sec/mpf, sec/dap, ppb/dap}{
+		\path [->,thick,draw] (\s) -- (\e);
+	}
+\end{tikzpicture}
