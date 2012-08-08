@@ -59,8 +59,8 @@ int main()
 	for (it=50; it>0; it--) {
 		//TODO
 		for (h=0; h<M; h++) {
-			x = acc[h][0];
-			y = acc[h][1];
+			x = acc[h][1];
+			y = acc[h][0];
 			m[x*N+y] = 2;
 		} 
 	}
