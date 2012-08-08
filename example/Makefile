@@ -6,13 +6,15 @@ endif
 
 CFLAGS=-g -O2 $(INC)
 
-all: redblack jc mm
+all: redblack jc mm batman
 
 redblack: redblack.c
 
 jc: jc.c
 
 mm: mm.c
+
+batman: batman.c
 
 redblack_ncurses: redblack_ncurses.c
 	$(CC) $(CFLAGS) redblack_ncurses.c -o redblack_ncurses -lcurses
