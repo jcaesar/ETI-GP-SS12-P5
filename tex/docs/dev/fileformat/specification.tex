@@ -1,4 +1,5 @@
 \subsubsection{Overall conventions}
+
 In the diagrams below, a box like this:
 \begin{verbatim}
 +---+
@@ -13,19 +14,6 @@ represents one byte; a box like this:
 \end{verbatim}
 represents a variable number of bytes.
 
-Bytes stored within a computer do not have a "bit order", since they are always treated as a unit. However, 
-a byte considered as an integer between 0 and 255 does have a most- and least-significant bit, and since we 
-write numbers with the most-significant digit on the left, we also write bytes with the most-significant bit 
-on the left. In the diagrams below, we number the bits of a byte so that bit 0 is the least-significant bit, 
-i.e., the bits are numbered:
-\begin{verbatim}
-+--------+
-|76543210|
-+--------+
-\end{verbatim}
-This document does not address the issue of the order in which bits of a byte are transmitted on a bit-sequential 
-medium, since the data format described here is byte- rather than bit-oriented.
-
 Within a computer, a number may occupy multiple bytes. All multi-byte numbers in the format described here are 
 stored with the least-significant byte first (at the lower memory address). For example, the decimal number 520 
 is stored as:
@@ -39,86 +27,113 @@ is stored as:
  |        + more significant byte = 2 x 256
  + less significant byte = 8
 \end{verbatim}
-(source: http://www.gzip.org/zlib/rfc-gzip.html)
 
 All values are unsigned unless noted otherwise.
 
 \subsubsection{File Format}
 
-A etis file consists of a file-header, a cluster of matrice-headers and a number of Matrix Data Blocks (MDB). 
-The header-formats and the format of the MIBs will be specified in the following sections.
+An etis file consists of a file-header, a cluster of matrice-headers and a number of matrix data blocks (MDB). 
+The header formats and the format of the MDBs will be specified in the following sections.
 
-\paragraph{File-Header (FH) 4 Byte}
+\paragraph{File-Header (FH) 4 Byte}$\;$ \\
 
-The header has the following structure:
+The file header has the following structure:
+
 \begin{verbatim}
 +---+---+---+---+
 |ID1|ID2| V |NM |
 +---+---+---+---+
 \end{verbatim}
-\begin{description}
-\item[ID1 (IDentification 1) 1 Byte]
-\item[ID2 (IDentification 2) 1 Byte]
-These have fixed values ID1 = 175 (0xaf, \textbackslash0257), ID2 = 254 (0xfe, \textbackslash0376), to identify 
-the file as being in etis format.
-\item[V (Version) 1 Byte]
-Specifies the version of the fileformat that the current file is in. Currently at 3.
-\item[NM (Number of Matrices) 1 Byte]
-The overall number of traced matrices.
-\end{description}
+ID1 (IDentification 1) 1 Byte \\
+ID2 (IDentification 2) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	These have fixed values ID1 = 175 (0xaf, \textbackslash0257), ID2 = 254 (0xfe, \textbackslash0376), to identify the file as being in etis format.
+\end{addmargin} 
+V (Version) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	Specifies the version of the fileformat that the current file is in. Currently at 3.
+\end{addmargin}
+NM (Number of Matrices) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The overall number of traced matrices.
+\end{addmargin}
 
-\paragraph{Matrix Header (MH) 36 Byte}
+\paragraph{Matrix Header (MH) 36 Byte}$\;$ \\
 
 Exactly FH:NM matrix header simply appear one after another in the file, with no additional information 
 before, between, or after them.
 \begin{verbatim}
-+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-|  SX   |  SY   |NLA|NSA|NAP|NSQ|              ADR              |     MIBADR    |
-+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-|     SLH       |      SLM      |      SSH      |      SSM      |
 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+|  SX   |  SY   |NLA|NSA|NAP|NSQ|              ADR              |
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+|     MDBADR    |     SLH       |      SLM      |      SSH      |
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+|      SSM      |
++---+---+---+---+
 \end{verbatim}
-\begin{description}
-\item[SX (Size X) 2 Byte (signed!)]
-The size of the matrix in x direction (number of columns). Must be positive.
-\item[SY (Size Y) 2 Byte (signed!)]
-The size of the matrix in y direction (number of rows). Must be positive.
-\item[NLA (Number of Loading Accesses) 1 Byte]
-The number of saved relative accesses loading data from this matrix. Maximum of eight.
-\item[NSA (Number of Storing Accesses) 1 Byte]
-The number of saved relative accesses storing data into this matrix. Maximum of eight.
-\item[NAP (Number of Accesss Patterns) 1 Byte]
-The number of access patterns saved for this matrix.
-\item[NSQ (Number of access SeQuences) 1 Byte]
-The number of access sequences saved for this matrix.
-\item[ADR (ADRess) 8 Byte -> 64-Bit]
-The pointer of the matrix.
-\item[MDBADR (MDB ADRess) 4 Byte]
-The adress of the affiliated Matrix-Datablock in this file.
-\item[SLH (Sum Load Hits) 4 Byte]
-The sum of all load hits for this matrix.
-\item[SLM (Sum Load Misses) 4 Byte]
-The sum of all load misses for this matrix.
-\item[SSH (Sum Store Hits) 4 Byte]
-The sum of all store hits for this matrix.
-\item[SSM (Sum Store Misses) 4 Byte]
-The sum of all store misses for this matrix.
-\end{description}
+SX (Size X) 2 Byte (signed!)
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The size of the matrix in x direction (number of columns). Must be positive.
+\end{addmargin}
+SY (Size Y) 2 Byte (signed!)
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The size of the matrix in y direction (number of rows). Must be positive.
+\end{addmargin}
+NLA (Number of Loading Accesses) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The number of saved relative accesses loading data from this matrix. Maximum of eight.
+\end{addmargin}
+NSA (Number of Storing Accesses) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The number of saved relative accesses storing data into this matrix. Maximum of eight.
+\end{addmargin}
+NAP (Number of Accesss Patterns) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The number of access patterns saved for this matrix.
+\end{addmargin}
+NSQ (Number of access SeQuences) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The number of access sequences saved for this matrix.
+\end{addmargin}
+ADR (ADRess) 8 Byte $\rightarrow$ 64-Bit
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The pointer of the matrix.
+\end{addmargin}
+MDBADR (MDB ADRess) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The adress of the affiliated MDB in this file.
+\end{addmargin}
+SLH (Sum Load Hits) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The sum of all load hits for this matrix.
+\end{addmargin}
+SLM (Sum Load Misses) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The sum of all load misses for this matrix.
+\end{addmargin}
+SSH (Sum Store Hits) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The sum of all store hits for this matrix.
+\end{addmargin}
+SSM (Sum Store Misses) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm}
+	The sum of all store misses for this matrix.
+\end{addmargin}
 
-\paragraph{Matrix Data Block (MDB)}
+\paragraph{Matrix Data Block (MDB)}$\;$ \\
 
 A Matrix Data Block consists of two byte arrays, some (MH:NLA+MH:NSA) relative accesses, some (MH:NAP) access 
 patterns, several (MH:NSQ) access sequences and the name assigned to the matrix.
 
-\subparagraph{2 x byte array (BA) (MH:SX * MH:SY) Byte}
+\subparagraph{2 x Byte Array (BA) (MH:SX * MH:SY) Byte}$\;$ \\
 
 One byte array has a size of MH:SX*MH:SY and every byte signifies one matrix element. The matrix is traversed 
 row by row. The first byte array represents the tracked load accesses, the second one the store accesses. 
 The value of each byte signifies the hit to miss ratio of accesses to the specific element. 
-A value of 0 signifies 0% hits (only misses) and a value of 254 signifies 100% hits. 
+A value of 0 signifies 0\% hits (only misses) and a value of 254 signifies 100\% hits. 
 The value 255 is reserved to show that there wasn't any access to this element.
 
-\subparagraph{Relative Access (RA) 12 Byte}
+\subparagraph{Relative Access (RA) 12 Byte}$\;$ \\
 
 First there are all MH:NLA diffrent relative accesses for loading from the matrix, then the MH:NSA diffrent 
 relative accesses for storing into the matrix. They simply appear one after another in the file, with no 
@@ -128,18 +143,24 @@ additional information before, between, or after them.
 |  OX   |  OY   |      SH       |      SM       |
 +---+---+---+---+---+---+---+---+---+---+---+---+
 \end{verbatim}
-\begin{description}
-\item[OX (Offset X) 2 Byte (signed!)]
-The x offset of this relative access.
-\item[ON (Offset Y) 2 Byte (signed!)]
-The y offset of this relative access.
-\item[SH (Sum of Hits) 4 Byte]
-The accumulated number of hits for this type of relative access.
-\item[SM (Sum of Misses) 4 Byte]
-The accumulated number of misses for this type of relative access.
-\end{description}
+OX (Offset X) 2 Byte (signed!)
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The x offset of this relative access.
+\end{addmargin}
+OY (Offset Y) 2 Byte (signed!)
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The y offset of this relative access.
+\end{addmargin}
+SH (Sum of Hits) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The accumulated number of hits for this type of relative access.
+\end{addmargin}
+SM (Sum of Misses) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The accumulated number of misses for this type of relative access.
+\end{addmargin}
 
-\subparagraph{Access Pattern (AP) 7Byte + AP:LEN * 12 Byte}
+\subparagraph{Access Pattern (AP) 7 Byte + AP:LEN * 12 Byte}$\;$ \\
 
 An access pattern combines a series of relative accesses. There are exactly MH:NAP diffrent access patterns
  one after another. Each pattern consists of a short pattern header and afterwards AP:LEN diffrent relative 
@@ -147,19 +168,23 @@ accesses as defined above. They simply appear one after another in the file, wit
 before, between, or after them.
 \begin{verbatim}
 +---+---+---+---+---+---+---+
-|ID |      SO      |  LEN  |
+|ID |      SO       |  LEN  |
 +---+---+---+---+---+---+---+
 \end{verbatim}
-\begin{description}
-\item[ID (IDentification) 1 Byte]
-An identification number that is unique in the context of the current matrix.
-\item[SO (Sum of Occurences) 4 Byte]
-The accumulated sum of occurences of this pattern.
-\item[LEN (LENgth) 2 Byte]
-The length of this pattern.
-\end{description}
-
-\subparagraph{Access Sequence (SQ) 12 Byte}
+ID (IDentification) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	An identification number that is unique in the context of the current matrix.
+\end{addmargin}
+SO (Sum of Occurences) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The accumulated sum of occurences of this pattern.
+\end{addmargin}
+LEN (LENgth) 2 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The length of this pattern.
+\end{addmargin}
+	
+\subparagraph{Access Sequence (SQ) 12 Byte}$\;$ \\
 
 An access sequence consists of uninterrupted repetitions of a pattern combined with the next access or next 
 pattern. There are exactly MH:NSQ diffrent sequences one after another. They simply appear one after another 
@@ -169,28 +194,38 @@ in the file, with no additional information before, between, or after them.
 |PID|      SO      |   RP   |  NX   |  NY   |NID|
 +---+---+---+---+---+---+---+---+---+---+---+---+
 \end{verbatim}
-\begin{description}
-\item[PID (Pattern IDentification) 1 Byte]
-The AP:ID of the pattern that is repeated.
-\item[SO (Sum of Occurences) 4 Byte]
-The accumulated sum of occurrences of this sequences
-\item[RP (RePetitions) 2 Byte]
-The number of uninterrupted repetitions of the pattern.
-\item[NX (Next access offset X) 2 Byte (signed!)]
-The x offset of the access following the sequence.
-\item[NY (Next access offset Y) 2 Byte (signed!)]
-The y offset of the access following the sequence.
-\item[NID (Next IDentification) 1 Byte]
-References the pattern following the sequence. If there wasn't any it's 0xff.
-\end{description}
+PID (Pattern IDentification) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The AP:ID of the pattern that is repeated.
+\end{addmargin}
+SO (Sum of Occurences) 4 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The accumulated sum of occurrences of this sequences
+\end{addmargin}
+RP (RePetitions) 2 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The number of uninterrupted repetitions of the pattern.
+\end{addmargin}
+NX (Next access offset X) 2 Byte (signed!)
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The x offset of the access following the sequence.
+\end{addmargin}
+NY (Next access offset Y) 2 Byte (signed!)
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The y offset of the access following the sequence.
+\end{addmargin}
+NID (Next IDentification) 1 Byte
+\begin{addmargin}[0,5cm]{0,5cm} 
+	References the pattern following the sequence. 0xff if none could be found.
+\end{addmargin}
 
-\subparagraph{Name (NA)}
+\subparagraph{Name (NA)}$\;$ \\
 \begin{verbatim}
 +========+
 |  NAME  |
 +========+
 \end{verbatim}
-\begin{description}
-\item[NAME (Name) Null terminated]
-The name of the matrix, as it's passed when the tracing starts. ASCII-encoded.
-\end{description}
+NAME (Name) Null terminated
+\begin{addmargin}[0,5cm]{0,5cm} 
+	The name of the matrix, as it's passed when the tracing starts. ASCII-encoded.
+\end{addmargin}
