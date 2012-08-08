@@ -4,8 +4,9 @@
 
 #include <valgrind/mctracer.h>
 
-#define N 256
+#define N 14
 
+/*
 double H(double x)
 {
 	double y;
@@ -32,21 +33,36 @@ double lower(double x)
 	return (abs(x/2) + sqrt(1-pow(abs(abs(x)-2)-1,2)) - x*x/112*(3*sqrt(33)-7) + 3*sqrt(1-pow(x/7,2)) - 3)/2 
 		* ((x+4)/(abs(x+4)) - (x-4)/(abs(x-4))) - 3*sqrt(1-pow(x/7,2));
 }
-
+*/
 int main()
 {
 	double* m;
 	m = (double*) malloc(sizeof(double)*N*N);
 
 	// init
-	for (int i=0; i<N; i++)
-		for (int j=0; j<N; j++)
+	int i,j;
+	for (i=0; i<N; i++)
+		for (j=0; j<N; j++)
 			m[i*N+j] = 1;
 
 	SSIM_MATRIX_TRACING_START(m, N, N, sizeof(double), "batman - m");
 	
-	for (int it=50; it>0; it--) {
-		//TODO	
+	int M = 24;
+	int acc[24][2] = {
+		{0,7},{1,5},{3,4},{4,6},{5,6},{6,4},{7,5},{8,4},{9,6},{10,6},{11,4},
+		{13,5},{14,7},{13,9},{11,10},{10,8},{9,9},{8,8},{7,10},{6,8},{5,9},
+		{4,8},{3,10},{1,9}
+	};
+	int x,y;
+	int it;
+	int h;
+	for (it=50; it>0; it--) {
+		//TODO
+		for (h=0; h<M; h++) {
+			x = acc[h][0];
+			y = acc[h][1];
+			m[x*N+y] = 2;
+		} 
 	}
 
 	SSIM_MATRIX_TRACING_STOP(m);
