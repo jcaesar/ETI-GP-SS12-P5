@@ -2,8 +2,9 @@
 	\begin{itemize}
 		\item Valgrind ist ein Framework um dynamische Analyseprogramme (Tools) zu entwickeln.
 		\pause \item Valgrind ist eine virtuelle Maschine und JIT Compiler.
-		\pause \item Valgrind verwendet Dynamic Binary Translation (DBT) 
-		\pause \item Tools führen Analyse und/oder Instrumentierung durch
+		\pause \item Valgrind verwendet Dynamic Binary Translation (DBT).
+        \pause \item Verwendet (dynamisch gelinkte) ELF Binärdateien => kein erneutes Kompilieren.
+		\pause \item Tools führen Analyse und/oder Instrumentierung durch.
 		\pause \item Einfachste Tools koennen mit nur vier Funktionen implementiert werden.
 		\pause \item{\bf Tools:} Memcheck, Cachegrind, Callgrind, {\bf McTracer} 
 	\end{itemize}
@@ -16,7 +17,7 @@
 		\item Das Programm wird eingelesen und in die Vex Intermediate Representation (UCode) ueberfuehrt.
 		\pause \item IRSB's (IR Super Block) werden an das Tool uebergeben. 
 		\pause \item Das Skin instrumentiert/analysiert die IRSB's.
-		\pause \item Die IRSB's werden zu Maschinencode kompiliert und nativ ausgefuehrt. 
+		\pause \item Die IRSB's werden zu Maschinencode kompiliert und auf Valgrind's CPU ausgefuehrt. 
 	\end{enumerate}
 \end{frame}
 
