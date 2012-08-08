@@ -6,10 +6,12 @@ IRSB* mt_instrument (..., IRSB* sbIn, ...) {
              case Ist_Store:
 		 /* Fuege Aufruf von ssim_store ein */
                  addStmtToIRSB(sbOut, ..., ssim_store);
+		 break;
  
              case Ist_Load:
 		 /* Fuege Aufruf von ssim_load ein */
                  addStmtToIRSB(sbOut, ..., ssim_load);
+		 break;
         }
     }
 

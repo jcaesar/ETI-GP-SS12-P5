@@ -51,13 +51,17 @@
 static Char* clo_ssim_output = NULL;
 static Int clo_ssim_cache_set_size = 16;
 static Int clo_ssim_cache_sets = 512;
+Int clo_ssim_max_pattern_length = 16;
+Int clo_ssim_max_patterns_per_matrix = 16;
 
 static Bool mt_process_cmd_line_option(Char* arg)
 {
 	if VG_STR_CLO(arg, "--output", clo_ssim_output) {}
-    else if VG_INT_CLO(arg, "--cache-set-size", clo_ssim_cache_set_size) {}
-    else if VG_INT_CLO(arg, "--cache-sets", clo_ssim_cache_sets) {} 
-    else
+	else if VG_INT_CLO(arg, "--cache-set-size", clo_ssim_cache_set_size) {}
+	else if VG_INT_CLO(arg, "--cache-sets", clo_ssim_cache_sets) {}
+	else if VG_INT_CLO(arg, "--max-pattern-length", clo_ssim_max_pattern_length) {}
+	else if VG_INT_CLO(arg, "--max-patterns-per-matrix", clo_ssim_max_patterns_per_matrix) {}
+	else
 		return False;
 
 	return True;
@@ -74,6 +78,13 @@ static void mt_print_usage(void)
 	VG_(printf)(
 	    "    --cache-set-size=<number>    number of cachelines per cache set [16]\n"
 	);
+	VG_(printf)(
+	    "    --max-pattern-length=<number>       maximum length of detectable patterns [16]\n"
+	);
+	VG_(printf)(
+	    "    --max-patterns-per-matrix=<number>  maximum number of patterns for one matrix [16]\n"
+	);
+
 }
 
 static void mt_print_debug_usage(void)
@@ -314,7 +325,7 @@ Bool mt_handle_client_request(ThreadId tid, UWord *args, UWord *ret)
 
 static void mt_post_clo_init(void)
 {
-    ssim_init(clo_ssim_cache_sets, clo_ssim_cache_set_size);
+	ssim_init(clo_ssim_cache_sets, clo_ssim_cache_set_size);
 }
 
 static
@@ -463,24 +474,27 @@ static void mt_fini(Int exitcode)
 		ssim_save_stats(clo_ssim_output);
 	else
 	{
-		/** 
+		/**
 		 * extract the filename
 		 * from the program path
-		 * 
+		 *
 		 * */
-		
+
 		const HChar* exename = VG_(args_the_exename);
 		// find the last occurence of /
 		int i, len = VG_(strlen)(exename);
 		for (i = len-1; i > 0 && *(exename+i) != '/'; --i);
 
 		// allocate 5 more bytes for the .etis extension and 1 for the \0
-		HChar* filename = VG_(malloc)("filename", sizeof(HChar*) * (6 + len-i)); 
+		HChar* filename = VG_(malloc)("filename", sizeof(HChar*) * (6 + len-i));
 
-		if (i == 0) {
+		if (i == 0)
+		{
 			VG_(strcpy)(filename, exename);
 			VG_(strcpy)(filename+len, ".etis");
-		} else {
+		}
+		else
+		{
 			VG_(strcpy)(filename, exename+i+1);
 			VG_(strcpy)(filename + (len - i - 1), ".etis");
 		}
