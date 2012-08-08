@@ -360,12 +360,9 @@ static void write_access_methods(Int fd, matrix_access_data* access_data)
 	 */
 
 	int accm_count = access_data->access_methods_count;
-
-	if (accm_count > 8)
-	{
-		// sort the access methods according to their cumulative hits and misses
-		ssim_qsort_am(access_data->access_methods, 0, accm_count);
-	}
+	
+	// sort the access methods according to their cumulative hits and misses
+	ssim_qsort_am(access_data->access_methods, 0, accm_count);
 
 	accm_count = accm_count > 8 ? 8 : accm_count;
 
