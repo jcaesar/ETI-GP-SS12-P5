@@ -59,3 +59,9 @@
 \item[\fun{reallocate\_sequencearray}] Helper to make sure enough space is reserved for the current number of sequences
 
 \end{description}
+
+\subsection{Writing to file}
+
+In the end all the collected data has to be written into one file. We use the etis format as specified in the next section. The process is pretty simple with the only noteworthy detail being that we sort relative accesses
+as well as sequences by hits and misses or occurences respectively and then write out as many as possible.
+

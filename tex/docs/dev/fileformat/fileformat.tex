@@ -1,11 +1,26 @@
-Gereral shit.
-blablabla.
-Lorem Ipsum etc.
+\subsection{Introduction}
 
-General Stuff, use etc...
+Firstly I'd like to state that we are closely following the GZIP file format specification version 4.3 (as found at http://www.gzip.org/zlib/rfc-gzip.html) in structure, design and sometimes content.
 
-changes:
-mn to xy
-namechanges to english change in code!
+\paragraph{Purpose}
+
+The purpose of this specification is to define a byte-oriented data format that can save all of the statistical data collected by the valgrind tool McTracer. Specifically that means that it's able to save
+the data collected for several diffrent matrices into one file. The data for one matrix consists of information about individual matrix elements, relative accesses, access patterns and access sequences as
+well as some statistical data about the matrix as a whole.
+
+\paragraph{Intended audience}
+
+This specification is intended for use by implementors of software to read the etis format and display it in a way that makes it easier to understand by humans.
+
+The text of the specification assumes a background in programming at the level of bits and other primitve data representations.
+
+\paragraph{Changes from previous versions}
+Currently we are at Version 3. Version 1 was bascially a draft, outlining the ideas behind the format for the first time. Version 2 improved the general design and made changes to some field-sizes. 
+In Version 3 support for patterns and sequences was added.
 
 \subsection{Detailed Specification} \input{fileformat/specification.tex}
+
+\subsection{Overview}
+\includegraphics[width=\textwidth]{fileformat/structure}
+This is a conceptual outline of an etis file. It consists of the file header, three matrix headers and three matrix data blocks (MDB). The first MDB is then displayed in more detail to show the diffrent element
+that it contains, namely namely two byte arrays, several relative accesses, three patterns with one, one and three sequences and the name. The last detail shows an access pattern in some more detail.
