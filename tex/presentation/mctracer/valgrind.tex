@@ -3,7 +3,8 @@
 		\item Valgrind ist ein Framework um dynamische Analyseprogramme (Tools) zu entwickeln.
 		\pause \item Valgrind ist eine virtuelle Maschine und JIT Compiler.
 		\pause \item Valgrind verwendet Dynamic Binary Translation (DBT) 
-		\pause \item Tools führen Analyse und/oder Instrumentierung durch.
+		\pause \item Tools führen Analyse und/oder Instrumentierung durch
+		\pause \item Einfachste Tools koennen mit nur vier Funktionen implementiert werden.
 		\pause \item{\bf Tools:} Memcheck, Cachegrind, Callgrind, {\bf McTracer} 
 	\end{itemize}
 \end{frame}
@@ -12,8 +13,8 @@
 
 \begin{frame}{Valgrind Workflow}
 	\begin{enumerate}
-		\item Das Programm wird eingelesen und in die Vex Intermediate Representation (Vex IR) ueberfuehrt.
-		\pause \item IRSB's (IR Super Block) werden an das Skin uebergeben. 
+		\item Das Programm wird eingelesen und in die Vex Intermediate Representation (UCode) ueberfuehrt.
+		\pause \item IRSB's (IR Super Block) werden an das Tool uebergeben. 
 		\pause \item Das Skin instrumentiert/analysiert die IRSB's.
 		\pause \item Die IRSB's werden zu Maschinencode kompiliert und nativ ausgefuehrt. 
 	\end{enumerate}
@@ -47,4 +48,9 @@
 \begin{frame}{Valgrind Client Requests}
 	\lstset{frame=single}
 	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/client_impl.c}	
+\end{frame}
+
+\begin{frame}{Valgrind Client Request Internals}
+	\lstset{frame=single}
+	\lstinputlisting[language=C, basicstyle=\tiny]{mctracer/client_request_valgrind.c}	
 \end{frame}
