@@ -5,7 +5,7 @@
 \tikzstyle{trsim} = [draw,fill=green!50]
 \tikzstyle{trstats} = [draw,fill=blue!50]
 \tikzstyle{trseq} = [draw,fill=purple!50]
-\begin{tikzpicture}[scale=0.9]
+\begin{tikzpicture}[scale=1]
 	\node [trmain]  (instrument) at (0,2.5) {\fun{mt\_instrument}};
 	\node [trmain]  (fE) at (0,1.5)         {\fun{flushEvents}};
 	\node [cloud,draw,aspect=2,cloud puffs=9] (magic) at (0,0.25) {magic};
@@ -17,12 +17,12 @@
 	\node [trstats] (umas) at (0,-3)        {\fun{update\_matrix\_access\_stats}};
 	\node [trseq]   (umps) at (0,-4)        {\fun{update\_matrix\_pattern\_stats}};
 	\node [trseq]   (ppb)  at (0,-6)        {\fun{process\_pattern\_buffer}};
-	\node [trseq]   (sec)  at (-4.5,-8)       {\fun{subpatttern\_elimination\_check}};
+	\node [trseq]   (sec)  at (-4.5,-8)     {\fun{subpatttern\_elimination\_check}};
 	\node [trseq]   (mpf)  at (-5.25,-7)    {\fun{mark\_pattern\_findings}};
 	\node [trseq]   (dap)  at (2.5,-8)      {\fun{delete\_access\_pattern}};
 	\node [trseq]   (fnp)  at (0,-7)        {\fun{find\_new\_patterns}};
-	\node [trseq]   (fs)   at (5.1,-7)        {\fun{find\_sequences}};
-	\node [trseq]   (rapa) at (5.1,-9)        {\fun{reallocate\_sequencearray}};
+	\node [trseq]   (fs)   at (5.1,-7)      {\fun{find\_sequences}};
+	\node [trseq]   (rapa) at (5.1,-9)      {\fun{reallocate\_sequencearray}};
 	\foreach \s/\e in {instrument/fE, load/ums, store/ums, ums/fm, ums/cr, cr/csr, ums/umas, umas/umps, ppb/mpf, ppb/fnp, ppb/fs, fs/rapa}{
 		\path [->,thick,draw] (\s) -- (\e);
 	}
@@ -54,9 +54,9 @@
 \item[\fun{process\_pattern\_buffer()}] For a matrix, one of it's patterns and it's access buffer: Marks each location that pattern occurs
 \item[\fun{mark\_pattern\_findings()}] For a matrix and it's access buffer: Tries to find non-marked, short, repeating patterns. Avoids/deletes patterns being parts of other patterns
 \item[\fun{subpatttern\_elimination\_check()}] For a pattern: Eliminates it, if it is part ("subpattern") of any other pattern of that matrix
-\item[\fun{delete\_access\_pattern}] Eleminates the given pattern. Makes sure to clean all remains
-\item[\fun{find\_sequences}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of paterns as sequences
-\item[\fun{reallocate\_sequencearray}] Helper to make sure enough space is reserved for the current number of sequences
+\item[\fun{delete\_access\_pattern()}] Eleminates the given pattern. Makes sure to clean all remains
+\item[\fun{find\_sequences()}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of paterns as sequences
+\item[\fun{reallocate\_sequencearray()}] Helper to make sure enough space is reserved for the current number of sequences
 
 \end{description}
 
