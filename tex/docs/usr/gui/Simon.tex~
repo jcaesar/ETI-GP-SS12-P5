@@ -1,9 +1,3 @@
-\documentclass[ngerman]{article}
-\usepackage[T1]{fontenc}
-\usepackage[latin9]{inputenc}
-\usepackage{graphicx}
-\usepackage{babel}
-\begin{document}
 The following illustration gives an overview of the different parts
 of the gui:
 
@@ -75,5 +69,3 @@ follows the repetition of the pattern corresponding to the sequence.
 If this is the case, this following pattern is identified by the id
 as assigned in the pattern list. Of course the same sequence can appear
 multiple times, so the number of occurrences of that sequence is shown.\end{description}
-
-\end{document}
