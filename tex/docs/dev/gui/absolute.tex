@@ -1,0 +1,50 @@
+The Absolute Matrix Representation shows the cache usage for each memory cell. Every memory cell is represented by a scaled pixel which is colored as follows:
+\begin{description}
+\item[white]There has been no access.
+\item[red]All accesses have been misses.
+\item[green]All accesses have been hits.
+\item[other colors between red and green (e.g. yellow)]different hit/access ratios (scaled linearly)
+\end{description}
+To keep the information readable, the panel showing the matrix has to be zoomable and consequently movable.
+
+\subsubsection{Affine Transformation}
+An affine transformation is equivalent to a linear transformation followed by a translation\footnote{\url{http://en.wikipedia.org/wiki/Affine_transformation}}, i.e. it preserves collinearity, parallelism and ratios of colinear points. Here, it is used to adjust the pixels to the current zoom level and position.
+
+Two affine transformations (one for translation, one for scaling) are concatenated to form the affine transformation, which can be used to transform the $(x,y)$-based point values into the actual drawing coordinates.\\
+
+$\underbrace {\left(
+   \begin{array}{ccc}
+     1 & 0 & scale*d_{x} \\
+     0 & 1 & scale*d_{y} \\
+     0 & 0 & 1
+   \end{array}
+\right)}_{Translation}*\underbrace {\left(
+   \begin{array}{ccc}
+     scale & 0 & 0 \\
+     0 & scale & 0 \\
+     0 & 0 & 1
+   \end{array}
+\right)}_{Scaling}=\left(
+   \begin{array}{ccc}
+     scale & 0 & scale*d_{x} \\
+     0 & scale & scale*d_{y} \\
+     0 & 0 & 1
+   \end{array}
+\right)$
+\begin{description}
+\item[$scale$]actual pixel size
+\item[$d_{y}$]offset in x direction
+\item[$d_{y}$]offset in y direction
+\end{description}
+
+
+\subsubsection{Implementation}
+The Absolute Matrix Representation is implemented in \texttt{view.MatrixPanel} which extends Java's \texttt{JPanel}.
+
+Zooming is enabled by implementing a \texttt{MouseWheelListener} and the \\
+\texttt{zoom(MouseWheelEvent e)} method. A new scale is calculated, the scrollbars are adjusted and revalidated. The program also checks that zooming does not result in white space appearing, hence it checks for the view area to only show (parts of) the matrix. Eventually, a repainting is initiated. 
+
+Scrolling is enabled by a \texttt{JScrollPane}. A \texttt{AdjustmentListener} checks for changes to the scrollbar positions and initiates a repainting, where the new $d_{x}$ and $d_{y}$ values will be calculated, as well.
+
+The repainting results in the \texttt{paintComponent(Graphics g)} method getting called. The affine transformation is implemented by an instance of \\
+\texttt{AffineTransform} which gets applied to the \texttt{Graphics2D} object. Afterwards, each pixel in the visible area is drawn by drawing 1x1 rectangles.
