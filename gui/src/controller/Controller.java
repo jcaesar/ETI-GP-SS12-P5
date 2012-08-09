@@ -15,7 +15,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import view.EtiGP;
 import view.MainFrame;
 
@@ -40,52 +39,16 @@ public class Controller {
         this.view = view;
         this.currentMatrix = -1;
 
+        // Add listeners to the menubar
         view.addFileMenuListener(new Controller.FileMenuListener());
         view.addHelpMenuListener(new Controller.HelpMenuListener());
+        // Add listeners to the toolbar
         view.addAccessModeListener(new Controller.AccessModeListener());
         view.addMatrixListener(new Controller.MatrixListener());
-    }
-
-    public Controller(MainFrame view, DataInput[][] matrixList) {
-        this.view = view;
-        this.matrixList = matrixList;
-        this.currentMatrix = -1;
-
-        addMatrices();
-
-        view.addFileMenuListener(new Controller.FileMenuListener());
-        view.addHelpMenuListener(new Controller.HelpMenuListener());
-        view.addAccessModeListener(new Controller.AccessModeListener());
-        view.addMatrixListener(new Controller.MatrixListener());
-    }
-
-    class PatternsTableListener implements ListSelectionListener {
-
-        private JTable table;
-
-        public PatternsTableListener(JTable table) {
-            this.table = table;
-        }
-
-        @Override
-        public void valueChanged(ListSelectionEvent e) {
-            // If no data is load (may happen when you load a new file)
-            if (currentMatrix < 0) {
-                return;
-            }
-
-            if (e.getSource() == table.getSelectionModel()) {
-
-                // determine selected row
-                int selectedRow = table.getSelectedRow();
-                if (selectedRow < 0) {
-                    return;
-                }
-                // receive the corresponding pattern id from to display detailed data
-                int pid = (int) ((DefaultTableModel) table.getModel()).getValueAt(selectedRow, 0);
-                updateDetailedPatternStatistics(pid);
-            }
-        }
+        // Add SelectionListener to the patternstable
+        view.getPatternsOverviewPanel().getPatternsTable().getSelectionModel().
+                addListSelectionListener(new Controller.PatternsTableListener(
+                view.getPatternsOverviewPanel().getPatternsTable()));
     }
 
     class FileMenuListener implements ActionListener {
@@ -127,9 +90,6 @@ public class Controller {
         }
     }
 
-    /**
-     *
-     */
     class HelpMenuListener implements ActionListener {
 
         @Override
@@ -146,7 +106,7 @@ public class Controller {
     }
 
     /**
-     * ActionListener which checks whether a new matrix/data structre has been
+     * ActionListener which checks whether a new matrix/data structure has been
      * selected in the toolbar. Initiates the update process of the GUI.
      */
     class MatrixListener implements ActionListener {
@@ -162,6 +122,7 @@ public class Controller {
 
     /**
      *
+     * Listener for the Load and Store Buttons
      */
     class AccessModeListener implements ActionListener {
 
@@ -186,6 +147,38 @@ public class Controller {
                     view.addPieChart(matrixList[currentMatrix][1]);
                     view.addAbsoluteRepresentation(matrixList[currentMatrix][1]);
                     break;
+            }
+        }
+    }
+
+    /**
+     * Listener for the patternstable, needs to be a
+     */
+    class PatternsTableListener implements ListSelectionListener {
+
+        private JTable table;
+
+        public PatternsTableListener(JTable table) {
+            this.table = table;
+        }
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            // If no data is load (may happen when you load a new file)
+            if (currentMatrix < 0) {
+                return;
+            }
+
+            if (e.getSource() == table.getSelectionModel()) {
+
+                // determine selected row
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow < 0) {
+                    return;
+                }
+                // receive the corresponding pattern id from to display detailed data
+                int pid = (int) table.getValueAt(selectedRow, 0);
+                updateDetailedPatternStatistics(pid);
             }
         }
     }
@@ -247,9 +240,7 @@ public class Controller {
         view.removeAbsoluteRepresentation();
         view.removeArrowStatistics();
         view.removePieChart();
-        // view.removeSequences();
         view.removePatterns();
-
 
         // Add/Update relevant data
         currentMatrix = n;
@@ -257,14 +248,9 @@ public class Controller {
         view.addAbsoluteRepresentation(matrix[0]);
         addArrowStatistics(matrix[0]);
         view.addPieChart(matrix[0]);
-        matrix[0].getSequences();
-        // addSequences(matrix[0]);
         addPatterns(matrix[0]);
-        view.getPatternsOverviewPanel().getPatternsTable().getSelectionModel().
-                addListSelectionListener(new Controller.PatternsTableListener(
-                view.getPatternsOverviewPanel().getPatternsTable()));
         updateDetailedPatternStatistics(0);
-        // Load Accesses are shown by default
+        // Load accesses are shown by default
         view.getLoadButton().setSelected(true);
     }
 

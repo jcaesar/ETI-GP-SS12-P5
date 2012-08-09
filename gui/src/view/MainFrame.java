@@ -17,7 +17,7 @@ import javax.swing.*;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    private PatternDetailedPanel detailedPanel;
+    private PatternDetailsPanel detailedPanel;
 
     /**
      * Creates new MainFrame
@@ -517,7 +517,7 @@ public class MainFrame extends javax.swing.JFrame {
         constraints.weighty = 1.0;
 
         patternDetailsPanel.removeAll();
-        detailedPanel = new PatternDetailedPanel();
+        detailedPanel = new PatternDetailsPanel();
         detailedPanel.setPattern(p);
 
         patternDetailsPanel.add(detailedPanel, constraints);
