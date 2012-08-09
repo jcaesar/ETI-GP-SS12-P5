@@ -63,68 +63,47 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Antialiasing on for smother graphics
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // stores current x,y position while going through the pattern
         int x = 0;
         int y = 0;
-        double x_max = 0;
-        double x_min = 0;
-        double y_max = 0;
-        double y_min = 0;
+        // store minimal and maximal x,y value to determine the boundaries of the system
+        double x_max = 0.01;
+        double x_min = -0.01;
+        double y_max = 0.01;
+        double y_min = -0.01;
 
+        // determine minimal and maximal x,y values while going through the pattern
         for (RelativeJump jump : jumps) {
             x += jump.getX_move();
             y += jump.getY_move();
 
+            // update max/min values if necessary
             if (x > x_max) {
                 x_max = x;
-            }
-            if (x < x_min) {
+            } else if (x < x_min) {
                 x_min = x;
             }
             if (y > y_max) {
                 y_max = y;
-            }
-            if (y < y_min) {
+            } else if (y < y_min) {
                 y_min = y;
             }
         }
 
-        if (x_max == 0) {
-            x_max = 0.01;
-        }
-        if (y_max == 0) {
-            y_max = 0.01;
-        }
-        if (x_min == 0) {
-            x_min = -0.01;
-        }
-        if (y_min == 0) {
-            y_min = -0.01;
-        }
+        // overall movement in x and y direction
+        double x_overall_max = x_max + Math.abs(x_min);
+        double y_overall_max = y_max + Math.abs(y_min);
 
-        double x_overall_max = 0;
-        double y_overall_max = 0;
-        if (x_max < Math.abs(x_min)) {
-            x_overall_max = Math.abs(x_min);
-        } else {
-            x_overall_max = x_max;
-        }
-        if (y_max < Math.abs(y_min)) {
-            y_overall_max = Math.abs(y_min);
-        } else {
-            y_overall_max = y_max;
-        }
+        // Scale both axes independently
+        double scaling_x = 90.0 / x_overall_max;
+        double scaling_y = 90.0 / y_overall_max;
 
-        double scaling_x = 50.0 / x_overall_max;
-        double scaling_y = 50.0 / y_overall_max;
-
-        x = 0;
-        y = 0;
-
+        // draw a black startpoint
         g.setColor(new Color(0, 0, 0));
-
         g.drawRect(10 + (int) (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * 100) - 1,
                 10 + (int) (((double) Math.abs(y_min) / (double) (Math.abs(y_min) + y_max)) * 100) - 1,
                 2, 2);
@@ -132,9 +111,12 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
                 10 + (int) (((double) Math.abs(y_min) / (double) (Math.abs(y_min) + y_max)) * 100) - 1,
                 2, 2);
 
-        
+        // reset the variables
         int x_old = 0;
         int y_old = 0;
+        x = 0;
+        y = 0;
+        // draw the actual pattern
         for (RelativeJump jump : jumps) {
             x_old = x;
             y_old = y;
@@ -144,8 +126,8 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
             // System.out.println("old: " + x_old + " + 10 + " + (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * scaling_x));
             // System.out.println("min:" + x_min + " max: " + x_max);
             // System.out.println("new: " + x + " + 10 + " + (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * scaling_x));
-            g.setColor(calcColor((double)jump.getHits()/(double)(jump.getHits()+jump.getMisses())*100));
-            
+            g.setColor(calcColor((double) jump.getHits() / (double) (jump.getHits() + jump.getMisses()) * 100));
+
             drawArrow(g, (int) (x_old * scaling_x) + 10 + (int) (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * 100),
                     (int) (y_old * scaling_y) + 10 + (int) (((double) Math.abs(y_min) / (double) (Math.abs(y_min) + y_max)) * 100),
                     (int) (x * scaling_x) + 10 + (int) (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * 100),

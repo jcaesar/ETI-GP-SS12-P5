@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Philip Becker-Ehmck
  */
-public class PatternDetailedPanel extends javax.swing.JPanel {
+public class PatternDetailsPanel extends javax.swing.JPanel {
 
     private final GridBagConstraints constraints;
     private GridBagConstraints c;
@@ -26,7 +26,7 @@ public class PatternDetailedPanel extends javax.swing.JPanel {
     /**
      * Creates new form PatternsStatisticsPanel
      */
-    public PatternDetailedPanel() {
+    public PatternDetailsPanel() {
         initComponents();
         constraints = new GridBagConstraints();
         constraints.gridx = 2;
@@ -65,7 +65,6 @@ public class PatternDetailedPanel extends javax.swing.JPanel {
 
         jLabel3.setText("jLabel3");
 
-        setBorder(javax.swing.BorderFactory.createEtchedBorder());
         setMinimumSize(new java.awt.Dimension(450, 135));
         setName("");
         setPreferredSize(new java.awt.Dimension(450, 135));
@@ -89,7 +88,8 @@ public class PatternDetailedPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(patternSequence, gridBagConstraints);
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(450, 100));
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(300, 100));
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(300, 450));
 
         accessesTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
