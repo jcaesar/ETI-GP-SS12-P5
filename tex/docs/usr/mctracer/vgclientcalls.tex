@@ -1,34 +1,34 @@
 \lstset{language=C}
 
 The following valgrind client calls are provided by mctracer, to use them, you have to
-\begin{lstlisting}
+\begin{lstlisting} [numbers=none]
 #include <valgrind/mctracer.h>
 \end{lstlisting}
 in your debuggee source.
 
-\subsubsection{start tracing a matrix}
+\subsubsection{Start Tracing a Matrix}
 When you want to start simulating cache actions on a matrix, you have to use this call.
-\begin{lstlisting}
+\begin{lstlisting} [numbers=none]
 SSIM_MATRIX_TRACING_START(addr, m, n, element_size, name)
 \end{lstlisting}
 \begin{description}
-\item[addr] The address of the first element of your array
-\item[m,n] The dimensions of the matrix
-\item[element\_size] The size, in bytes, of one element
-\item[name] A name you are free to specify to identify your matrix later
+\item[\texttt{addr}] The address of the first element of your array.
+\item[\texttt{m},\texttt{n}] The dimensions of the matrix.
+\item[\texttt{element\_size}] The size, in bytes, of one element.
+\item[\texttt{name}] A name you are free to specify to identify your matrix later.
 \end{description}
 
 
-\subsubsection{stop tracing a matrix}
+\subsubsection{Stop Tracing a Matrix}
 When you want to stop simulating cache actions on a matrix (because you free it or it's not going to be on stack anymore), you have to use this call.
-\begin{lstlisting}
+\begin{lstlisting} [numbers=none]
 SSIM_MATRIX_TRACING_STOP(addr)
 \end{lstlisting}
-addr can be any address inside the matrix' memory area.
+\texttt{addr} can be any address inside the matrix' memory area.
 
-\subsubsection{flush the cache}
+\subsubsection{Flush the Cache}
 Sometimes, you want to run multiple things in one program and trace them separately. To avoid interference you can use this call to reset the cache simulator.
-\begin{lstlisting}
+\begin{lstlisting} [numbers=none]
 SSIM_FLUSH_CACHE
 \end{lstlisting}
 
