@@ -51,8 +51,8 @@
     access stats. It does so by retrieving a reference to the matrix containing the given address and
     querying \fun{cache\_ref} to determine whether the access was a cache hit or miss. Depending on the outcome
     of the last operation, the hit or miss counter of the matrix entry referenced by the given address will be incremented.
-    Furthermore the method makes a call to \fun{update\_matrix_access_stats()} to gather relative access statistics.
-\item[\fun{update\_matrix\_access\_stats(traced_matrix* matr, \ldots, int is_hit, Addr addr, SizeT size)}] For
+    Furthermore the method makes a call to \fun{update\_matrix\_access\_stats()} to gather relative access statistics.
+\item[\fun{update\_matrix\_access\_stats(traced\_matrix* matr, ..., int is\_hit, Addr addr)}] For
     the given matrix and absolute access: updates the relative access statistics. Therefore it keeps track of the last most
     access (address) to the matrix and calculates the difference in the index position to the current access. The
     difference is referred to as a relative access method and explicitly stored as such. In case the particular access
@@ -71,6 +71,4 @@
 
 \subsection{Writing to file}
 
-In the end all the collected data has to be written into one file. We use the etis format as specified in the next section. The process is pretty simple with the only noteworthy detail being that we sort relative accesses
-as well as sequences by hits and misses or occurences respectively and then write out as many as possible.
-
+Finally all of the collected data is written to a file on disk. We use the etis format as specified in the next section. The process is straightforward with the only noteworthy detail being that relative accesses and sequences are sorted by hits and misses or occurences respectively.
