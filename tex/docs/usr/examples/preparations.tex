@@ -1,0 +1,53 @@
+Suppose we have a square matrix \texttt{a} of size \texttt{M} $\times$ \texttt{N} which we want to trace, then the following code snippet will tell the tool to record and analyze all accesses to the memory area where \texttt{a} is stored:
+\begin{lstlisting}
+#include <valgrind/mctracer.h>
+// ...
+SSIM_MATRIX_TRACING_START(a, M, N, sizeof(double), "a");
+// ... (crucial matrix accesses that are to trace)
+SSIM_MATRIX_TRACING_STOP(a);
+\end{lstlisting}
+The commands in lines 1 and 3 are so-called Valgrind client requests, by means of which the sample program can communicate with the tool (Section \ref{vgclientcalls}).
+%The syntax of these requests is as follows:
+%
+%\begin{lstlisting} [numbers=none]
+%SSIM_MATRIX_TRACING_START(void* addr, int m, int n, 
+%                          size_t ele_size, char* name);
+%\end{lstlisting}
+%signals the beginning of a trace of all accesses on the memory area starting at address \texttt{addr} representing a \texttt{m}-by-\texttt{n} matrix with entries of size \texttt{ele\_size}. When tracing multiple matrices, the argument \texttt{name} should be a unique identifier for the traced matrix, as the user interface will display the specified name for each traced matrix.
+%With the request
+%\begin{lstlisting} [numbers=none]
+%SSIM_MATRIX_TRACING_STOP(void* addr);
+%\end{lstlisting}
+%you can stop the recording of accesses on the referenced matrix.
+
+Valgrind client requests for starting and stopping the tracing must be called for each matrix.
+
+\subsubsection*{Comparing multiple implementations}
+For the problems in the previous examples, there were different solution approaches. Each of these can be encapsuled in a method of its own. Suppose we have the two methods
+\begin{lstlisting} [numbers=none]
+void method1(double* a) { /* ... */ }
+void method2(double* a) { /* ... */ }
+\end{lstlisting}
+which solve a certain problem on a \texttt{N}-by-\texttt{N} matrix \texttt{a}; then we have to use the requests once for each method:
+\begin{lstlisting}
+init(a); // initializes the entries of a
+SSIM_MATRIX_TRACING_START(a, N, N, sizeof(double), 
+                          "method1 - a");
+method1(a);
+SSIM_MATRIX_TRACING_STOP(a);
+
+SSIM_FLUSH_CACHE;
+init(a);
+SSIM_MATRIX_TRACING_START(a, N, N, sizeof(double), 
+                          "method2 - a");
+method2(a);
+SSIM_MATRIX_TRACING_STOP(a);
+\end{lstlisting}
+As both methods operate on the same matrix, calling \texttt{method2} directly after \texttt{method1} (and after the repeated initialization) could distort the memory access statistics if the cache still holds some matrix entries that are later used again in \texttt{method2}. (We assume that the \texttt{init} procedure does not flush the cache or resets all matrix entries.) Therefore we need to flush the entire cache between the two method calls in line 7. %, which can be done via another Valgrind client request:
+%\begin{lstlisting} [numbers=none]
+%SSIM_FLUSH_CACHE;
+%\end{lstlisting}
+
+\subsubsection*{Further implementation notes}
+If you have many alternative implementations which have the same method signature, it may prove useful to define a function pointer to such an implemented method and use that in generic function calls. This makes the different methods exchangable and comparable.
+
