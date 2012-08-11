@@ -28,13 +28,13 @@ the data format specification their names should be quite self explanatory.
 The following code excerpt shows how those helper functions play together
 to read a {*}.etis file:
 
-\lstinputlisting[language=Java]{gui/ReadProcOverview.java}
+\lstinputlisting[language=Java,numbers=none]{gui/ReadProcOverview.java}
 
 The information contained in a \texttt{StandardInput} object is the
 name of the matrix, the number of hits/misses on the matrix (either
 for loads or stores) and the absolute access matrix (again either
 for loads or stores). It also links to a number of \texttt{Sequence}
-objects, a number of \texttt{Pattern} objects and a number of \texttt{RelativeJumps}
+objects, a number of \texttt{Pattern} objects and a number of \texttt{RelativeJump}
 objects. Those should be quite self explanatory as they simply contain
 all the information as specified in the data format specification.
 Also the pattern that is repeated in a sequence and a possible next

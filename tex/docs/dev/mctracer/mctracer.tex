@@ -44,9 +44,9 @@
 \begin{description} %the plan is to add a longer description to the more complex ones of these
 \item[\fun{cache\_ref()}] Maps an access to one or two cache sets. Queries \fun{cache\_setref} to return hit or miss.
 \item[\fun{cache\_setref()}] For a given cache set and adress: Updates the set and returns hit or miss;
-\item[\fun{ssim\_load()}] Proxy function for calling \fun{update\_matrix\_stats(..., MATRIX\_LOAD)}
-\item[\fun{ssim\_store()}] Proxy function for calling \fun{update\_matrix\_stats(..., MATRIX\_STORE)}
-\item[\fun{find\_matrix()}] Finds and returns a pointer to the matrix containing a given memory address
+\item[\fun{ssim\_load()}] Proxy function for calling \fun{update\_matrix\_stats(..., MATRIX\_LOAD)}.
+\item[\fun{ssim\_store()}] Proxy function for calling \fun{update\_matrix\_stats(..., MATRIX\_STORE)}.
+\item[\fun{find\_matrix()}] Finds and returns a pointer to the matrix containing a given memory address.
 \item[\fun{update\_matrix\_stats(Addr addr, SizeT size, char type)}] For the given address: Updates the absolute position
     access stats. It does so by retrieving a reference to the matrix containing the given address and
     querying \fun{cache\_ref} to determine whether the access was a cache hit or miss. Depending on the outcome
@@ -59,13 +59,13 @@
     method did not yet exist it will be newly created. Lastly the hit or miss counter for the access method is incremented
     by one.
 \item[\fun{update\_matrix\_pattern\_stats()}] Fills the buffer for pattern recognition with one relative access per call. Invokes \fun{process\_pattern\_buffer} when full.
-\item[\fun{process\_pattern\_buffer()}] Management function for pattern/sequence recognition. Keeps a buffer stating which access belongs to which pattern. Invokes marking existing patterns in that buffer, finding new patterns and the statistics on that buffer
-\item[\fun{process\_pattern\_buffer()}] For a matrix, one of it's patterns and it's access buffer: Marks each location that pattern occurs
-\item[\fun{mark\_pattern\_findings()}] For a matrix and it's access buffer: Tries to find non-marked, short, repeating patterns. Avoids/deletes patterns being parts of other patterns
-\item[\fun{subpatttern\_elimination\_check()}] For a pattern: Eliminates it, if it is part ("subpattern") of any other pattern of that matrix
-\item[\fun{delete\_access\_pattern()}] Eliminates the given pattern. Makes sure to clean all remains
-\item[\fun{find\_sequences()}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of patterns as sequences
-\item[\fun{reallocate\_sequencearray()}] Helper to make sure enough space is reserved for the current number of sequences
+\item[\fun{process\_pattern\_buffer()}] Management function for pattern/sequence recognition. Keeps a buffer stating which access belongs to which pattern. Invokes marking existing patterns in that buffer, finding new patterns and the statistics on that buffer.
+\item[\fun{process\_pattern\_buffer()}] For a matrix, one of it's patterns and it's access buffer: Marks each location that pattern occurs.
+\item[\fun{mark\_pattern\_findings()}] For a matrix and it's access buffer: Tries to find non-marked, short, repeating patterns. Avoids/deletes patterns being parts of other patterns.
+\item[\fun{subpatttern\_elimination\_check()}] For a pattern: Eliminates it, if it is part ("subpattern") of any other pattern of that matrix.
+\item[\fun{delete\_access\_pattern()}] Eliminates the given pattern. Makes sure to clean all remains.
+\item[\fun{find\_sequences()}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of patterns as sequences.
+\item[\fun{reallocate\_sequencearray()}] Helper to make sure enough space is reserved for the current number of sequences.
 
 \end{description}
 
