@@ -1,3 +1,5 @@
+Most things in \texttt{tr\_sim.c}, \texttt{tr\_stats.c}, \texttt{tr\_sequences.c}, \texttt{tr\_write.c} and \texttt{simplesim.h} are commented, and all the function names are picked to be descriptive. This documentation intends to give an overview to help simplifying reading the code. The real step to understanding the code is always reading the code.
+
 \subsection{Call hierarchy: Memory access}
 
 \tikzstyle{accarrw} = [draw,->,thick, shorten <=10, shorten >=10]
@@ -33,20 +35,23 @@
 	\path [->,thick,draw,dashed] (umps) -- (ppb) node [midway,right,draw,xshift=0.5em] {When the buffer is full};
 	\path [->,thick,draw]        (-7,-9) -- (-6,-9) node [right] {Call, always};
 	\path [->,thick,draw,dashed] (-7,-9.5) -- (-6,-9.5) node [right] {Call, conditional};
-	\node [anchor=west,trmain]  at(-7,-10.5)   {Method from \texttt{tr\_main.c}};
+	\node [anchor=west,trmain]  at(-7,-10.5) {Method from \texttt{tr\_main.c}};
 	\node [anchor=west,trsim]   at(-7,-11.1) {Method from \texttt{tr\_sim.c}};
 	\node [anchor=west,trstats] at(-7,-11.7) {Method from \texttt{tr\_stats.c}};
 	\node [anchor=west,trseq]   at(-7,-12.3) {Method from \texttt{tr\_sequences.c}};
 \end{tikzpicture}
-\newpage
+
+\subsection{Data structures}
+Please refer to \texttt{valgrind-source/mctracer/simplesim.h}, all data structures and their members are documented there.
+
 \subsection{Explanation by Methods}
 
 \begin{description} %the plan is to add a longer description to the more complex ones of these
-\item[\fun{cache\_ref()}] Maps an access to one or two cache sets. Queries \fun{cache\_setref} to return hit or miss.
-\item[\fun{cache\_setref()}] For a given cache set and adress: Updates the set and returns hit or miss;
-\item[\fun{ssim\_load()}] Proxy function for calling \fun{update\_matrix\_stats(..., MATRIX\_LOAD)}.
-\item[\fun{ssim\_store()}] Proxy function for calling \fun{update\_matrix\_stats(..., MATRIX\_STORE)}.
-\item[\fun{find\_matrix()}] Finds and returns a pointer to the matrix containing a given memory address.
+\item[\fun{cache\_ref(Addr a, int size)}] Maps an access to one or two cache lines. Queries \fun{cache\_setref} to return hit or miss.
+\item[\fun{cache\_setref(int set\_no, Addr tag)}] For a given cache set and adress: Updates the set and returns hit or miss;
+\item[\fun{ssim\_load(Addr a, SizeT s)}] Proxy function for calling \fun{update\_matrix\_stats(a, s, MATRIX\_LOAD)}.
+\item[\fun{ssim\_store(Addr a, SizeT s)}] Proxy function for calling \fun{update\_matrix\_stats(a, s, MATRIX\_STORE)}.
+\item[\fun{find\_matrix(Addr a)}] Finds and returns a pointer to the matrix containing a given memory address.
 \item[\fun{update\_matrix\_stats(Addr addr, SizeT size, char type)}] For the given address: Updates the absolute position
     access stats. It does so by retrieving a reference to the matrix containing the given address and
     querying \fun{cache\_ref} to determine whether the access was a cache hit or miss. Depending on the outcome
@@ -57,16 +62,24 @@
     access (address) to the matrix and calculates the difference in the index position to the current access. The
     difference is referred to as a relative access method and explicitly stored as such. In case the particular access
     method did not yet exist it will be newly created. Lastly the hit or miss counter for the access method is incremented
-    by one.
-\item[\fun{update\_matrix\_pattern\_stats()}] Fills the buffer for pattern recognition with one relative access per call. Invokes \fun{process\_pattern\_buffer} when full.
-\item[\fun{process\_pattern\_buffer()}] Management function for pattern/sequence recognition. Keeps a buffer stating which access belongs to which pattern. Invokes marking existing patterns in that buffer, finding new patterns and the statistics on that buffer.
-\item[\fun{process\_pattern\_buffer()}] For a matrix, one of it's patterns and it's access buffer: Marks each location that pattern occurs.
-\item[\fun{mark\_pattern\_findings()}] For a matrix and it's access buffer: Tries to find non-marked, short, repeating patterns. Avoids/deletes patterns being parts of other patterns.
+	by one. Calls \fun{update\_matrix\_pattern\_stats}.
+\item[\fun{update\_matrix\_pattern\_stats}] Fills the buffer for pattern recognition with one relative access per call. Invokes \fun{process\_pattern\_buffer} when full.
+\item[\fun{process\_pattern\_buffer(traced\_matrix*)}] Management function for pattern/sequence recognition. Keeps a buffer stating which access belongs to which pattern. (\texttt{access\_pattern ** patterned\_access}) Invokes marking existing patterns in that buffer, finding new patterns and the statistics on that buffer. It also manages preserving the end of the access buffer which is denoted by \fun{find\_sequences} to be not suitable for statistics yet.
+\item[\fun{mark\_pattern\_findings}] For a matrix, one of its patterns and its access buffer: Marks each location that pattern occurs in the array pointed to by \texttt{patterned\_access} (3rd parameter).\newline
+	A loop is used to go over all accesses that the matrix has in its buffer. If one access matches the first access of \texttt{ap}, the method tries to match as many sequences as possible. It also looks backward to do that. When an access can't be matched to \texttt{ap} anymore, but the last access of the buffer was not the last access of the pattern, the pattern is rotated. After that, the last access of the pattern is also the last one that matched. (That could lead to many consecutive rotations of the pattern. That behaviour wasn't observed yet, though)
+\item[\fun{find\_new\_patterns}] For a matrix and its access buffer: Tries to find non-marked, short, repeating patterns. Avoids/deletes patterns being parts of other patterns.\newline
+	The function loops over all the not yet marked accesses in the buffer. For each of these, the next accesses whithin \texttt{max\_pattern\_length} are checked. If the access repeats, and all other accesses between the two repetitions repeat with the same distance, the function has localized a new pattern. If the matrix pattern buffer is full, one pattern is picked and replaced, otherwise, the new pattern is just stored. The replacement tries to favor picking older patterns over newer, but it generally eliminates patterns which don't have much accesses. Finally, all the patterns are subjected to a subpattern elimination check.
 \item[\fun{subpatttern\_elimination\_check()}] For a pattern: Eliminates it, if it is part ("subpattern") of any other pattern of that matrix.
-\item[\fun{delete\_access\_pattern()}] Eliminates the given pattern. Makes sure to clean all remains.
-\item[\fun{find\_sequences()}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of patterns as sequences.
-\item[\fun{reallocate\_sequencearray()}] Helper to make sure enough space is reserved for the current number of sequences.
-
+\item[\fun{delete\_access\_pattern}] Eliminates the given pattern. Makes sure to clean all remains. \newline
+	Zeroes the length of the pattern, removes all the occurrences of the pattern in the matrix' sequence array and, when given, unmarks occurences of the pattern in the pattern marking buffer \texttt{patterned\_access}.
+\item[\fun{find\_sequences}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of patterns as sequences.\newline
+	Again, a loop over all accesses, respectively all accesses marked to be part of a pattern, is used. As long as accesses are part of the same access pattern, the access pattern's hit/miss statistics are updated and the buffer is traversed. Each time the full length of that same access pattern is traversed, the sequence length counter \texttt{traced\_matrix::current\_sequence\_length} is incremented. All that happens in the second step of the loop. The first step of the loop only takes action if the access pattern of the current access has changed. If that is the case, it means the method has found a sequence. The method now traverses the existing sequences to find a sequence with the same characteristics (pattern, length, next access and its pattern) and increments its occurence count. If it can't find one, it creates a new one. 
+\item[\fun{reallocate\_sequencearray()}] Helper to make sure enough space is reserved for the current number of sequences.\newline
+	Current is to be taken litterally, the count has to be incremented before a new sequence can be added.
+\item[\fun{coordinates\_equal(matrix\_coordintes a, matrix\_coordinates b)}] Simple helper shorthand.
+	\begin{lstlisting}
+	return a.m == b.m && a.n == b.n;
+	\end{lstlisting}
 \end{description}
 
 \subsection{Writing to file}

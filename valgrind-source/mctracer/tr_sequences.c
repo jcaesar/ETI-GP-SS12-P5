@@ -104,6 +104,8 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 }
 
 // check whether oap is a subpattern of any other patterns and kill it, if so
+// The usage and structure of this function is kind of a relict.
+// The correct usage of it would be to rewrite it so it checks whether any pattern is subpattern to oap. That way, find_new_patterns would just need one call to this. It's not performance-relevant though, so I kept it.
 static bool subpattern_elimination_check(traced_matrix * const matr, access_pattern * const oap, access_pattern ** const patterned_access)
 {
 	if(oap->length == 0)
@@ -111,7 +113,7 @@ static bool subpattern_elimination_check(traced_matrix * const matr, access_patt
 	unsigned int j;
 	for(j = 0; j < clo_ssim_max_patterns_per_matrix; ++j) // loop over patterns which could eliminate oap
 	{
-		access_pattern * const iap = matr->access_patterns + j; // inner access pattern
+		access_pattern * const iap = matr->access_patterns + j; // containing access pattern
 		if(iap == oap)
 			continue;
 		if(iap->length < oap->length)
