@@ -16,9 +16,10 @@
 
 typedef struct _matrix_coordinates
 {
-	short m;
-	short n;
+	short m; // row
+	short n; // column
 } matrix_coordinates;
+static inline bool coordinates_equal(matrix_coordinates a, matrix_coordinates b) { return a.m == b.m && a.n == b.n; }
 
 struct _element_access_count;
 typedef struct _element_access_count
@@ -30,10 +31,7 @@ typedef struct _element_access_count
 struct _matrix_access_method;
 typedef struct _matrix_access_method
 {
-	/* relative row number */
-	short offset_m;
-	/* relative column number */
-	short offset_n;
+	matrix_coordinates offset; // relative
 	unsigned int misses;
 	unsigned int hits;
 } matrix_access_method;
@@ -129,7 +127,7 @@ void ssim_save_stats(char* fname);
 
 void update_matrix_stats(Addr addr, SizeT size, char type);
 void process_pattern_buffer(traced_matrix * matr);
-void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, short offset_m, bool is_hit);
+void update_matrix_pattern_stats(traced_matrix *, matrix_coordinates, bool is_hit);
 traced_matrix* find_matrix(Addr access);
 int cache_ref(Addr a, int size);
 
