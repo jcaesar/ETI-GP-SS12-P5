@@ -18,9 +18,10 @@ The text of the specification assumes a background in programming at the level o
 Currently we are at Version 3. Version 1 was bascially a draft, outlining the ideas behind the format for the first time. Version 2 improved the general design and made changes to some field-sizes. 
 In Version 3 support for patterns and sequences was added.
 
+\newpage
 \subsection{Detailed Specification} \input{fileformat/specification.tex}
 
 \subsection{Overview}
 \includegraphics[width=\textwidth]{fileformat/structure}
-This is a conceptual outline of an etis file. It consists of the file header, three matrix headers and three matrix data blocks (MDB). The first MDB is then displayed in more detail to show the diffrent element
+This is a conceptual outline of an etis file. It consists of the file header, three matrix headers and three matrix data blocks (MDB). The first MDB is then displayed in more detail to show the different element
 that it contains, namely namely two byte arrays, several relative accesses, three patterns with one, one and three sequences and the name. The last detail shows an access pattern in some more detail.

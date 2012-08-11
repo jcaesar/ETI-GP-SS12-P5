@@ -1,8 +1,11 @@
 \documentclass{scrartcl}
+\input{../common/packages.tex}
 \input{../../common/packages.tex}
 \input{../../common/macros.tex}
 \input{../common/title.tex}
 \title{ETI GP 5 - SS 2012\newline ETIS Developer Documentation}
+
+\lstset{basicstyle=\ttfamily, numbers=left, numberstyle=\tiny\color{gray}, keywordstyle=\color{blue}, commentstyle=\color{green}, stringstyle=\color{red}, backgroundcolor=\color{gray!15}}
 
 \begin{document}
 
@@ -10,18 +13,16 @@
 \tableofcontents
 \newpage
 
-\section{TODO}
-- alphabetische Sortierung der Terminology. \\
-- Namen aufm titel zu lang \\
-- Rechtschreibprüfung \\
-- Absätze, neue Seiten etc sinnvoll verteilen \\
-
 \section{Explanations}
 	\subsection{Terminology} \input{../common/terminology.tex}
-	\subsection{Patterns vs. Sequences} \input{../common/patseq-intentions.tex}
-\section{Examples} \input{examples/examples.tex}
-\section{Mctracer} \input{mctracer/mctracer.tex}
+	\subsection{Patterns and Sequences} \input{../common/patseq-intentions.tex}
+\newpage
+%\section{Examples} \input{examples/examples.tex}
+%\newpage
+\section{McTracer} \input{mctracer/mctracer.tex}
+\newpage
 \section{File Format} \input{fileformat/fileformat.tex}
+\newpage
 \section{GUI} \input{gui/gui.tex}
 
 \end{document}

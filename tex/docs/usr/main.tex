@@ -1,8 +1,11 @@
 \documentclass{scrartcl}
+\input{../common/packages.tex}
 \input{../../common/packages.tex}
 \input{../../common/macros.tex}
 \input{../common/title.tex}
 \title{ETI GP 5 - SS 2012\newline ETIS User Documentation}
+
+\lstset{basicstyle=\ttfamily, language=c, numbers=left, numberstyle=\tiny\color{gray}, keywordstyle=\color{blue}, commentstyle=\color{green}, stringstyle=\color{red}, backgroundcolor=\color{gray!15}}
 
 \begin{document}
 
@@ -11,8 +14,11 @@
 \newpage
 
 \section{Abstract} \input{abstract.tex}
-\section{Examples} \input{examples/examples.tex}
+\newpage
 \section{McTracer} \input{mctracer/mctracer.tex}
+\newpage
 \section{GUI} \input{gui/gui.tex}
+\newpage
+\section{Examples} \input{examples/examples.tex}
 
 \end{document}

@@ -1,9 +1,17 @@
 \texttt{
-	valgrind --tool=mctracer
-	[--output=<\textit{outputfilepath}>]
+	valgrind --tool=mctracer \newline
+	[--output=<\textit{outputfilepath}>] \newline
+	[--cache-sets=<cache\_set\_cout>] \newline
+	[--cache-set-size=<cache\_set\_size>] \newline
+	[--max-pattern-length=<max\_pattern\_length>] \newline
+	[--max-patterns-per-matrix=<max\_patterns\_per\_matrix>] \newline
 	<\textit{debuggee}>
 }
 \begin{description}
-\item[\texttt{outputfilepath}] Path where the analysis report file is written. Default is the debuggee filename suffixed with \texttt{.etis}
+\item[\texttt{outputfilepath}] Path where the analysis report file is written. Default is the debuggee filename suffixed with \texttt{.etis}.
+\item[\texttt{cache\_set\_cout}] Number of sets the cache simulator uses. Defaults to 512.
+\item[\texttt{cache\_set\_size}] Number of 32 Byte cache lines per set. Defaults to 16.
+\item[\texttt{max\_pattern\_length}] The maximum length of a pattern that mctracer can recognize. Defaults to 16.
+\item[\texttt{max\_patterns\_per\_matrix}] Maximum number of patterns mctracer tracks per matrix. When exceeded, patterns are thrown out. Defaults to 16.
 \item[\texttt{debuggee}] Path to the program to be run and analyzed. Common valgrind usage.
 \end{description}

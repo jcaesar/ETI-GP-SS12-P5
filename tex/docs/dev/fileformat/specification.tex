@@ -135,7 +135,7 @@ The value 255 is reserved to show that there wasn't any access to this element.
 
 \subparagraph{Relative Access (RA) 12 Byte}$\;$ \\
 
-First there are all MH:NLA diffrent relative accesses for loading from the matrix, then the MH:NSA diffrent 
+First there are all MH:NLA different relative accesses for loading from the matrix, then the MH:NSA diffrent 
 relative accesses for storing into the matrix. They simply appear one after another in the file, with no 
 additional information before, between, or after them.
 \begin{verbatim}
@@ -159,10 +159,10 @@ SM (Sum of Misses) 4 Byte
 \begin{addmargin}[0,5cm]{0,5cm} 
 	The accumulated number of misses for this type of relative access.
 \end{addmargin}
-
+\newpage
 \subparagraph{Access Pattern (AP) 7 Byte + AP:LEN * 12 Byte}$\;$ \\
 
-An access pattern combines a series of relative accesses. There are exactly MH:NAP diffrent access patterns
+An access pattern combines a series of relative accesses. There are exactly MH:NAP different access patterns
  one after another. Each pattern consists of a short pattern header and afterwards AP:LEN diffrent relative 
 accesses as defined above. They simply appear one after another in the file, with no additional information 
 before, between, or after them.
