@@ -1,6 +1,27 @@
 \subsection{Goal}
-Nowadays programers face the following situation, when they try to optimize the memory performance of their programs: An access to a formerly unknown memory location is very expensive, it can take more than a 100 processor cycles to be completed. However, caches can reduce this time to under 10 cycles for a small subset of the memory. That means, while a programmer can not see that a cache is being used, it's very important to use it efficiently, the difference can make up 90\% of your computation time.\newline
+Nowadays programmers face the following situation, when they try to optimize the memory performance of their programs: An access to a formerly unknown memory location is very expensive, it can take more than a 100 processor cycles to be completed. However, caches can reduce this time to under 10 cycles for a small subset of the memory. That means, while a programmer can not see that a cache is being used, it's very important to use it efficiently, the difference can make up 90\% of your computation time.\newline
 To simplify this, a programmer needs tools. This specific tool we've developed is specialized on algorithms that work on two-dimensional matrices. It tries to visualize regions, access types and patterns so a programmer can decide which part of his algorithm is well-designed in regard to caches.
+
+\subsection{Short description}
+\subsubsection{Existing techical basis}
+The operations aren't performed on the real cache, but on a simulated, so that they can be traced. This will be done by more than one program. There is the tool McTracer, which is based on Valgrind and traces the operations. The simulated Cache is represented by the program SimpleSim, which can give information if the operation was a hit or a miss. The task of our project was to modify the existing programs, that they can give us detailed data of the matrices like the size of them.
+\\
+
+We used the following programs:
+\begin{itemize}
+\item Valgrind
+\item McTracer
+\item SimpleSim
+\item Examples (Multiplication, Jacobi, RedBlack)
+\end{itemize}
+
+\subsubsection{How this will be done?}
+\begin{enumerate}
+\item The tools analyze the cache usage
+\item This information will be processed and the tools look for sequences and patterns
+\item The program writes a file for the Java Application
+\item The stand alone Java GUI reads the file and makes an graphical output of the results
+\end{enumerate}
 
 \subsection{Terminology}
 \input{../common/terminology.tex}
