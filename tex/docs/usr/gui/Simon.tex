@@ -10,8 +10,8 @@ or b) close the application
 \item [{3$\;$Data$\;$Structures:}] In the selector right next to this
 label, one can select a matrix by name, for which all of the information
 gathered by McTracer should be shown.
-\item [{4$\;$Load/Store$\;$switch:}] This switch is located in the top
-right corner and determines if the information displayed throughout
+\item [{4$\;$Load/Store$\;$switch:}] This switch 
+determines if the information displayed throughout
 the rest of the GUI refers to load or store type accesses.
 \item [{5$\;$Overall$\;$Statistics:}] This part presents statistics for
 the total number of hits/misses and the ratio hits/(hits+misses) aka
@@ -30,8 +30,8 @@ throughout the rest of the graphics appearing in this GUI.
 (that is loads or stores as selected by the load/store switch) on
 different fields are classified by the difference in position of two
 consecutive accesses. For example, if the program makes two consecutive
-accesses to the fields at positions (1|1) and (1|3) this will give
-a new relative access class identified by the position delta of (0|2).
+accesses to the fields at positions (1,1) and (1,3) this will give
+a new relative access class identified by the position delta of (0,2).
 The following information is displayed for the 8 access classes that
 were found most often: The number of hits and misses that occurred
 for accesses belonging to that class, the corresponding hit/miss ratio
@@ -47,14 +47,16 @@ with fewer accesses will have a smaller pie chart. It can happen that
 some of the accesses do not appear as a pie chart, because their charts
 would be too small to be displayed.
 \item [{9$\;$Patterns:}] A pattern groups multiple relative accesses
-into bigger sequences in order to give the user a feel of how the matrix
+into bigger "paths" in order to give the user a feel of how the matrix
 is traversed by the program. By selecting a pattern from the list,
 the following detail information is shown below the pattern list:
 Each pattern consists of a number of relative accesses that are traversed
 in the displayed order. Also for each pattern the total number of
 occurrences and the number of hits and misses is presented to the
 user. Each pattern is graphically represented by a picture showing
-a start point and an arrow for each consecutive relative access. Again
+a start point and an arrow for each consecutive relative access (actuallly
+this start point is just eye candy, patterns do not contain any information
+about a concrete start point). Again
 the colouring of the arrows correlates to the hit/miss ratio. The
 bottom part shows a list of sequences, of which this pattern is part
 of. Patterns do not distinguish load and store.
