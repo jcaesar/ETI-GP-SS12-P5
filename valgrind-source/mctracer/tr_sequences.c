@@ -235,6 +235,7 @@ static unsigned int find_sequences(traced_matrix * const matr, access_pattern **
 	access_pattern * cap = matr->current_pattern; // convenience variable. I want references. :(
 	// note on the condition: I've switched around between 3,2 and 1*clo_ssim_max_pattern_length multiple times. It should be 3 so a pattern that emerges on the last few accesses can be safely recognized and categorized.
 	unsigned int i = 0;
+	unsigned int pattern_offset = INT_MAX; // since we don't know which access of a pattern actually is the first, we have to trick around a little
 	while(i <= count - 3*clo_ssim_max_pattern_length)
 	{
 		if(patterned_access[i] != cap)
@@ -267,9 +268,20 @@ static unsigned int find_sequences(traced_matrix * const matr, access_pattern **
 			}
 			cap = patterned_access[i];
 			matr->current_sequence_length = 0;
+			pattern_offset = INT_MAX;
 		}
 		if(cap)
 		{
+			if(pattern_offset == INT_MAX) // new pattern, we have to adjust the offset anew
+			{
+				pattern_offset = 0;
+				while(!coordinates_equal(cap->steps[pattern_offset].offset, accbuf[i].offset))
+				{
+					++pattern_offset;
+					if(pattern_offset > cap->length)
+						VG_(tool_panic)("Invalid pattern marking buffer state: pattern marked where it did not belong");
+				}
+			}
 			unsigned int j;
 			for(j = 0; j < cap->length; ++j)
 			{
@@ -278,9 +290,11 @@ static unsigned int find_sequences(traced_matrix * const matr, access_pattern **
 				// Here is the best place to do the statistics on the pattern. Why?
 				// Because we know which accesses will not be copied and have to be counted next round
 				if(accbuf[i+j].is_hit)
-					++cap->steps[j].hits;
+					++cap->steps[pattern_offset].hits;
 				else
-					++cap->steps[j].misses;
+					++cap->steps[pattern_offset].misses;
+				if(++pattern_offset >= cap->length)
+					pattern_offset = 0;
 			}
 			if(j >= cap->length)
 				matr->current_sequence_length++;
