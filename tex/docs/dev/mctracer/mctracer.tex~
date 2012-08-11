@@ -64,7 +64,7 @@
 \item[\fun{mark\_pattern\_findings()}] For a matrix and it's access buffer: Tries to find non-marked, short, repeating patterns. Avoids/deletes patterns being parts of other patterns
 \item[\fun{subpatttern\_elimination\_check()}] For a pattern: Eliminates it, if it is part ("subpattern") of any other pattern of that matrix
 \item[\fun{delete\_access\_pattern()}] Eliminates the given pattern. Makes sure to clean all remains
-\item[\fun{find\_sequences()}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of patterns as sequences
+\item[\fun{find\_sequences()}] The workhorse of the pattern/sequence statistics. Counts hits and misses for the accesses in the patterns. Sums up the length of repetitions of paterns as sequences
 \item[\fun{reallocate\_sequencearray()}] Helper to make sure enough space is reserved for the current number of sequences
 
 \end{description}
