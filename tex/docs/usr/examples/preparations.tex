@@ -2,11 +2,11 @@ Suppose we have a square matrix \texttt{a} of size \texttt{M} $\times$ \texttt{N
 \begin{lstlisting}
 #include <valgrind/mctracer.h>
 // ...
-SSIM_MATRIX_TRACING_START(a, M, N, sizeof(double), "a");
-// ... (crucial matrix accesses that are to trace)
-SSIM_MATRIX_TRACING_STOP(a);
+   SSIM_MATRIX_TRACING_START(a, M, N, sizeof(double), "a");
+   // ... (crucial matrix accesses that are to trace)
+   SSIM_MATRIX_TRACING_STOP(a);
 \end{lstlisting}
-The commands in lines 1 and 3 are so-called Valgrind client requests, by means of which the sample program can communicate with the tool (Section \ref{vgclientcalls}).
+The commands in lines 3 and 5 are Valgrind client requests by means of which the debuggee can communicate with the tool (Section \ref{vgclientcalls}).
 %The syntax of these requests is as follows:
 %
 %\begin{lstlisting} [numbers=none]
