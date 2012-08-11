@@ -261,11 +261,11 @@ static void write_patterns(int fd, traced_matrix * matrix)
 				matrix_access_method accm = matrix->access_patterns[i].steps[k];
 
 				// RA:OX
-				uint16_t tmp16 = (uint16_t)accm.offset_m;
+				uint16_t tmp16 = (uint16_t)accm.offset.m;
 				VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 				// RA:OY
-				tmp16 = (uint16_t)accm.offset_n;
+				tmp16 = (uint16_t)accm.offset.n;
 				VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 				// RA:SH
@@ -317,8 +317,8 @@ static void write_sequences(int fd, traced_matrix * matrix)
 				all_sequences[counter].pattern_id = (uint8_t)(&matrix->access_patterns[i] - matrix->access_patterns);
 				all_sequences[counter].occurences = (uint32_t)matrix->access_patterns[i].sequences[j].occurences;
 				all_sequences[counter].repetitions = (uint16_t)matrix->access_patterns[i].sequences[j].length;
-				all_sequences[counter].next_acces_m = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset_m;
-				all_sequences[counter].next_acces_n = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset_n;
+				all_sequences[counter].next_acces_m = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset.m;
+				all_sequences[counter].next_acces_n = (int16_t)matrix->access_patterns[i].sequences[j].next_access.offset.n;
 				all_sequences[counter].next_id = 0xff;
 				if(matrix->access_patterns[i].sequences[j].next_pattern!=0)
 				{
@@ -379,11 +379,11 @@ static void write_access_methods(Int fd, matrix_access_data* access_data)
 		matrix_access_method accm = access_data->access_methods[k];
 
 		// RA:OX
-		int16_t tmp16 = (int16_t)accm.offset_m;
+		int16_t tmp16 = (int16_t)accm.offset.m;
 		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// RA:OY
-		tmp16 = (int16_t)accm.offset_n;
+		tmp16 = (int16_t)accm.offset.n;
 		VG_(write)(fd, &(tmp16), sizeof(int16_t));
 
 		// RA:SH

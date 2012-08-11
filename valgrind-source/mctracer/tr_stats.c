@@ -55,8 +55,9 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 		{
 
 			// calculate the current access method
-			short offset_n = n - access_data->last_access.n;
-			short offset_m = m - access_data->last_access.m;
+			matrix_coordinates offset;
+			offset.n = n - access_data->last_access.n;
+			offset.m = m - access_data->last_access.m;
 
 			int i;
 			int amc = access_data->access_methods_count;
@@ -67,7 +68,7 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 			{
 				matrix_access_method* am = access_data->access_methods+i;
 
-				if (am->offset_m == offset_m && am->offset_n == offset_n)
+				if (am->offset.m == offset.m && am->offset.n == offset.n)
 				{
 					// we got a matching access method
 					// ... now check for hit or miss
@@ -89,8 +90,8 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 			if (!found)
 			{
 				matrix_access_method* am = (access_data->access_methods + access_data->access_methods_count);
-				am->offset_m = offset_m;
-				am->offset_n = offset_n;
+				am->offset.m = offset.m;
+				am->offset.n = offset.n;
 
 				if (is_hit)
 				{
@@ -112,7 +113,7 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 					VG_(tool_panic)("Max. number of access methods exceeded.");
 				}
 			}
-			update_matrix_pattern_stats(matr, offset_n, offset_m, is_hit);
+			update_matrix_pattern_stats(matr, offset, is_hit);
 		}
 
 		// update

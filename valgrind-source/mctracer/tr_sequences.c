@@ -60,8 +60,8 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 
 		unsigned int apstep;
 		for(apstep = 0; apstep < ap->length; ++apstep) // loop over access method steps
-			if(ap->steps[apstep].offset_m != accbuf[j+apstep].offset.m ||
-			   ap->steps[apstep].offset_n != accbuf[j+apstep].offset.n)
+			if(ap->steps[apstep].offset.m != accbuf[j+apstep].offset.m ||
+			   ap->steps[apstep].offset.n != accbuf[j+apstep].offset.n)
 				break;
 		if(apstep == ap->length || (apstep > 0 && lastwas != -1)) // means that all were equal || means that the pattern continued but didn't finish
 		{
@@ -79,8 +79,8 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 					{
 						--l;
 						if(patterned_access[k] ||
-						   ap->steps[l].offset_m != accbuf[k].offset.m ||
-						   ap->steps[l].offset_n != accbuf[k].offset.n)
+						   ap->steps[l].offset.m != accbuf[k].offset.m ||
+						   ap->steps[l].offset.n != accbuf[k].offset.n)
 							break;
 						patterned_access[k] = ap;
 					}
@@ -127,8 +127,8 @@ static bool subpattern_elimination_check(traced_matrix * const matr, access_patt
 			{
 				if(o >= iap->length)
 					o = 0;
-				if(oap->steps[l].offset_n != iap->steps[o].offset_n ||
-				   oap->steps[l].offset_m != iap->steps[o].offset_m)
+				if(oap->steps[l].offset.n != iap->steps[o].offset.n ||
+				   oap->steps[l].offset.m != iap->steps[o].offset.m)
 					break;
 				++o;
 			}
@@ -177,8 +177,8 @@ static void find_new_patterns(traced_matrix * const matr, access_pattern ** cons
 		nap.steps = VG_(malloc)("access pattern",length*sizeof(access_pattern));
 		for(j = 0; j < length; ++j)
 		{
-			nap.steps[j].offset_n = accbuf[i+j].offset.n;
-			nap.steps[j].offset_m = accbuf[i+j].offset.m;
+			nap.steps[j].offset.n = accbuf[i+j].offset.n;
+			nap.steps[j].offset.m = accbuf[i+j].offset.m;
 			nap.steps[j].hits = 0;
 			nap.steps[j].misses = 0;
 		}
@@ -252,8 +252,8 @@ static unsigned int find_sequences(traced_matrix * const matr, access_pattern **
 				for(j = 0; j < cap->sequence_count; ++j) // can we find a sequence that looks like the current one?
 				{
 					if(cap->sequences[j].length == matr->current_sequence_length &&
-					   cap->sequences[j].next_access.offset_n == accbuf[i].offset.n &&
-					   cap->sequences[j].next_access.offset_m == accbuf[i].offset.m &&
+					   cap->sequences[j].next_access.offset.n == accbuf[i].offset.n &&
+					   cap->sequences[j].next_access.offset.m == accbuf[i].offset.m &&
 					   cap->sequences[j].next_pattern == patterned_access[i])
 						break;
 				}
@@ -263,8 +263,8 @@ static unsigned int find_sequences(traced_matrix * const matr, access_pattern **
 					reallocate_sequencearray(cap);
 					cap->sequences[j].length = matr->current_sequence_length;
 					cap->sequences[j].next_pattern = patterned_access[i];
-					cap->sequences[j].next_access.offset_n = accbuf[i].offset.n;
-					cap->sequences[j].next_access.offset_m = accbuf[i].offset.m;
+					cap->sequences[j].next_access.offset.n = accbuf[i].offset.n;
+					cap->sequences[j].next_access.offset.m = accbuf[i].offset.m;
 					cap->sequences[j].occurences = 0;
 				}
 				++(cap->sequences[j].occurences);
@@ -335,15 +335,15 @@ void process_pattern_buffer(traced_matrix * matr)
 	matr->access_event_count = copylen;
 }
 
-void update_matrix_pattern_stats(traced_matrix * matr, short offset_n, short offset_m, bool is_hit)
+void update_matrix_pattern_stats(traced_matrix * matr, matrix_coordinates offset, bool is_hit)
 {
 	if(!matr || !matr->access_buffer)
 		VG_(tool_panic)("internal error: matrix passed for pattern finding without access buffer.");
 	// store new event
 	access_event ev;
 	ev.is_hit = is_hit;
-	ev.offset.n = offset_n;
-	ev.offset.m = offset_m;
+	ev.offset.n = offset.n;
+	ev.offset.m = offset.m;
 	matr->access_buffer[matr->access_event_count] = ev;
 	if(++matr->access_event_count == MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH)
 		process_pattern_buffer(matr);
