@@ -9,7 +9,9 @@ int main(int argc, char* argv[])
 	int i, j, it;
 	double sum = 0.0;
 	int size = 1024;
-	if(argc == 2) size = atoi(argv[1]);
+	int iterations = 50;
+	if(argc >= 2) size = atoi(argv[1]);
+	if(argc >= 3) iterations = atoi(argv[2]);
 
 	m = (double*) malloc(sizeof(double)*size*size);
 	SSIM_MATRIX_TRACING_START(m, size, size, sizeof(double), "redblack - m");
@@ -26,7 +28,7 @@ int main(int argc, char* argv[])
 	}
 
 	// run 50 iterations
-	for(it=0; it<50; it++)
+	for(it=0; it<iterations; it++)
 	{
 
 		// update inner black points
