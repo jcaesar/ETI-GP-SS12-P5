@@ -74,7 +74,7 @@ static void mark_pattern_findings(traced_matrix * matr, access_pattern * const a
 				{
 					// matching pattern for the first time in this sequence. look backward and mark accesses which also belong to this pattern
 					unsigned int l = ap->length;
-					for(k = j - 1; k > j - ap->length && k != UINT_MAX; --k)
+					for(k = j - 1; k > (int64_t)j - ap->length && k != UINT_MAX; --k)
 					{
 						--l;
 						if(patterned_access[k] || !coordinates_equal(ap->steps[l].offset, accbuf[k].offset))
