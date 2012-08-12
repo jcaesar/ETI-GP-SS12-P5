@@ -19,8 +19,8 @@ Requirements:
 * Git 
 
 Installation:
-git clone https://github.com/bucjac/ETI-GP-SS12-P5.git PROJEKTPFAD
-cd PROJEKTPFAD
+git clone https://github.com/bucjac/ETI-GP-SS12-P5.git PROJECTPATH
+cd PROJECTPATH
 ./init.sh
 
 Instead of letting init.sh take care of the building, you can do it manually.
