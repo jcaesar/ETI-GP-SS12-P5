@@ -23,11 +23,11 @@ git clone https://github.com/bucjac/ETI-GP-SS12-P5.git PROJEKTPFAD
 cd PROJEKTPFAD
 ./init.sh
 
-Statt die installationsschritte von init.sh übernehmen zu lassen kann man auch
+Statt die installationsschritte von init.sh Ã¼bernehmen zu lassen kann man auch
 manuell vorgehen:
 cd valgrind-source
 ./autogen.sh
-./configure --prefix=<Installationspfad für valgrind>
+./configure --prefix=<Installationspfad fÃ¼r valgrind>
 make
 make install
 cd ..
@@ -35,11 +35,13 @@ cd example
 make
 cd ..
 
+Anmerkung: Die Valgrind-makefiles sind nicht freundlich gegenÃ¼ber CC="ccache gcc"
+
 
 Nutzung von McTracer/SimpleSim mit Code-Beispiel
 ------------------------------------------------
-McTracer lässt sich nur mit angepasstem Code verwenden, da ohne informationen
-über Größe und Beschaffenheit der Speicherbereiche keine gute Analyse erstellt
+McTracer lÃ¤sst sich nur mit angepasstem Code verwenden, da ohne informationen
+Ã¼ber GrÃ¶ÃŸe und Beschaffenheit der Speicherbereiche keine gute Analyse erstellt
 werden kann.
 
 Testen:
@@ -47,7 +49,7 @@ Testen:
  valgrind --tool=mctracer example/redblack
 
 Dies weist McTracer an, den Hitzeverteilungssimulator redblack zu starten.
-Dabei werden informationen über Zugriffe auf den Speicherbereich gesammelt,
+Dabei werden informationen Ã¼ber Zugriffe auf den Speicherbereich gesammelt,
 der die Simulation abbildet. Die Ausgabe wird in redblack.etis gespeichert.
 Ein alternativer Ausgabepfad kann mit --output=<pfad> spezifiziert werden.
 
