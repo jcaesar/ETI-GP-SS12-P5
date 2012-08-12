@@ -4,7 +4,7 @@
 
 #include <valgrind/mctracer.h>
 
-#define N 14
+#define N 15
 
 /*
 double H(double x)
