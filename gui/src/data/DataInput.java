@@ -4,7 +4,8 @@ import java.util.List;
 
 /**
  *
- * @author Simon Wimmer Did get sort of obosolete by the time, but is still
+ * @author Simon Wimmer 
+ * Did get sort of obosolete by the time, but is still
  * there to keep the amount of code changes down. Now there ist only one
  * implementing class StandardInput, which provides some extra functionality.
  */

@@ -5,7 +5,8 @@ import java.util.List;
 
 /**
  *
- * @author Simon Wimmer Is the main object that contains all the information for
+ * @author Simon Wimmer 
+ * Is the main object that contains all the information for
  * an matrix that is specified in a file corresponding to
  * https://github.com/bucjac/ETI-GP-SS12-P5/wiki/Dateiformat
  */

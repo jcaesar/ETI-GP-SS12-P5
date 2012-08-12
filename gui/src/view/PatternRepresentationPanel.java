@@ -122,10 +122,7 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
             y_old = y;
             x += jump.getX_move();
             y += jump.getY_move();
-            // System.out.println("x: " + x + " | move:" + jump.getX_move());
-            // System.out.println("old: " + x_old + " + 10 + " + (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * scaling_x));
-            // System.out.println("min:" + x_min + " max: " + x_max);
-            // System.out.println("new: " + x + " + 10 + " + (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * scaling_x));
+           
             g.setColor(calcColor((double) jump.getHits() / (double) (jump.getHits() + jump.getMisses()) * 100));
 
             drawArrow(g, (int) (x_old * scaling_x) + 10 + (int) (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * 100),
@@ -133,7 +130,6 @@ public class PatternRepresentationPanel extends javax.swing.JPanel {
                     (int) (x * scaling_x) + 10 + (int) (((double) Math.abs(x_min) / (double) (Math.abs(x_min) + x_max)) * 100),
                     (int) (y * scaling_y) + 10 + (int) (((double) Math.abs(y_min) / (double) (Math.abs(y_min) + y_max)) * 100));
         }
-        // System.out.println("----------------------------");
     }
 
     /*

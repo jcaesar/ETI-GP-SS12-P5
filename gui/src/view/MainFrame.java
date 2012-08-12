@@ -5,7 +5,6 @@ import data.DataInput;
 import data.Pattern;
 import data.RelativeJump;
 import data.Sequence;
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -216,7 +215,7 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 1.5;
         relativeJumpsTab.add(piePanel, gridBagConstraints);
         piePanel.getAccessibleContext().setAccessibleDescription("");
 
@@ -430,7 +429,14 @@ public class MainFrame extends javax.swing.JFrame {
      * @param matrix implementation
      */
     public void addAbsoluteRepresentation(DataInput matrix) {
-        MatrixPanel m = new MatrixPanel(matrix);
+        JPanel m;
+        if (matrix.getAbsoluteMatrix().length <= 1024) {
+            m = new MatrixPanel(matrix);
+        } else {
+            m = new JPanel();
+            JLabel l = new JLabel("Matrix is too big to be displayed!");
+            m.add(l);
+        }
         JScrollPane scrollPane = new JScrollPane(m,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new java.awt.Dimension(450, 450));
