@@ -14,7 +14,7 @@
 #define MATRIX_LOAD 'L'
 #define MATRIX_STORE 'S'
 
-typedef struct _matrix_coordinates
+typedef struct _matrix_coordinates // helper structure for any sort of coordinates
 {
 	short m; // row
 	short n; // column
@@ -22,14 +22,14 @@ typedef struct _matrix_coordinates
 static inline bool coordinates_equal(matrix_coordinates a, matrix_coordinates b) { return a.m == b.m && a.n == b.n; }
 
 struct _element_access_count;
-typedef struct _element_access_count
+typedef struct _element_access_count // hit miss counter for matrix (absolute) stats
 {
 	unsigned int hits;
 	unsigned int misses;
 } element_access_count;
 
 struct _matrix_access_method;
-typedef struct _matrix_access_method
+typedef struct _matrix_access_method // one access method (relative matrix access, see docs) and its hit/miss statistics
 {
 	matrix_coordinates offset; // relative
 	unsigned int misses;
@@ -37,7 +37,7 @@ typedef struct _matrix_access_method
 } matrix_access_method;
 
 struct _matrix_access_data;
-typedef struct _matrix_access_data
+typedef struct _matrix_access_data // substructure to each matrix (twice, for loads and stores) Manages the access methods
 {
 	/* last address accessed by this matrix */
 	matrix_coordinates last_access;
@@ -47,14 +47,14 @@ typedef struct _matrix_access_data
 } matrix_access_data;
 
 #define MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH (1<<16)
-typedef struct _access_event
+typedef struct _access_event // for buffering a lot of accesses in a matrix for pattern/sequence
 {
 	bool is_hit;
-	matrix_coordinates offset;
+	matrix_coordinates offset; // relative coordinates of that access method
 } access_event;
 
 struct _access_pattern;
-typedef struct _pattern_sequence
+typedef struct _pattern_sequence // a pattern sequence. Managed by the pattern it belongs to
 {
 	unsigned int length; // how many times did we observe the pattern subsequently?
 	struct _access_pattern * next_pattern; // which pattern did we observe next? 0 for no pattern
@@ -65,13 +65,13 @@ typedef struct _pattern_sequence
 #define MAX_MAX_PATTERN_LENGTH (MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH/8)
 typedef struct _access_pattern
 {
-	unsigned int length;
-	matrix_access_method * steps;
+	unsigned int length; // size of steps. 0 is used to indicate an inactive pattern in continous arrays
+	matrix_access_method * steps; // the accesses belonging to that pattern. The algorithms don't really care which is first, oonly order matters
 	unsigned int occurences; // accesses = ouccurences * length
 	unsigned int accesses_before_lifetime; // for deciding which pattern to purge
-	pattern_sequence * sequences;
-	unsigned int sequence_count;
-	unsigned int sequence_allocated;
+	pattern_sequence * sequences; // Sequences consisting of that pattern
+	unsigned int sequence_count; // length of sequences (used)
+	unsigned int sequence_allocated; // length of sequences (allocated)
 } access_pattern;
 
 //for writing sequences into file
@@ -104,12 +104,13 @@ typedef struct _traced_matrix
 	/* accumulated number of hits/misses for stores over the whole matrix*/
 	element_access_count stores;
 	/* buffer for finding access patterns */
-	access_event * access_buffer; // relative
-	unsigned int access_event_count;
+	access_event * access_buffer; // buffer for making pattern/sequence possible
+	unsigned int access_event_count; // how full access_buffer is
+	matrix_coordinates last_access; // unlike load/store_access_data's last_access: does not distinguish between stores and loads
 	/* access patterns */
-	access_pattern * access_patterns;
-	access_pattern * current_pattern;
-	unsigned int current_sequence_length;
+	access_pattern * access_patterns; // all the access patterns of a matrix. length is always clo_ssim_max_patterns_per_matrix. Can contain "holes". Unused patterns are marked by 0 length
+	access_pattern * current_pattern; // for helping find_sequences smooth over the buffer end
+	unsigned int current_sequence_length; // for find_sequences
 } traced_matrix;
 
 extern traced_matrix traced_matrices [MAX_MATRIX_COUNT];
