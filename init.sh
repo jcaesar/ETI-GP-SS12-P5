@@ -98,6 +98,19 @@ fi
 cd $START_DIR
 
 
+cd tex
+echo -n "making latex pdfs... "  | tee -a $BUILDLOG
+make &>>$BUILDLOG
+if [[ $? -eq 0 ]]; then
+	echo "success";
+else
+	echo "failed, cleaning up..."
+	make clean all &>> $BUILDLOG
+fi
+cd $START_DIR
+
+
+
 PATH_ADDITION=$VALGRIND_INSTALL/bin
 if [[ ! $PATH == *"$PATH_ADDITION"* ]]; then
 	echo "To use valgrind, do $ export PATH=$PATH_ADDITION:\$PATH"  | tee -a $BUILDLOG
