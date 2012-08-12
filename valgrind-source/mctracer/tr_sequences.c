@@ -342,14 +342,15 @@ void process_pattern_buffer(traced_matrix * matr)
 	matr->access_event_count = copylen;
 }
 
-void update_matrix_pattern_stats(traced_matrix * matr, matrix_coordinates offset, bool is_hit)
+void update_matrix_pattern_stats(traced_matrix * matr, unsigned short m, unsigned short n, bool is_hit)
 {
 	if(!matr || !matr->access_buffer)
 		VG_(tool_panic)("internal error: matrix passed for pattern finding without access buffer.");
 	// store new event
 	access_event ev;
 	ev.is_hit = is_hit;
-	ev.offset = offset;
+	ev.offset.m = m;
+	ev.offset.n = n;
 	matr->access_buffer[matr->access_event_count] = ev;
 	if(++matr->access_event_count == MATRIX_ACCESS_ANALYSIS_BUFFER_LENGTH)
 		process_pattern_buffer(matr);

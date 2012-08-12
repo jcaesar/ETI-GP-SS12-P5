@@ -190,6 +190,8 @@ bool ssim_matrix_tracing_start(Addr addr, unsigned short m, unsigned short n, un
 	matr->load_access_data.last_access.m = SHRT_MIN;
 	matr->store_access_data.last_access.n = SHRT_MIN;
 	matr->store_access_data.last_access.m = SHRT_MIN;
+	matr->last_access.n = SHRT_MIN;
+	matr->last_access.m = SHRT_MIN;
 	matr->load_count = (element_access_count*) VG_(malloc)("matrix load count", m*n*sizeof(element_access_count));
 	matr->store_count = (element_access_count*) VG_(malloc)("matrix store count", m*n*sizeof(element_access_count));
 

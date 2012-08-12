@@ -41,6 +41,7 @@ traced_matrix* find_matrix(Addr access)
 	return 0;
 }
 
+// the access_data is in place to easily distinguish loads and stores.
 static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* access_data, int is_hit, Addr addr, SizeT size)
 {
 	if(matr && access_data)
@@ -113,12 +114,15 @@ static void update_matrix_access_stats(traced_matrix* matr, matrix_access_data* 
 					VG_(tool_panic)("Max. number of access methods exceeded.");
 				}
 			}
-			update_matrix_pattern_stats(matr, offset, is_hit);
 		}
+		if(matr->last_access.n != SHRT_MIN && matr->last_access.m != SHRT_MIN)
+			update_matrix_pattern_stats(matr, m - matr->last_access.m, n - matr->last_access.n, is_hit);
 
-		// update
+		// update last_accesses
 		access_data->last_access.n = n;
 		access_data->last_access.m = m;
+		matr->last_access.n = n;
+		matr->last_access.m = m;
 
 	}
 }

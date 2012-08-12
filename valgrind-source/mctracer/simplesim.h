@@ -128,7 +128,7 @@ void ssim_save_stats(char* fname);
 
 void update_matrix_stats(Addr addr, SizeT size, char type);
 void process_pattern_buffer(traced_matrix * matr);
-void update_matrix_pattern_stats(traced_matrix *, matrix_coordinates, bool is_hit);
+void update_matrix_pattern_stats(traced_matrix *, unsigned short m, unsigned short n, bool is_hit);
 traced_matrix* find_matrix(Addr access);
 int cache_ref(Addr a, int size);
 
