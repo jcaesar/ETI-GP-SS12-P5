@@ -306,7 +306,7 @@ static unsigned int find_sequences(traced_matrix * const matr, access_pattern **
 			++i;
 	}
 	matr->current_pattern = cap;
-	return i;
+	return i - 1;
 }
 
 void process_pattern_buffer(traced_matrix * matr)
@@ -333,11 +333,11 @@ void process_pattern_buffer(traced_matrix * matr)
 	// find new patterns
 	find_new_patterns(matr, patterned_access);
 	// process sequences of patterns
-	unsigned int uncounted = 
+	unsigned int last_captured = 
 	find_sequences(matr, patterned_access); // this is also where the hit/miss statistics for the patterns' accesses are updated
 	// preserve the last few accesses which can not be accounted to maximum pattern lengths
 	// copy as much patterns as the sequence recognition hasn't processed
-	unsigned int copylen = count - uncounted;
+	unsigned int copylen = count - last_captured;
 	VG_(memmove)(accbuf, accbuf + count - copylen, copylen*sizeof(access_event));
 	matr->access_event_count = copylen;
 }
