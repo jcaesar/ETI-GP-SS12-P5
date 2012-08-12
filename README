@@ -1,21 +1,21 @@
-Quellen zum ETI Grossprojekt
-"Cache Simulator fuer Visualisierungen zum Cacheverhalten"
+Source of the ETI Lab
+"Cache Simulator for Visualizing Cache Behavior"
 
 
-Generator fuer Speicherzugriffsereignisse: McTracer
+Generator for memory access events: McTracer
 ===================================================
 
-mctracer-vg370.patch war ein Patch fuer die Original-Quellen
-von Valgrind 3.7.0 und enthaelt das sogenannte McTracer-Tool,
-welches Speicherzugriffe an einen eigenen Simulator ueber
-Shared-Memory weiterleiten kann (siehe SimpleSim unten).
+
+mctracer-vg370.patch was a patch for the original source of valgrind 3.7.0
+and contained the mctracer-tool. This tool was made to relay memory accesses
+to an external program, e.g. a cache simulator, over shared memory.
 
 Installation
 ------------
 
-Voraussetzung:
-* relativ neue Linux-Distribution
-* "gcc" (C-Compiler), "automake" installiert
+Requirements:
+* "Current" linux distro
+* "gcc" (C-Compiler), "automake" installed
 * Git 
 
 Installation:
@@ -23,11 +23,10 @@ git clone https://github.com/bucjac/ETI-GP-SS12-P5.git PROJEKTPFAD
 cd PROJEKTPFAD
 ./init.sh
 
-Statt die installationsschritte von init.sh übernehmen zu lassen kann man auch
-manuell vorgehen:
+Instead of letting init.sh take care of the building, you can do it manually.
 cd valgrind-source
 ./autogen.sh
-./configure --prefix=<Installationspfad für valgrind>
+./configure --prefix=<Install path for valgrind>
 make
 make install
 cd ..
@@ -35,27 +34,29 @@ cd example
 make
 cd ..
 
-Anmerkung: Die Valgrind-makefiles sind nicht freundlich gegenüber CC="ccache gcc"
+Note: The valgrind makefiles choke on CC="ccache gcc"
 
 
-Nutzung von McTracer/SimpleSim mit Code-Beispiel
-------------------------------------------------
-McTracer lässt sich nur mit angepasstem Code verwenden, da ohne informationen
-über Größe und Beschaffenheit der Speicherbereiche keine gute Analyse erstellt
-werden kann.
+Using mctracer as a valgrind module
+-----------------------------------
+Using mctracer is only possible with adjustments to your code. Without
+information on size and structure of memory areas being used in the simulation,
+no meaningfull analysis can be made.
+The valgrind client calls that are used for this are documented in the user
+documentation.
 
-Testen:
+Testing:
 
  valgrind --tool=mctracer example/redblack
 
-Dies weist McTracer an, den Hitzeverteilungssimulator redblack zu starten.
-Dabei werden informationen über Zugriffe auf den Speicherbereich gesammelt,
-der die Simulation abbildet. Die Ausgabe wird in redblack.etis gespeichert.
-Ein alternativer Ausgabepfad kann mit --output=<pfad> spezifiziert werden.
+This instructs valgrind to run mctracer and the heat distribution simulation
+redblack. mctracer will collect infomation on accesses on the memory area which
+is used for the simulation. McTracer will save the result of its analysis to
+./redblack.etis
+That file can be viewed with ./gui/dist/EtiGP.jar
 
 
 Viel Spass,
 Josef Weidendorfer
   - Dankesehr!
-
 
