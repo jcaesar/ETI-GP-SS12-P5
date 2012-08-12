@@ -134,7 +134,7 @@ void run_jac(jacfunc f, const char* name, int it,
 	double start, stop, mflops;
 	int i;
 
-	SSIM_FLUSH_CACHE;
+	SSIM_FLUSH_CACHE();
 	init(sz, a, 0);
 	init_leftright_boundary(sz, a, 10.0);
 	start = gettime();

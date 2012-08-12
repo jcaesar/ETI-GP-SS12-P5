@@ -36,7 +36,7 @@ SSIM_MATRIX_TRACING_START(a, N, N, sizeof(double),
 method1(a);
 SSIM_MATRIX_TRACING_STOP(a);
 
-SSIM_FLUSH_CACHE;
+SSIM_FLUSH_CACHE();
 init(a);
 SSIM_MATRIX_TRACING_START(a, N, N, sizeof(double), 
                           "method2 - a");
@@ -45,7 +45,7 @@ SSIM_MATRIX_TRACING_STOP(a);
 \end{lstlisting}
 As both methods operate on the same matrix, calling \texttt{method2} directly after \texttt{method1} (and after the repeated initialization) could distort the memory access statistics if the cache still holds some matrix entries that are later used again in \texttt{method2}. (We assume that the \texttt{init} procedure does not flush the cache or resets all matrix entries.) Therefore we need to flush the entire cache between the two method calls in line 7. %, which can be done via another Valgrind client request:
 %\begin{lstlisting} [numbers=none]
-%SSIM_FLUSH_CACHE;
+%SSIM_FLUSH_CACHE();
 %\end{lstlisting}
 
 \subsubsection*{Further implementation notes}

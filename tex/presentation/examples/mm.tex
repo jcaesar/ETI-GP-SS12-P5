@@ -193,7 +193,7 @@
 {
 	   double start, stop, mflops;
 
-	   SSIM_FLUSH_CACHE;
+	   SSIM_FLUSH_CACHE();
 	   
 	   start = gettime();
 	   
@@ -215,7 +215,7 @@
 	
 	\item Cache leeren:
 	\begin{lstlisting}[numbers=none]
-	SSIM_FLUSH_CACHE;
+	SSIM_FLUSH_CACHE();
 	\end{lstlisting}
 	
 	\item<2-> Speicherzugriffe verfolgen:

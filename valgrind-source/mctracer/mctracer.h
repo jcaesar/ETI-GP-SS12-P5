@@ -117,7 +117,7 @@ enum
    }
 
 /*  */
-#define SSIM_FLUSH_CACHE                                                \
+#define SSIM_FLUSH_CACHE()                                              \
    {unsigned int _qzz_res;                                              \
     VALGRIND_DO_CLIENT_REQUEST(_qzz_res, 0,                             \
                                VG_USERREQ__FLUSHCACHE,                  \

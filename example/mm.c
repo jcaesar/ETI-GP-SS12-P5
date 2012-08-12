@@ -192,7 +192,7 @@ void run_mul(mulfunc f, const char* name,
 {
 	double start, stop, mflops;
 
-	SSIM_FLUSH_CACHE;
+	SSIM_FLUSH_CACHE();
 	start = gettime();
 	init(sz, c, 0);
 	(*f)(sz, a, b, c);
